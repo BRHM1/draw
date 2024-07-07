@@ -5,7 +5,6 @@ const Draw = ({contextRef}) => {
   const startDrawing = (e) => {
     contextRef?.current?.beginPath();
     contextRef?.current?.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    console.log(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
     setIsDrawing(true)
   };
 
@@ -17,6 +16,7 @@ const Draw = ({contextRef}) => {
 
   const stopDrawing = () => {
     contextRef?.current.closePath();
+    contextRef?.current.save()
     setIsDrawing(false)
   };
   return {startDrawing , draw , stopDrawing};

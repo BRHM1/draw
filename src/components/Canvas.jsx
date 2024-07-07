@@ -13,17 +13,19 @@ const Canvas = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
 
     // this context is used to draw on the canvas
     // and will be shared with the toolbar and the draw functions
     context.lineCap = "round";
+    context.lineJoin = "round";
     context.strokeStyle = "black";
     context.lineWidth = 5;
     contextRef.current = context;
 
   }, []);
+
 
   return (
     <div className="w-full h-screen grid">
@@ -34,6 +36,7 @@ const Canvas = () => {
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
+        onMouseLeave={stopDrawing}
       />
     </div>
   );

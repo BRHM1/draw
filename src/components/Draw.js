@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const Draw = () => {
+const Draw = ({contextRef}) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const startDrawing = (e) => {
     contextRef.current.beginPath();

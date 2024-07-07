@@ -1,10 +1,11 @@
+import Canvas from "./components/Canvas"
 
 
 function App() {
 
   return (
     <div>
-      hello world
+      <Canvas/>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, forwardRef , createRef} from "react";
+import { useRef, useEffect} from "react";
 import React from "react";
 import Draw from "../utils/Draw";
 import Erase from "../utils/Erase";

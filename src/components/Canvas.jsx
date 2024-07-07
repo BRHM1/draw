@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, forwardRef , createRef} from "react";
+import React from "react";
 import Draw from "../utils/Draw";
 import Erase from "../utils/Erase";
 import Toolbar from "./Toolbar";
@@ -27,7 +28,7 @@ const Canvas = () => {
   return (
     <div className="w-full h-screen grid">
       <Toolbar className="col-start-1 row-start-1" />
-      <canvas
+      <CanvasElement
         className="col-start-1 row-start-1 w-full h-screen"
         ref={canvasRef}
         onMouseDown={startDrawing}
@@ -37,5 +38,10 @@ const Canvas = () => {
     </div>
   );
 };
+
+const CanvasElement = React.forwardRef((props , ref) => (
+        <canvas ref={ref} {...props} />
+))
+
 
 export default Canvas;

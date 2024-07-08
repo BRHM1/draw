@@ -6,26 +6,19 @@ import rough from "roughjs/bundled/rough.esm";
 import Draw from "../utils/Draw";
 import Erase from "../utils/Erase";
 import Toolbar from "./Toolbar";
-import Rectangle from "../utils/Rectangle";
-import Line from "../utils/Line";
 import Shape from "../utils/Shape";
 
 const Canvas = () => {
   const [elements, setElements] = useState([]);
-  const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
 
   const { startDrawing, draw, stopDrawing } = Draw({ contextRef });
   const { startErasing, Erasing, stopErasing } = Erase({ contextRef });
-  // const { onMouseDown, onMouseMove, onMouseUp } = Rectangle(
-  //   elements,
-  //   setElements
-  // );
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
     setElements,
-    "Rectangle"
+    "Circle"
   );
 
   useLayoutEffect(() => {
@@ -50,7 +43,7 @@ const Canvas = () => {
 
   return (
     <div className="w-full h-screen grid">
-      <Toolbar className="col-start-1 row-start-1" />
+      {/* <Toolbar className="col-start-1 row-start-1" /> */}
       <CanvasElement
         className="col-start-1 row-start-1 w-full h-screen"
         ref={canvasRef}

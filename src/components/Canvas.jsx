@@ -8,6 +8,7 @@ import Erase from "../utils/Erase";
 import Toolbar from "./Toolbar";
 import Rectangle from "../utils/Rectangle";
 import Line from "../utils/Line";
+import Shape from "../utils/Shape";
 
 const Canvas = () => {
   const [elements, setElements] = useState([]);
@@ -21,9 +22,10 @@ const Canvas = () => {
   //   elements,
   //   setElements
   // );
-  const { onMouseDown, onMouseMove, onMouseUp } = Line(
+  const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
-    setElements
+    setElements,
+    "Rectangle"
   );
 
   useLayoutEffect(() => {

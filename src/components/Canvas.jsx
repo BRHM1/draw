@@ -18,7 +18,7 @@ const Canvas = () => {
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
     setElements,
-    "Circle"
+    "Ellipse"
   );
 
   useLayoutEffect(() => {

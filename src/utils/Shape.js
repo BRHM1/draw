@@ -9,7 +9,8 @@ const Shape = (elements, setElements, type) => {
     const TYPES = {
         Rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, { fill: "black", }),
         Line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
-        Circle: (x1, y1, diameter) => generator.circle(x1, y1, diameter)
+        Circle: (x1, y1, diameter) => generator.circle(x1, y1, diameter),
+        Ellipse: (x1, y1, x2, y2) => generator.ellipse(x1, y1, (x2 - x1) * 2, (y2 - y1) * 2),
     }
     const createElement = (x1, y1, x2, y2) => {
         const roughElement =

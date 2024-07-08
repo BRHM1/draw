@@ -18,8 +18,9 @@ const Canvas = () => {
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
     setElements,
-    "Circle"
+    "Rectangle"
   );
+  const handleToolbarClick = (selected) => {};
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -43,9 +44,12 @@ const Canvas = () => {
 
   return (
     <div className="w-full h-screen grid">
-      {/* <Toolbar className="col-start-1 row-start-1" /> */}
+      <Toolbar
+        className={"row-start-1 col-start-1 justify-self-center left-1/4"}
+        onToolbarClick={handleToolbarClick}
+      />
       <CanvasElement
-        className="col-start-1 row-start-1 w-full h-screen"
+        className="row-start-1 col-start-1 w-full h-screen"
         ref={canvasRef}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}

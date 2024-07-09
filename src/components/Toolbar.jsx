@@ -7,52 +7,38 @@ import { twMerge } from "tailwind-merge";
 
 const Toolbar = (props) => {
   const [selected, setSelected] = useState("draw");
-  const [type , setType] = useState("Rectangle")
   const buttons = [
     {
       name: "draw",
+      type: "draw",
       icon: <LuPen />,
-      onClick: () => setSelected("draw")
     },
     {
       name: "erase",
+      type: "erase",
       icon: <RxEraser />,
-      onClick: () => setSelected("erase"),
     },
     {
-      name: "Rectangle",
+      name: "shape",
       icon: <FaRegSquareFull />,
-      onClick: () => {
-        setSelected("shape")
-        setType("Rectangle")
-      },
+      type: "Rectangle",
     },
     {
-      name: "Line",
+      name: "shape",
+      type: "Line",
       icon: <FaMinus />,
-      onClick: () => {
-        setSelected("shape")
-        setType("Line")
-      },
     },
     {
-      name: "Circle",
+      name: "shape",
       icon: <FaRegCircle />,
-      onClick: () => {
-        setSelected("shape")
-        setType("Circle")
-      },
+      type: "Circle",
     },
     {
-      name: "Ellipse",
+      name: "shape",
       icon: <FaRegCircle />,
-      onClick: () => {
-        setSelected("shape")
-        setType("Ellipse")
-      },
+      type: "Ellipse",
     },
   ];
-  props.onToolbarClick(selected , type);
   return (
     <div
       className={twMerge(
@@ -63,10 +49,13 @@ const Toolbar = (props) => {
       {buttons.map((button, index) => (
         <button
           key={index}
-          onClick={button.onClick}
+          onClick={() => {
+            props.onToolbarClick(button.name , button.type)
+            setSelected(button.type)
+          }}
           className={
             twMerge(`w-12 h-8 grid place-content-center justify-self-center rounded-md `,
-            selected === button.name ? "bg-blue-200" : "bg-blue-50 hover:bg-blue-100")
+            selected === button.type ? "bg-blue-200" : "bg-blue-50 hover:bg-blue-100")
           }
         >
           {button.icon}

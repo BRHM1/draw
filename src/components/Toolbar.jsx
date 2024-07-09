@@ -15,7 +15,7 @@ const Toolbar = (props) => {
     {
       name: "draw",
       icon: <LuPen />,
-      onClick: () => setSelected("draw"),
+      onClick: () => setSelected("draw")
     },
     {
       name: "erase",
@@ -47,7 +47,7 @@ const Toolbar = (props) => {
   return (
     <div
       className={twMerge(
-        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-6 rounded-md mt-3 border border-lime-300",
+        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-6 rounded-md mt-3 border border-lime-300 ",
         props.className
       )}
     >
@@ -56,8 +56,8 @@ const Toolbar = (props) => {
           key={index}
           onClick={button.onClick}
           className={
-            twMerge(`w-12 h-8 grid place-content-center justify-self-center rounded-md`,
-            selected === button.name ? "bg-blue-200" : "bg-blue-50")
+            twMerge(`w-12 h-8 grid place-content-center justify-self-center rounded-md `,
+            selected === button.name ? "bg-blue-200" : "bg-blue-50 hover:bg-blue-100")
           }
         >
           {button.icon}

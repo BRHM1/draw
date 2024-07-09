@@ -12,7 +12,7 @@ const Canvas = () => {
   const [elements, setElements] = useState([]);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
-
+  
   const { startDrawing, draw, stopDrawing } = Draw({ contextRef });
   const { startErasing, Erasing, stopErasing } = Erase({ contextRef });
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
@@ -20,7 +20,10 @@ const Canvas = () => {
     setElements,
     "Rectangle"
   );
-  const handleToolbarClick = (selected) => {};
+
+  const handleToolbarClick = (selected) => {
+    console.log(selected)
+  };
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -47,13 +50,14 @@ const Canvas = () => {
       <Toolbar
         className={"row-start-1 col-start-1 justify-self-center left-1/4"}
         onToolbarClick={handleToolbarClick}
+        contextRef={contextRef}
       />
       <CanvasElement
         className="row-start-1 col-start-1 w-full h-screen"
         ref={canvasRef}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
       />
     </div>

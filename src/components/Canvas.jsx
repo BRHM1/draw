@@ -10,20 +10,41 @@ import Shape from "../utils/Shape";
 
 const Canvas = () => {
   const [elements, setElements] = useState([]);
+  const [type, setType] = useState("Rectangle");
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
+
+  // this is the logic behind the toolbar connection with the canvas 17 - 46
+  const [action, setAction] = useState("draw");
+
   
   const { startDrawing, draw, stopDrawing } = Draw({ contextRef });
   const { startErasing, Erasing, stopErasing } = Erase({ contextRef });
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
     setElements,
-    "Rectangle"
+    type
   );
 
-  const handleToolbarClick = (selected) => {
-    console.log(selected)
+  const handleToolbarClick = (selected, shape) => {
+    setAction(selected);
+    setType(shape);
   };
+  const actionTypes = {
+    draw: [startDrawing, draw, stopDrawing],
+    erase: [startErasing, Erasing, stopErasing],
+    shape: [onMouseDown, onMouseMove, onMouseUp],
+  };
+
+  let Down = (e) => {
+      actionTypes[action][0](e);
+    },
+    Move = (e) => {
+      actionTypes[action][1](e);
+    },
+    Up = (e) => {
+      actionTypes[action][2](e);
+    };
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -55,10 +76,10 @@ const Canvas = () => {
       <CanvasElement
         className="row-start-1 col-start-1 w-full h-screen"
         ref={canvasRef}
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
+        onMouseDown={Down}
+        onMouseMove={Move}
+        onMouseUp={Up}
+        onMouseLeave={Up}
       />
     </div>
   );

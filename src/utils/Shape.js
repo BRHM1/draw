@@ -6,7 +6,6 @@ import rough from "roughjs/bundled/rough.esm"
 const Shape = (elements, setElements, type) => {
     const [isDrawing, setIsDrawing] = useState(false)
     const generator = rough.generator();
-
     const TYPES = {
         Rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, { roughness: 2, fill: "black", }),
         Line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
@@ -29,7 +28,7 @@ const Shape = (elements, setElements, type) => {
         if (!isDrawing) return;
         const { clientX, clientY } = e;
         const index = elements.length - 1;
-        const { x1, y1 } = elements[index];
+        const { x1, y1 } = elements[index]?? 1;
 
         const updatedElement = createElement(x1, y1, clientX, clientY)
         const elementsCopy = [...elements];

@@ -5,12 +5,9 @@ import { LuPen } from "react-icons/lu";
 import { FaRegCircle, FaMinus , FaRegSquareFull } from "react-icons/fa6";
 import { twMerge } from "tailwind-merge";
 
-import Draw from "../utils/Draw";
-import Erase from "../utils/Erase";
-import Shape from "../utils/Shape";
-
 const Toolbar = (props) => {
   const [selected, setSelected] = useState("draw");
+  const [type , setType] = useState("Rectangle")
   const buttons = [
     {
       name: "draw",
@@ -25,25 +22,37 @@ const Toolbar = (props) => {
     {
       name: "Rectangle",
       icon: <FaRegSquareFull />,
-      onClick: () => setSelected("Rectangle"),
+      onClick: () => {
+        setSelected("shape")
+        setType("Rectangle")
+      },
     },
     {
       name: "Line",
       icon: <FaMinus />,
-      onClick: () => setSelected("Line"),
+      onClick: () => {
+        setSelected("shape")
+        setType("Line")
+      },
     },
     {
       name: "Circle",
       icon: <FaRegCircle />,
-      onClick: () => setSelected("Circle"),
+      onClick: () => {
+        setSelected("shape")
+        setType("Circle")
+      },
     },
     {
       name: "Ellipse",
       icon: <FaRegCircle />,
-      onClick: () => setSelected("Ellipse"),
+      onClick: () => {
+        setSelected("shape")
+        setType("Ellipse")
+      },
     },
   ];
-  props.onToolbarClick(selected);
+  props.onToolbarClick(selected , type);
   return (
     <div
       className={twMerge(

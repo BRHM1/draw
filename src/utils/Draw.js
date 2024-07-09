@@ -15,8 +15,8 @@ const Draw = ({contextRef}) => {
   };
 
   const stopDrawing = () => {
-    contextRef?.current.closePath();
-    contextRef?.current.save()
+    contextRef?.current?.closePath();
+    contextRef?.current?.save()
     setIsDrawing(false)
   };
   return {startDrawing , draw , stopDrawing};

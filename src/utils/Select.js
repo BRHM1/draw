@@ -3,6 +3,8 @@ import rough from 'roughjs/bundled/rough.esm'
 const Select = (elements, setElements) => {
     const [isMoving, setIsMoving] = useState(false)
     const [selectedElement, setSelectedElement] = useState(null)
+    const [firstX, setFirstX] = useState(0)
+    const [firstY, setFirstY] = useState(0)
     const generator = rough.generator()
 
     const TYPES = {
@@ -62,6 +64,8 @@ const Select = (elements, setElements) => {
         if (element !== null) {
             setIsMoving(true)
             setSelectedElement(prev => element)
+            setFirstX(clientX- elements[element].x1)
+            setFirstY(clientY- elements[element].y1)
         }
     }
     const moveMouseMove = (e) => {
@@ -72,9 +76,8 @@ const Select = (elements, setElements) => {
         console.log(element)
         const offsetX = clientX - x1
         const offsetY = clientY - y1
-        console.log(offsetX, offsetY)
         const type = element?.roughElement?.shape
-        const updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
+        const updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type)
         const elementsCopy = [...elements]
         elementsCopy[selectedElement] = updatedElement
         setElements(elementsCopy)

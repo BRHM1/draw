@@ -14,9 +14,6 @@ const Canvas = () => {
   const [elements, setElements] = useState([]);
   const [type, setType] = useState("Rectangle");
 
-  const [started, setStarted] = useState(false);
-  const updateStarted = () => setStarted(state => !state);
-
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
 
@@ -34,8 +31,6 @@ const Canvas = () => {
     let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
       contextRef,
       elements,
-      started,
-      updateStarted
     );
 
   const handleToolbarClick = (selected, shape) => {

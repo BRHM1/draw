@@ -37,7 +37,7 @@ const Select = (elements, setElements) => {
             const { x1, y1, x2, y2 } = element
             const center = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 }
             const distance = Math.hypot(Math.abs(x - center.x), Math.abs(y - center.y))
-            return distance <= Math.abs(x2 - x1) * 1.3 ? element : null
+            return distance <= Math.abs(x2 - x1) * 1.5 ? element : null
         },
         ellipse: (x, y, element) => {
             const { x1, y1, x2, y2 } = element

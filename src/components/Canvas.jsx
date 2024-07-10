@@ -1,23 +1,26 @@
-import { useRef, useLayoutEffect, useState } from "react";
+import { useRef, useLayoutEffect,useEffect, useState } from "react";
 import React from "react";
 
 import rough from "roughjs/bundled/rough.esm";
 
 import Draw from "../utils/Draw";
 import Erase from "../utils/Erase";
-import Toolbar from "./Toolbar";
 import Shape from "../utils/Shape";
+import Select from "../utils/Select";
+
+import Toolbar from "./Toolbar";
 
 const Canvas = () => {
   const [elements, setElements] = useState([]);
   const [type, setType] = useState("Rectangle");
+
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
 
   // this is the logic behind the toolbar connection with the canvas 17 - 46
   const [action, setAction] = useState("draw");
 
-  
+  // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
   const { startDrawing, draw, stopDrawing } = Draw({ contextRef });
   const { startErasing, Erasing, stopErasing } = Erase({ contextRef });
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
@@ -25,15 +28,22 @@ const Canvas = () => {
     setElements,
     type
   );
+    let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
+      contextRef,
+      elements,
+    );
 
   const handleToolbarClick = (selected, shape) => {
     setAction(selected);
     setType(shape);
   };
+
+  // 2- create a key value pair to call the tool functions dynamically
   const actionTypes = {
     draw: [startDrawing, draw, stopDrawing],
     erase: [startErasing, Erasing, stopErasing],
     shape: [onMouseDown, onMouseMove, onMouseUp],
+    select: [moveMouseDown, moveMouseMove, moveMouseUp],
   };
 
   let Down = (e) => {
@@ -56,6 +66,7 @@ const Canvas = () => {
 
     const roughCanvas = rough.canvas(canvas);
     elements.forEach(({ roughElement }) => roughCanvas.draw(roughElement));
+    
 
     // this context is used to draw on the canvas
     // and will be shared with the toolbar and the draw functions

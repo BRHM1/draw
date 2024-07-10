@@ -3,6 +3,8 @@ import { useState } from "react";
 import { RxEraser } from "react-icons/rx";
 import { LuPen } from "react-icons/lu";
 import { FaRegCircle, FaMinus , FaRegSquareFull } from "react-icons/fa6";
+import { PiCursorClickBold } from "react-icons/pi"; 
+
 import { twMerge } from "tailwind-merge";
 
 const Toolbar = (props) => {
@@ -38,11 +40,16 @@ const Toolbar = (props) => {
       icon: <FaRegCircle />,
       type: "Ellipse",
     },
+    {
+      name: "select",
+      icon: <PiCursorClickBold  />,
+      type: "select",
+    },
   ];
   return (
     <div
       className={twMerge(
-        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-6 rounded-md mt-3 border border-lime-300 ",
+        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-7 rounded-md mt-3 border border-lime-300 ",
         props.className
       )}
     >

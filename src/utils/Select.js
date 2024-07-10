@@ -1,7 +1,21 @@
 import { useState } from 'react'
+import rough from 'roughjs/bundled/rough.esm'
+const Select = (elements, setElements) => {
+    const [isMoving, setIsMoving] = useState(false)
+    const [selectedElement, setSelectedElement] = useState(null)
+    const generator = rough.generator()
 
-const Select = (contextRef, elements) => {
-    const [isMoving , setIsMoving] = useState(false)
+    const TYPES = {
+        rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, Math.abs(x2 - x1), Math.abs(y2 - y1), { roughness: 2, fill: "black", }),
+        line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
+        circle: (x1, y1, x2, y2) => generator.circle((x1 + x2) / 2, (y1 + y2) /2, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
+        ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
+    }
+    const createElement = (x1, y1, x2, y2, type) => {
+        const roughElement = TYPES[type](x1, y1, x2, y2)
+        return { x1, y1, x2, y2, roughElement };
+    };
+    // a set of functions to check if the mouse is on the element
     const elementFormula = {
         rectangle: (x, y, element) => {
             const { x1, y1, x2, y2 } = element
@@ -19,11 +33,9 @@ const Select = (contextRef, elements) => {
         },
         circle: (x, y, element) => {
             const { x1, y1, x2, y2 } = element
-            console.log(x, y , x1, y1, x2, y2)
-            const center = { x: (x1 + x2) / 2 , y: (y1 + y2) / 2 }
-            const distance = Math.hypot(Math.abs(x - center.x),Math.abs(y - center.y))
-            console.log(center , distance, Math.abs(x2 - x1))
-            return distance <= Math.abs(x2 - x1) * 1.3? element : null
+            const center = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 }
+            const distance = Math.hypot(Math.abs(x - center.x), Math.abs(y - center.y))
+            return distance <= Math.abs(x2 - x1) * 1.3 ? element : null
         },
         ellipse: (x, y, element) => {
             const { x1, y1, x2, y2 } = element
@@ -39,7 +51,7 @@ const Select = (contextRef, elements) => {
         if (elements?.length === 0) return null
         for (let i = elements?.length - 1; i >= 0; i--) {
             const element = elements[i]
-            return elementFormula[element?.roughElement?.shape](x, y, element)
+            if (elementFormula[element?.roughElement?.shape](x, y, element)) return i
         }
         return null
     }
@@ -47,10 +59,25 @@ const Select = (contextRef, elements) => {
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
         const element = getElementAtPos(clientX, clientY, elements)
-        if (element) setIsMoving(true)
+        if (element !== null) {
+            setIsMoving(true)
+            setSelectedElement(prev => element)
+        }
     }
     const moveMouseMove = (e) => {
         if (!isMoving) return
+        const { clientX, clientY } = e
+        const element = elements[selectedElement]
+        const { x1, y1, x2, y2 } = element
+        console.log(element)
+        const offsetX = clientX - x1
+        const offsetY = clientY - y1
+        console.log(offsetX, offsetY)
+        const type = element?.roughElement?.shape
+        const updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
+        const elementsCopy = [...elements]
+        elementsCopy[selectedElement] = updatedElement
+        setElements(elementsCopy)
     }
     const moveMouseUp = () => {
         setIsMoving()

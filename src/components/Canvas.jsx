@@ -29,8 +29,8 @@ const Canvas = () => {
     type
   );
     let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
-      contextRef,
       elements,
+      setElements,
     );
 
   const handleToolbarClick = (selected, shape) => {

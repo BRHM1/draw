@@ -91,6 +91,7 @@ const Canvas = () => {
         onMouseMove={Move}
         onMouseUp={Up}
         onMouseLeave={Up}
+        onMouseEnter={Move}
       />
     </div>
   );

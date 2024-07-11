@@ -90,7 +90,7 @@ const Canvas = () => {
         onMouseDown={Down}
         onMouseMove={Move}
         onMouseUp={Up}
-        onMouseLeave={Up}
+        // onMouseLeave={Up}
         onMouseEnter={Move}
       />
     </div>

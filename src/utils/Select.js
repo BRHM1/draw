@@ -43,9 +43,9 @@ const getElementAtPos = (x, y, elements) => {
 }
 const generator = rough.generator()
 const TYPES = {
-    rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, Math.abs(x2 - x1), Math.abs(y2 - y1), { roughness: 2, fill: "black", }),
+    rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, { roughness: 2, fill: "black", }),
     line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
-    circle: (x1, y1, x2, y2) => generator.circle((x1 + x2) / 2, (y1 + y2) /2, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
+    circle: (x1, y1, x2, y2) => generator.circle(x1 , y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
     ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
 }
 const createElement = (x1, y1, x2, y2, type) => {

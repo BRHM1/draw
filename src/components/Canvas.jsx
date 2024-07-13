@@ -21,7 +21,7 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing, elements: paths, myPath } = Draw({ contextRef });
+  const { startDrawing, draw, stopDrawing, myPath } = Draw(elements , setElements);
   const { startErasing, Erasing, stopErasing } = Erase({ contextRef });
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
@@ -63,15 +63,12 @@ const Canvas = () => {
     canvas.height = window.innerHeight;
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    paths?.forEach((path) => {
-      context.fill(path);
-    });
-    context.fill(myPath);
     const roughCanvas = rough.canvas(canvas);
-    elements.forEach(element => roughCanvas.draw(element.roughElement));
+    elements.forEach(element => element.x1 ? roughCanvas.draw(element.roughElement) : context.fill(element));
+    context.fill(myPath);
   
     contextRef.current = context;
-  }, [elements, paths, myPath]);
+  }, [elements, myPath]);
 
   return (
     <div className="w-full h-screen grid">

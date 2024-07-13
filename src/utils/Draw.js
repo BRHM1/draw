@@ -1,25 +1,28 @@
 import { useState } from "react";
+import { getStroke } from "perfect-freehand";
+import { getSvgPathFromStroke } from "./utils";
 
-const Draw = ({contextRef}) => {
-  const [isDrawing, setIsDrawing] = useState(false);
+const Draw = ({ contextRef }) => {
+  const [points, setPoints] = useState([]);
+  const [ elements , setElements ] = useState([]);
+
   const startDrawing = (e) => {
-    contextRef?.current?.beginPath();
-    contextRef?.current?.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    setIsDrawing(true)
+    setPoints([[e.pageX, e.pageY, e.pressure]]);
   };
 
+  const stroke = getStroke(points);
+  const path = getSvgPathFromStroke(stroke);
+  const myPath = new Path2D(path);
   const draw = (e) => {
-    if (!isDrawing) return;
-    contextRef?.current.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    contextRef?.current.stroke();
+    if(e.buttons !== 1) return;
+    const newPoint = [e.pageX, e.pageY, e.pressure];
+    setPoints((prevPoints) => [...prevPoints, newPoint]);
   };
 
   const stopDrawing = () => {
-    contextRef?.current?.closePath();
-    contextRef?.current?.save()
-    setIsDrawing(false)
+    setElements([...elements, myPath])
   };
-  return {startDrawing , draw , stopDrawing};
+  return { startDrawing, draw, stopDrawing, elements, myPath };
 };
 
 export default Draw;

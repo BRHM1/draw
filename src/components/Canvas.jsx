@@ -64,8 +64,8 @@ const Canvas = () => {
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const roughCanvas = rough.canvas(canvas);
-    elements.forEach(element => element.x1 ? roughCanvas.draw(element.roughElement) : context.fill(element));
-    context.fill(myPath);
+    elements.forEach(element => element?.x1 ? roughCanvas.draw(element.roughElement) : context.fill(element));
+    if(myPath) context.fill(myPath);
   
     contextRef.current = context;
   }, [elements, myPath]);
@@ -85,7 +85,7 @@ const Canvas = () => {
         onMouseDown={Down}
         onMouseMove={Move}
         onMouseUp={Up}
-        // onMouseLeave={Up}
+        onMouseLeave={Up}
         onMouseEnter={Move}
       />
     </div>

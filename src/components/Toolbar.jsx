@@ -2,8 +2,9 @@ import { useState } from "react";
 
 import { RxEraser } from "react-icons/rx";
 import { LuPen } from "react-icons/lu";
-import { FaRegCircle, FaMinus , FaRegSquareFull } from "react-icons/fa6";
-import { PiCursorClickBold } from "react-icons/pi"; 
+import { FaRegCircle, FaMinus, FaRegSquareFull } from "react-icons/fa6";
+import { TbOvalVertical } from "react-icons/tb";
+import { PiCursorClickBold } from "react-icons/pi";
 
 import { twMerge } from "tailwind-merge";
 
@@ -37,12 +38,12 @@ const Toolbar = (props) => {
     },
     {
       name: "shape",
-      icon: <FaRegCircle />,
+      icon: <TbOvalVertical />,
       type: "Ellipse",
     },
     {
       name: "select",
-      icon: <PiCursorClickBold  />,
+      icon: <PiCursorClickBold />,
       type: "select",
     },
   ];
@@ -57,13 +58,16 @@ const Toolbar = (props) => {
         <button
           key={index}
           onClick={() => {
-            props.onToolbarClick(button.name , button.type)
-            setSelected(button.type)
+            props.onToolbarClick(button.name, button.type);
+            setSelected(button.type);
           }}
-          className={
-            twMerge(`w-12 h-8 grid place-content-center justify-self-center rounded-md `,
-            selected === button.type ? "bg-blue-200" : "bg-blue-50 hover:bg-blue-100")
-          }
+          className={twMerge(
+            `w-12 h-8 grid place-content-center justify-self-center rounded-md `,
+            selected === button.type
+              ? "bg-blue-200"
+              : "bg-blue-50 hover:bg-blue-100",
+            button.type === "Ellipse" ? "text-2xl" : ""
+          )}
         >
           {button.icon}
         </button>

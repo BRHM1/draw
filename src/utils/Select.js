@@ -37,7 +37,7 @@ const getElementAtPos = (x, y, elements) => {
     if (elements?.length === 0) return null
     for (let i = elements?.length - 1; i >= 0; i--) {
         const element = elements[i]
-        if (elementFormula[element?.roughElement?.shape](x, y, element)) return i
+        if (elementFormula[element?.roughElement?.shape] && elementFormula[element?.roughElement?.shape](x, y, element)) return i
     }
     return null
 }

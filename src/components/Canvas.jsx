@@ -1,4 +1,5 @@
-import { useRef, useLayoutEffect,useEffect, useState } from "react";
+import { useRef, useLayoutEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import React from "react";
 
 import rough from "roughjs/bundled/rough.esm";
@@ -7,7 +8,6 @@ import Draw from "../utils/Draw";
 import Erase from "../utils/Erase";
 import Shape from "../utils/Shape";
 import Select from "../utils/Select";
-
 import Toolbar from "./Toolbar";
 
 const Canvas = () => {
@@ -78,7 +78,9 @@ const Canvas = () => {
         contextRef={contextRef}
       />
       <CanvasElement
-        className="row-start-1 col-start-1 w-full h-screen"
+        className={twMerge("row-start-1 col-start-1 min-w-full min-h-full overflow-hidden" , 
+        action === "draw" || action === "shape" ? "cursor-crosshair" : "cursor-default"
+        )}
         ref={canvasRef}
         onMouseDown={Down}
         onMouseMove={Move}

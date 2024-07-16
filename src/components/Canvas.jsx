@@ -34,7 +34,8 @@ const Canvas = () => {
   );
   let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
     elements,
-    setElements
+    setElements,
+    contextRef
   );
 
   const handleToolbarClick = (selected, shape) => {
@@ -75,6 +76,7 @@ const Canvas = () => {
     ? context.clearRect(element.x, element.y, element.width, element.height)
     : context.fill(element)
   );
+  console.log(elements)
   contextRef.current = context;
 
   }, [elements]);

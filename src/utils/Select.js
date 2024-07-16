@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import rough from 'roughjs/bundled/rough.esm'
+import Gizmo from './Gizmo'
 
 
 const elementFormula = {
@@ -53,7 +54,7 @@ const createElement = (x1, y1, x2, y2, type) => {
     return { x1, y1, x2, y2, roughElement };
 };
 
-const Select = (elements, setElements) => {
+const Select = (elements, setElements, contextRef) => {
     const [isMoving, setIsMoving] = useState(false)
     const [selectedElement, setSelectedElement] = useState(null)
     const [firstX, setFirstX] = useState(0)
@@ -62,6 +63,9 @@ const Select = (elements, setElements) => {
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
         const element = getElementAtPos(clientX, clientY, elements)
+        if(element === null) return
+        const gizmo = new Gizmo({ minX : Math.min(elements[element].x1, elements[element].x2), minY : Math.min(elements[element].y1, elements[element].y2), maxX : Math.max(elements[element].x1, elements[element].x2), maxY : Math.max(elements[element].y1, elements[element].y2) })
+        gizmo.draw(contextRef)
         if (element !== null) {
             setIsMoving(true)
             setSelectedElement(prev => element)

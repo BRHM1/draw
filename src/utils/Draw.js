@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { getStroke } from "perfect-freehand";
 import { getSvgPathFromStroke } from "./utils";
+import  Gizmo  from "./Gizmo";
 
-const Draw = (elements, setElements) => {
+const Draw = (elements, setElements, context) => {
   const [points, setPoints] = useState([]);
   const [idx, setIdx] = useState()
   const startDrawing = (e) => {
@@ -22,9 +23,9 @@ const Draw = (elements, setElements) => {
   };
 
   const stopDrawing = () => {
-    setElements([...elements, myPath])
+    setPoints([]);
   };
-  return { startDrawing, draw, stopDrawing, myPath };
+  return { startDrawing, draw, stopDrawing };
 };
 
 export default Draw;

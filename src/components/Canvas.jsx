@@ -21,9 +21,10 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing, myPath } = Draw(
+  const { startDrawing, draw, stopDrawing } = Draw(
     elements,
-    setElements
+    setElements,
+    contextRef
   );
   const { startErasing, Erasing, stopErasing } = Erase(elements, setElements);
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
@@ -64,7 +65,7 @@ const Canvas = () => {
     const context = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
+    
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const roughCanvas = rough.canvas(canvas);
     elements.forEach((element) =>
@@ -74,8 +75,8 @@ const Canvas = () => {
     ? context.clearRect(element.x, element.y, element.width, element.height)
     : context.fill(element)
   );
+  contextRef.current = context;
 
-    contextRef.current = context;
   }, [elements]);
 
   return (

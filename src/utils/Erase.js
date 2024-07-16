@@ -1,16 +1,12 @@
-import { useState } from "react"
-
-const Erase = ({ contextRef }) => {
-    const [isErasing, setIsErasing] = useState(false);
+const Erase = (elements , setElements) => {
     const startErasing = (e) => {
-        setIsErasing(true)
+        setElements([...elements, {x: e.pageX, y: e.pageY, width: 20 , height: 20}])
     }
     const Erasing = (e) => {
-        if (!isErasing) return
-        contextRef?.current?.clearRect(e.clientX, e.clientY, 20, 20);
+        if(!e.buttons) return 
+        setElements([...elements, {x: e.pageX, y: e.pageY, width: 20 , height: 20}])
     }
     const stopErasing = () => {
-        setIsErasing(false)
     }
     return { startErasing, Erasing, stopErasing }
 }

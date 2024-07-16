@@ -17,7 +17,7 @@ const Draw = (elements , setElements) => {
     const newPoint = [e.pageX, e.pageY, e.pressure];
     setPoints((prevPoints) => [...prevPoints, newPoint]);
   };
-
+  
   const stopDrawing = () => {
     setElements([...elements, myPath])
   };

@@ -21,17 +21,20 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing, myPath } = Draw(elements , setElements);
-  const { startErasing, Erasing, stopErasing } = Erase({ contextRef });
+  const { startDrawing, draw, stopDrawing, myPath } = Draw(
+    elements,
+    setElements
+  );
+  const { startErasing, Erasing, stopErasing } = Erase(elements, setElements);
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
     setElements,
     type
   );
-    let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
-      elements,
-      setElements,
-    );
+  let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
+    elements,
+    setElements
+  );
 
   const handleToolbarClick = (selected, shape) => {
     setAction(selected);
@@ -63,10 +66,16 @@ const Canvas = () => {
     canvas.height = window.innerHeight;
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    if (myPath) context.fill(myPath);
     const roughCanvas = rough.canvas(canvas);
-    elements.forEach(element => element?.x1 ? roughCanvas.draw(element.roughElement) : context.fill(element));
-    if(myPath) context.fill(myPath);
-  
+    elements.forEach((element) =>
+      element?.x1
+    ? roughCanvas.draw(element.roughElement)
+    : element.x
+    ? context.clearRect(element.x, element.y, element.width, element.height)
+    : context.fill(element)
+  );
+
     contextRef.current = context;
   }, [elements, myPath]);
 
@@ -78,8 +87,11 @@ const Canvas = () => {
         contextRef={contextRef}
       />
       <CanvasElement
-        className={twMerge("row-start-1 col-start-1 min-w-full min-h-full overflow-hidden" , 
-        action === "draw" || action === "shape" ? "cursor-crosshair" : "cursor-default"
+        className={twMerge(
+          "row-start-1 col-start-1 min-w-full min-h-full overflow-hidden",
+          action === "draw" || action === "shape"
+            ? "cursor-crosshair"
+            : "cursor-default"
         )}
         ref={canvasRef}
         onMouseDown={Down}

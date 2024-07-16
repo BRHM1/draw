@@ -66,7 +66,6 @@ const Canvas = () => {
     canvas.height = window.innerHeight;
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    if (myPath) context.fill(myPath);
     const roughCanvas = rough.canvas(canvas);
     elements.forEach((element) =>
       element?.x1
@@ -77,7 +76,7 @@ const Canvas = () => {
   );
 
     contextRef.current = context;
-  }, [elements, myPath]);
+  }, [elements]);
 
   return (
     <div className="w-full h-screen grid">
@@ -97,8 +96,8 @@ const Canvas = () => {
         onMouseDown={Down}
         onMouseMove={Move}
         onMouseUp={Up}
-        onMouseLeave={Up}
-        onMouseEnter={Move}
+        // onMouseLeave={Up}
+        // onMouseEnter={Move}
       />
     </div>
   );

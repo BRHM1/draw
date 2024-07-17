@@ -78,7 +78,7 @@ const Canvas = () => {
     ? context.clearRect(element.x, element.y, element.width, element.height)
     : context.fill(element?.path)
   );
-  console.log(elements)
+  console.log("elements are:" , elements)
   contextRef.current = context;
 
   }, [elements]);

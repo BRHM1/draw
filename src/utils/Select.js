@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import rough from 'roughjs/bundled/rough.esm'
 import Gizmo from './Gizmo'
+import { getStroke } from 'perfect-freehand'
+import { getSvgPathFromStroke } from './utils'
 // onMouseDown => get element at position => getElementAtPos => getting the elementFormula and return element index
 
 const elementFormula = {
@@ -48,7 +50,7 @@ const getElementAtPos = (x, y, elements) => {
         const element = elements[i]
         if (elementFormula[element?.roughElement?.shape] && elementFormula[element?.roughElement?.shape](x, y, element)) return i
         if (element?.type === "path") {
-           return elementFormula[element?.type](x, y, element) ? i : null
+            return elementFormula[element?.type](x, y, element) ? i : null
         }
     }
     return null
@@ -59,10 +61,29 @@ const TYPES = {
     line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
     circle: (x1, y1, x2, y2) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
     ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
+    path: (clientX, clientY, _firstX, _firstY, points) => {
+        if (points.length === 0) return;
+        //TODO: choose the right value to the offset 
+        //TODO: once a second path is drawn , you can't select the first one
+        let [firstX , firstY] = points[0];
+        let initialOffsetX = clientX - firstX ;
+        let initialOffsetY = clientY - firstY ;
+        // Apply the initial offset to all points
+        let adjustedPoints = points.map(([x, y, pressure]) => {
+            return [x + initialOffsetX, y + initialOffsetY, pressure];
+        });
+        // Generate the stroke and path from adjusted points
+        const stroke = getStroke(adjustedPoints);
+        const path = getSvgPathFromStroke(stroke);
+        const myPath = new Path2D(path);
+        return myPath;
+    }
 }
-const createElement = (x1, y1, x2, y2, type) => {
-    const roughElement = TYPES[type](x1, y1, x2, y2)
-    return { type: type, x1, y1, x2, y2, roughElement };
+const createElement = (x1, y1, x2, y2, type, points) => {
+    const roughElement = TYPES[type](x1, y1, x2, y2, points)
+    return type !== "path" ?
+        { type: type, x1, y1, x2, y2, roughElement } :
+        { type: type, x1, y1, x2, y2, points, path: roughElement }
 };
 
 const Select = (elements, setElements, contextRef) => {
@@ -90,11 +111,13 @@ const Select = (elements, setElements, contextRef) => {
         e.target.style.cursor = "move"
         const { clientX, clientY } = e
         const element = elements[selectedElement]
-        const { x1, y1, x2, y2 } = element
+        const { x1, y1, x2, y2, points } = element
         const offsetX = clientX - x1
         const offsetY = clientY - y1
-        const type = element?.roughElement?.shape
-        const updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type)
+        const type = element?.roughElement?.shape || element?.type
+        let updatedElement
+        if (type !== "path") updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type)
+        if (type === "path") updatedElement = createElement(clientX, clientY, firstX, firstY, type, points)
         const elementsCopy = [...elements]
         elementsCopy[selectedElement] = updatedElement
         setElements(elementsCopy)

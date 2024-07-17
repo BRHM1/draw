@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import rough from 'roughjs/bundled/rough.esm'
 import Gizmo from './Gizmo'
-
+// onMouseDown => get element at position => getElementAtPos => getting the elementFormula and return element index
 
 const elementFormula = {
     rectangle: (x, y, element) => {
@@ -31,6 +31,14 @@ const elementFormula = {
         const b = Math.abs(y2 - y1) / 2
         const c = Math.sqrt(Math.pow(x - ellipseCenter.x, 2) / Math.pow(a, 2) + Math.pow(y - ellipseCenter.y, 2) / Math.pow(b, 2))
         return c <= 1 ? element : null
+    },
+    path: (x, y, element) => {
+        const { path } = element
+        const ctx = document.createElement("canvas").getContext("2d")
+        ctx.beginPath()
+        ctx.stroke(path)
+        ctx.closePath()
+        return ctx.isPointInPath(path, x, y) ? element : null
     }
 }
 
@@ -39,6 +47,9 @@ const getElementAtPos = (x, y, elements) => {
     for (let i = elements?.length - 1; i >= 0; i--) {
         const element = elements[i]
         if (elementFormula[element?.roughElement?.shape] && elementFormula[element?.roughElement?.shape](x, y, element)) return i
+        if (element?.type === "path") {
+           return elementFormula[element?.type](x, y, element) ? i : null
+        }
     }
     return null
 }
@@ -46,12 +57,12 @@ const generator = rough.generator()
 const TYPES = {
     rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, { roughness: 2, fill: "black", }),
     line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
-    circle: (x1, y1, x2, y2) => generator.circle(x1 , y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
-    ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
+    circle: (x1, y1, x2, y2) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
+    ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
 }
 const createElement = (x1, y1, x2, y2, type) => {
     const roughElement = TYPES[type](x1, y1, x2, y2)
-    return { x1, y1, x2, y2, roughElement };
+    return { type: type, x1, y1, x2, y2, roughElement };
 };
 
 const Select = (elements, setElements, contextRef) => {
@@ -63,14 +74,14 @@ const Select = (elements, setElements, contextRef) => {
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
         const element = getElementAtPos(clientX, clientY, elements)
-        if(element === null) return
-        const gizmo = new Gizmo({ minX : Math.min(elements[element].x1, elements[element].x2), minY : Math.min(elements[element].y1, elements[element].y2), maxX : Math.max(elements[element].x1, elements[element].x2), maxY : Math.max(elements[element].y1, elements[element].y2) })
+        if (element === null) return
+        const gizmo = new Gizmo({ minX: Math.min(elements[element].x1, elements[element].x2), minY: Math.min(elements[element].y1, elements[element].y2), maxX: Math.max(elements[element].x1, elements[element].x2), maxY: Math.max(elements[element].y1, elements[element].y2) })
         gizmo.draw(contextRef)
         if (element !== null) {
             setIsMoving(true)
             setSelectedElement(prev => element)
-            setFirstX(clientX- elements[element].x1)
-            setFirstY(clientY- elements[element].y1)
+            setFirstX(clientX - elements[element].x1)
+            setFirstY(clientY - elements[element].y1)
         }
     }
     const moveMouseMove = (e) => {

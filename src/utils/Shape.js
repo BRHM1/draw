@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import rough from "roughjs/bundled/rough.esm"
 
-
-const Shape = (elements, setElements, type) => {
+// element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}
+const Shape = (elements, setElements, type, action) => {
     const [isDrawing, setIsDrawing] = useState(false)
     const generator = rough.generator();
     const TYPES = {
@@ -15,7 +15,7 @@ const Shape = (elements, setElements, type) => {
 
     const createElement = (x1, y1, x2, y2) => {
         const roughElement = TYPES[type](x1, y1, x2, y2)
-        return { x1, y1, x2, y2, roughElement };
+        return { type: action, x1, y1, x2, y2, roughElement };
     };
     const onMouseDown = (e) => {
         setIsDrawing(true);

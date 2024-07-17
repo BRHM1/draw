@@ -30,12 +30,14 @@ const Canvas = () => {
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(
     elements,
     setElements,
-    type
+    type,
+    action
   );
   let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
     elements,
     setElements,
-    contextRef
+    contextRef,
+    action
   );
 
   const handleToolbarClick = (selected, shape) => {
@@ -70,11 +72,11 @@ const Canvas = () => {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const roughCanvas = rough.canvas(canvas);
     elements.forEach((element) =>
-      element?.x1
+      element?.roughElement
     ? roughCanvas.draw(element.roughElement)
     : element.x
     ? context.clearRect(element.x, element.y, element.width, element.height)
-    : context.fill(element)
+    : context.fill(element?.path)
   );
   console.log(elements)
   contextRef.current = context;

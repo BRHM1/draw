@@ -50,7 +50,7 @@ const getElementAtPos = (x, y, elements) => {
         const element = elements[i]
         if (elementFormula[element?.roughElement?.shape] && elementFormula[element?.roughElement?.shape](x, y, element)) return i
         if (element?.type === "path") {
-            return elementFormula[element?.type](x, y, element) ? i : null
+           if(elementFormula[element?.type](x, y, element)) return  i 
         }
     }
     return null
@@ -106,6 +106,7 @@ const Select = (elements, setElements, contextRef) => {
         const { clientX, clientY } = e
         const element = elements[selectedElement]
         const { x1, y1, x2, y2, points } = element
+        console.log(x1, y1, x2, y2)
         const offsetX = clientX - x1
         const offsetY = clientY - y1
         const type = element?.roughElement?.shape || element?.type

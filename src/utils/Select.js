@@ -68,7 +68,7 @@ const TYPES = {
         return myPath;
     }
 }
-const createElement = (x1, y1, x2, y2, points, type) => {
+const createElement = (x1, y1, x2, y2, type, points) => {
     const roughElement = TYPES[type](x1, y1, x2, y2, points)
     return type !== "path" ?
         { type: type, x1, y1, x2, y2, roughElement } :
@@ -109,7 +109,7 @@ const Select = (elements, setElements, contextRef) => {
         if (type !== "path") updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
         if (type === "path") {
             const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
-            updatedElement = createElement(x1 + offsetX , y1 + offsetY, x2 + offsetX, y2 + offsetY, updatedPoints, type)
+            updatedElement = createElement(x1 + offsetX , y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints)
         }
         const elementsCopy = [...elements]
         elementsCopy[selectedElement] = updatedElement

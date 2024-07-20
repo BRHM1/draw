@@ -15,7 +15,7 @@ class Gizmo {
         const ctx = context.current;
         ctx.save();
         ctx.beginPath();
-        ctx.rect(minX - 15, minY - 15 , maxX - minX + 30, maxY - minY + 30);
+        ctx.rect(minX , minY , maxX - minX , maxY - minY );
         ctx.strokeStyle = "orange";
         ctx.lineWidth = 3;
         ctx.setLineDash([5, 5]);

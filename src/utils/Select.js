@@ -50,7 +50,7 @@ const getElementAtPos = (x, y, elements) => {
         const element = elements[i]
         if (elementFormula[element?.roughElement?.shape] && elementFormula[element?.roughElement?.shape](x, y, element)) return i
         if (element?.type === "path") {
-           if(elementFormula[element?.type](x, y, element)) return  i 
+            if (elementFormula[element?.type](x, y, element)) return i
         }
     }
     return null
@@ -61,18 +61,15 @@ const TYPES = {
     line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
     circle: (x1, y1, x2, y2) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
     ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
-    path: (x1, y1, x2, y2, points, deltaX, deltaY) => {
-        let adjustedPoints = points.map(([x, y, pressure]) => {
-            return [x + deltaX, y + deltaY, pressure];
-        });
-        const stroke = getStroke(adjustedPoints);
+    path: (x1, y1, x2, y2, updatedPoints) => {
+        const stroke = getStroke(updatedPoints);
         const path = getSvgPathFromStroke(stroke);
         const myPath = new Path2D(path);
         return myPath;
     }
 }
-const createElement = (x1, y1, x2, y2, type, points, clientX, clientY) => {
-    const roughElement = TYPES[type](x1, y1, x2, y2, points, clientX, clientY)
+const createElement = (x1, y1, x2, y2, points, type) => {
+    const roughElement = TYPES[type](x1, y1, x2, y2, points)
     return type !== "path" ?
         { type: type, x1, y1, x2, y2, roughElement } :
         { type: type, x1, y1, x2, y2, points, path: roughElement }
@@ -87,35 +84,38 @@ const Select = (elements, setElements, contextRef) => {
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
         const element = getElementAtPos(clientX, clientY, elements)
-        console.log("worked again")
         if (element === null) return
         console.log(elements[element].x1, elements[element].y1, elements[element].x2, elements[element].y2)
-        const gizmo = new Gizmo({ minX: elements[element].x1, minY:elements[element].y1, maxX: elements[element].x2, maxY:elements[element].y2 })
+        const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2 })
         gizmo.draw(contextRef)
         if (element !== null) {
             setIsMoving(true)
             setSelectedElement(prev => element)
-            setFirstX(clientX - elements[element].x1)
-            setFirstY(clientY - elements[element].y1)
+            setFirstX(clientX)
+            setFirstY(clientY)
         }
     }
     const moveMouseMove = (e) => {
         onMouseHover(e)
+        const { clientX, clientY } = e
         if (!isMoving) return
         e.target.style.cursor = "move"
-        const { clientX, clientY } = e
         const element = elements[selectedElement]
         const { x1, y1, x2, y2, points } = element
-        console.log(x1, y1, x2, y2)
-        const offsetX = clientX - x1
-        const offsetY = clientY - y1
+        const offsetX = clientX - firstX 
+        const offsetY = clientY - firstY 
         const type = element?.roughElement?.shape || element?.type
         let updatedElement
-        if (type !== "path") updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type)
-        if (type === "path") updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type, points, clientX - firstX, clientY - firstY)
+        if (type !== "path") updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
+        if (type === "path") {
+            const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
+            updatedElement = createElement(x1 + offsetX , y1 + offsetY, x2 + offsetX, y2 + offsetY, updatedPoints, type)
+        }
         const elementsCopy = [...elements]
         elementsCopy[selectedElement] = updatedElement
         setElements(elementsCopy)
+        setFirstX(clientX)
+        setFirstY(clientY)
     }
     const moveMouseUp = (e) => {
         setIsMoving(false)

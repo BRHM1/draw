@@ -61,26 +61,18 @@ const TYPES = {
     line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
     circle: (x1, y1, x2, y2) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
     ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
-    path: (clientX, clientY, _firstX, _firstY, points) => {
-        if (points.length === 0) return;
-        //TODO: choose the right value to the offset 
-        //TODO: once a second path is drawn , you can't select the first one
-        let [firstX , firstY] = points[0];
-        let initialOffsetX = clientX - firstX ;
-        let initialOffsetY = clientY - firstY ;
-        // Apply the initial offset to all points
+    path: (x1, y1, x2, y2, points, deltaX, deltaY) => {
         let adjustedPoints = points.map(([x, y, pressure]) => {
-            return [x + initialOffsetX, y + initialOffsetY, pressure];
+            return [x + deltaX, y + deltaY, pressure];
         });
-        // Generate the stroke and path from adjusted points
         const stroke = getStroke(adjustedPoints);
         const path = getSvgPathFromStroke(stroke);
         const myPath = new Path2D(path);
         return myPath;
     }
 }
-const createElement = (x1, y1, x2, y2, type, points) => {
-    const roughElement = TYPES[type](x1, y1, x2, y2, points)
+const createElement = (x1, y1, x2, y2, type, points, clientX, clientY) => {
+    const roughElement = TYPES[type](x1, y1, x2, y2, points, clientX, clientY)
     return type !== "path" ?
         { type: type, x1, y1, x2, y2, roughElement } :
         { type: type, x1, y1, x2, y2, points, path: roughElement }
@@ -95,8 +87,10 @@ const Select = (elements, setElements, contextRef) => {
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
         const element = getElementAtPos(clientX, clientY, elements)
+        console.log("worked again")
         if (element === null) return
-        const gizmo = new Gizmo({ minX: Math.min(elements[element].x1, elements[element].x2), minY: Math.min(elements[element].y1, elements[element].y2), maxX: Math.max(elements[element].x1, elements[element].x2), maxY: Math.max(elements[element].y1, elements[element].y2) })
+        console.log(elements[element].x1, elements[element].y1, elements[element].x2, elements[element].y2)
+        const gizmo = new Gizmo({ minX: elements[element].x1, minY:elements[element].y1, maxX: elements[element].x2, maxY:elements[element].y2 })
         gizmo.draw(contextRef)
         if (element !== null) {
             setIsMoving(true)
@@ -117,13 +111,13 @@ const Select = (elements, setElements, contextRef) => {
         const type = element?.roughElement?.shape || element?.type
         let updatedElement
         if (type !== "path") updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type)
-        if (type === "path") updatedElement = createElement(clientX, clientY, firstX, firstY, type, points)
+        if (type === "path") updatedElement = createElement(x1 + offsetX - firstX, y1 + offsetY - firstY, x2 + offsetX - firstX, y2 + offsetY - firstY, type, points, clientX - firstX, clientY - firstY)
         const elementsCopy = [...elements]
         elementsCopy[selectedElement] = updatedElement
         setElements(elementsCopy)
     }
     const moveMouseUp = (e) => {
-        setIsMoving()
+        setIsMoving(false)
         e.target.style.cursor = "default"
     }
 

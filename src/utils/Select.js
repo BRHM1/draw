@@ -83,18 +83,21 @@ const Select = (elements, setElements, contextRef) => {
 
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
+        // 1- get the element at the position of the mouse
         const element = getElementAtPos(clientX, clientY, elements)
         if (element === null) return
-        console.log(elements[element].x1, elements[element].y1, elements[element].x2, elements[element].y2)
+
+        // 2- draw the gizmo around the selected element
         const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2 })
         gizmo.draw(contextRef)
-        if (element !== null) {
-            setIsMoving(true)
-            setSelectedElement(prev => element)
-            setFirstX(clientX)
-            setFirstY(clientY)
-        }
+
+        // 3- set the selected element and the first position of the mouse
+        setIsMoving(true)
+        setSelectedElement(prev => element)
+        setFirstX(clientX)
+        setFirstY(clientY)
     }
+
     const moveMouseMove = (e) => {
         onMouseHover(e)
         const { clientX, clientY } = e
@@ -102,21 +105,35 @@ const Select = (elements, setElements, contextRef) => {
         e.target.style.cursor = "move"
         const element = elements[selectedElement]
         const { x1, y1, x2, y2, points } = element
-        const offsetX = clientX - firstX 
-        const offsetY = clientY - firstY 
+
+        // 4- calculate the offset between the first position of the mouse and the current position
+        const offsetX = clientX - firstX
+        const offsetY = clientY - firstY
         const type = element?.roughElement?.shape || element?.type
         let updatedElement
-        if (type !== "path") updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
-        if (type === "path") {
-            const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
-            updatedElement = createElement(x1 + offsetX , y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints)
+
+        switch (type) {
+            case "path":
+                // 5- update the points of the path element
+                const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
+                // 6- create the updated path element
+                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints)
+                break
+            default:
+                // 6- create the updated element
+                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
+                break
         }
+        // 7- update the elements array with the updated element to make the useEffect re-render the canvas
         const elementsCopy = [...elements]
         elementsCopy[selectedElement] = updatedElement
         setElements(elementsCopy)
+
+        // 8- update the first position of the mouse to the current position
         setFirstX(clientX)
         setFirstY(clientY)
     }
+
     const moveMouseUp = (e) => {
         setIsMoving(false)
         e.target.style.cursor = "default"
@@ -124,6 +141,7 @@ const Select = (elements, setElements, contextRef) => {
 
     const onMouseHover = (e) => {
         const { clientX, clientY } = e
+        // 9- change the cursor style based on the element at the position of the mouse to indicate that the element is draggable
         const element = getElementAtPos(clientX, clientY, elements)
         if (element !== null) e.target.style.cursor = "move"
         else e.target.style.cursor = "default"

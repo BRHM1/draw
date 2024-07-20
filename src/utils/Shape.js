@@ -38,6 +38,8 @@ const Shape = (elements, setElements, type, action) => {
 
     const onMouseUp = () => {
         setIsDrawing(false);
+        let { type, x1, y1, x2, y2, roughElement } = elements[elements.length - 1]
+        elements[elements.length - 1] = { type, x1: Math.min(x1, x2), y1: Math.min(y1, y2), x2: Math.max(x1, x2), y2: Math.max(y1, y2), roughElement }
     };
     return { onMouseDown, onMouseMove, onMouseUp }
 }

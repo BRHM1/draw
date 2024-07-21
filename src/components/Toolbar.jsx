@@ -4,7 +4,7 @@ import { RxEraser } from "react-icons/rx";
 import { LuPen } from "react-icons/lu";
 import { FaRegCircle, FaMinus, FaRegSquareFull } from "react-icons/fa6";
 import { TbOvalVertical } from "react-icons/tb";
-import { PiCursorClickBold } from "react-icons/pi";
+import { PiCursorClickBold , PiTextT  } from "react-icons/pi";
 
 import { twMerge } from "tailwind-merge";
 
@@ -46,11 +46,16 @@ const Toolbar = (props) => {
       icon: <PiCursorClickBold />,
       type: "select",
     },
+    {
+      name: "text",
+      icon: <PiTextT />,
+      type: "text",
+    },
   ];
   return (
     <div
       className={twMerge(
-        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-7 rounded-md mt-3 border border-lime-300 ",
+        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-8 rounded-md mt-3 border border-lime-300 ",
         props.className
       )}
     >
@@ -62,7 +67,7 @@ const Toolbar = (props) => {
             setSelected(button.type);
           }}
           className={twMerge(
-            `w-12 h-8 grid place-content-center justify-self-center rounded-md `,
+            `w-10 h-8 grid place-content-center justify-self-center rounded-md `,
             selected === button.type
               ? "bg-blue-200"
               : "bg-blue-50 hover:bg-blue-100",

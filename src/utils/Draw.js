@@ -27,7 +27,7 @@ const Draw = (elements, setElements, context) => {
   };
 
   const stopDrawing = () => {
-    const path = elements.at(-1).path
+    const path = elements.at(-1)?.path
     const wantedElements = elements.slice(0, idx)
     setElements([...wantedElements, {type: "path", points, path, x1: Math.min(xy[0] , xy[2]), y1: Math.min(xy[1] , xy[3]), x2: Math.max(xy[0] , xy[2]), y2: Math.max(xy[1] , xy[3])}])
     setXY([Infinity , Infinity, 0, 0])

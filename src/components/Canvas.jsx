@@ -42,11 +42,11 @@ const Canvas = () => {
     action
   );
   const reFocus = () => {
-    if(textRef.current !== null) textRef.current.value = "";
-    setTimeout( () => {
-      textRef?.current?.focus()
-    } , 0)
-  }
+    if (textRef.current !== null) textRef.current.value = "";
+    setTimeout(() => {
+      textRef?.current?.focus();
+    }, 0);
+  };
   const { startText, text, stopText } = Text(elements, setElements, reFocus);
 
   const handleToolbarClick = (selected, shape) => {
@@ -98,7 +98,29 @@ const Canvas = () => {
           context.font = element.font;
           context.strokeStyle = element.stroke;
           context.lineWidth = element.strokeWidth;
-          context.fillText(element.value, element.x, element.y);
+          const maxLineWidth = canvasRef.current.width - element.x;
+          const lines = element.value.split("\n");
+          // break the line if it exceeds the canvas width
+          for (const line of lines) {
+            if (context.measureText(line).width > maxLineWidth) {
+              let words = line.split("");
+              let newLine = "";
+              let testLine = "";
+              for (let i = words.length - 1; i >= 0; i--) {
+                testLine = words.slice(0, i).join("");
+                if (context.measureText(testLine).width < maxLineWidth) {
+                  newLine = words.slice(0, i).join("");
+                  break;
+                }
+              }
+              lines[lines.indexOf(line)] = newLine;
+              lines.splice(lines.indexOf(newLine) + 1, 0, line.slice(newLine.length));
+            }
+          }
+          // draw the text on the canvas
+          lines.forEach((line, i) => {
+            context.fillText(line, element.x, element.y + i * 25);
+          });
           break;
         default:
           roughCanvas.draw(element.roughElement);
@@ -124,22 +146,31 @@ const Canvas = () => {
           ref={textRef}
           style={{
             position: "absolute",
-            top: `${elements[elements.length - 1]?.y - elements[elements.length - 1]?.height + 4 }px`,
+            top: `${
+              elements[elements.length - 1]?.y -
+              elements[elements.length - 1]?.height +
+              4
+            }px`,
             left: `${elements[elements.length - 1]?.x - 9}px`,
-            width: `${elements[elements.length - 1]?.width}px`,
-            height: `${elements[elements.length - 1]?.height}px`,
-            textIndent: "10px",
+            width: `${
+              canvasRef.current.width - elements[elements.length - 1].x
+            }px`,
+            height: `${
+              canvasRef.current.height - elements[elements.length - 1].y
+            }px`,
             resize: "none",
-            // border: "none",
-            // outline: "none",
+            border: "none",
+            outline: "none",
             fontSize: "24px",
+            color: "transparent",
             fontFamily: "Arial",
             color: "black",
             backgroundColor: "transparent",
-            overflow: "hidden",
+            pointerEvents: "none",
+            // overflow: "hidden",
           }}
           onKeyDown={text}
-          onKeyUp={stopText}
+          onBlur={stopText}
         />
       )}
       <CanvasElement

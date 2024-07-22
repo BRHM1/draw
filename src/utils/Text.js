@@ -29,7 +29,7 @@ const Text = (elements, setElements, focus) => {
         }
         setElements((prevElements) => [...prevElements, newText])
     }
-    const newText = elements[elements.length - 1];
+    // const newText = elements[elements.length - 1];
     const chars = new Set([
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
         "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
@@ -42,9 +42,9 @@ const Text = (elements, setElements, focus) => {
         "[", "]", "{", "}", "|", ";", ":", "'", "\"", ",",
         ".", "<", ">", "/", "?", "`", "~", "\\", 
     ])
+    const newText = elements[elements.length - 1];
     const text = (e) => {
         if (elements.length === 0) return;
-        console.log(e.nativeEvent.key);
         if (!chars.has(e.nativeEvent.key)) return;
         switch (e.nativeEvent.key) {
             case 'Enter':

@@ -73,6 +73,25 @@ const Canvas = () => {
       actionTypes[action][2](e);
     };
 
+  const wrappedLines = (lines , maxLineWidth , ctx) => {
+    const wrapped = [];
+    for (let i = 0; i < lines.length; i++) {
+      const words = lines[i].split(" ");
+      let currentLine = words[0];
+      for (let j = 1; j < words.length; j++) {
+        const word = words[j];
+        const width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxLineWidth) {
+          currentLine += " " + word;
+        } else {
+          wrapped.push(currentLine);
+          currentLine = word;
+        }
+      }
+      wrapped.push(currentLine);
+    }
+    return wrapped;
+  }
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
@@ -82,7 +101,7 @@ const Canvas = () => {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const roughCanvas = rough.canvas(canvas);
     const drawElement = (element) => {
-      switch (element.type) {
+      switch (element?.type) {
         case "path":
           context.stroke(element.path);
           break;
@@ -100,25 +119,7 @@ const Canvas = () => {
           context.lineWidth = element.strokeWidth;
           const maxLineWidth = canvasRef.current.width - element.x;
           const lines = element.value.split("\n");
-          // break the line if it exceeds the canvas width
-          for (const line of lines) {
-            if (context.measureText(line).width > maxLineWidth) {
-              let words = line.split("");
-              let newLine = "";
-              let testLine = "";
-              for (let i = words.length - 1; i >= 0; i--) {
-                testLine = words.slice(0, i).join("");
-                if (context.measureText(testLine).width < maxLineWidth) {
-                  newLine = words.slice(0, i).join("");
-                  break;
-                }
-              }
-              lines[lines.indexOf(line)] = newLine;
-              lines.splice(lines.indexOf(newLine) + 1, 0, line.slice(newLine.length));
-            }
-          }
-          // draw the text on the canvas
-          lines.forEach((line, i) => {
+          wrappedLines(lines, maxLineWidth, context).forEach((line, i) => {
             context.fillText(line, element.x, element.y + i * 25);
           });
           break;
@@ -148,10 +149,9 @@ const Canvas = () => {
             position: "absolute",
             top: `${
               elements[elements.length - 1]?.y -
-              elements[elements.length - 1]?.height +
-              4
+              elements[elements.length - 1]?.height + 4
             }px`,
-            left: `${elements[elements.length - 1]?.x - 9}px`,
+            left: `${elements[elements.length - 1]?.x}px`,
             width: `${
               canvasRef.current.width - elements[elements.length - 1].x
             }px`,
@@ -162,12 +162,12 @@ const Canvas = () => {
             border: "none",
             outline: "none",
             fontSize: "24px",
-            color: "transparent",
             fontFamily: "Arial",
+            lineHeight: "25px",
             color: "black",
             backgroundColor: "transparent",
             pointerEvents: "none",
-            // overflow: "hidden",
+            overflow: "hidden",
           }}
           onKeyDown={text}
           onBlur={stopText}

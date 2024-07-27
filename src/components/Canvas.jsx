@@ -9,6 +9,7 @@ import Shape from "../utils/Shape";
 import Select from "../utils/Select";
 import Text from "../utils/Text";
 import Toolbar from "./Toolbar";
+import Button from "./Button";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
@@ -177,6 +178,10 @@ const Canvas = () => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
+      <div className="w-40 flex justify-center items-center gap-2 mb-2 ml-2">
+        <Button label="Undo" />
+        <Button label="Redo" />
+      </div>
     </div>
   );
 };

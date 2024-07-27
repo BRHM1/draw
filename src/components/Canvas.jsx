@@ -1,8 +1,7 @@
-import { useRef, useLayoutEffect, useState } from "react";
+import React, { useRef, useLayoutEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import React from "react";
-
 import rough from "roughjs/bundled/rough.esm";
+import { useStore } from "../store";
 
 import Draw from "../utils/Draw";
 import Erase from "../utils/Erase";
@@ -12,7 +11,7 @@ import Text from "../utils/Text";
 import Toolbar from "./Toolbar";
 
 const Canvas = () => {
-  const [elements, setElements] = useState([]);
+  const elements = useStore((state) => state.elements);
   const [type, setType] = useState("Rectangle");
 
   const canvasRef = useRef(null);
@@ -23,31 +22,18 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing } = Draw(
-    elements,
-    setElements,
-    contextRef
-  );
-  const { startErasing, Erasing, stopErasing } = Erase(elements, setElements);
-  const { onMouseDown, onMouseMove, onMouseUp } = Shape(
-    elements,
-    setElements,
-    type,
-    action
-  );
-  let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(
-    elements,
-    setElements,
-    contextRef,
-    action
-  );
+  const { startDrawing, draw, stopDrawing } = Draw();
+  const { startErasing, Erasing, stopErasing } = Erase();
+  const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action);
+  let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(contextRef);
+
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
       textRef?.current?.focus();
     }, 0);
   };
-  const { startText, text, stopText } = Text(elements, setElements, reFocus);
+  const { startText, text, stopText } = Text(reFocus);
 
   const handleToolbarClick = (selected, shape) => {
     setAction(selected);
@@ -73,7 +59,7 @@ const Canvas = () => {
       actionTypes[action][2](e);
     };
 
-  const wrappedLines = (lines , maxLineWidth , ctx) => {
+  const wrappedLines = (lines, maxLineWidth, ctx) => {
     const wrapped = [];
     for (let i = 0; i < lines.length; i++) {
       const words = lines[i].split(" ");
@@ -91,7 +77,8 @@ const Canvas = () => {
       wrapped.push(currentLine);
     }
     return wrapped;
-  }
+  };
+
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
@@ -149,7 +136,8 @@ const Canvas = () => {
             position: "absolute",
             top: `${
               elements[elements.length - 1]?.y -
-              elements[elements.length - 1]?.height + 4
+              elements[elements.length - 1]?.height +
+              4
             }px`,
             left: `${elements[elements.length - 1]?.x}px`,
             width: `${
@@ -182,8 +170,8 @@ const Canvas = () => {
         )}
         ref={canvasRef}
         onMouseDown={Down}
-        // onMouseMove={Move}
-        // onMouseUp={Up}
+        onMouseMove={Move}
+        onMouseUp={Up}
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />

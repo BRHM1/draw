@@ -1,4 +1,8 @@
-const Erase = (elements , setElements) => {
+import { useStore } from '../store'
+const Erase = () => {
+    const elements = useStore((state) => state.elements);
+    const setElements = useStore((state) => state.setElements);
+
     const startErasing = (e) => {
         setElements([...elements, {type: "erase" , x: e.pageX, y: e.pageY, width: 20 , height: 20}])
     }
@@ -6,8 +10,7 @@ const Erase = (elements , setElements) => {
         if(!e.buttons) return 
         setElements([...elements, {type: "erase" ,x: e.pageX, y: e.pageY, width: 20 , height: 20}])
     }
-    const stopErasing = () => {
-    }
+    const stopErasing = () => {}
     return { startErasing, Erasing, stopErasing }
 }
 

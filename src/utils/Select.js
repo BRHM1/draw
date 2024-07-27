@@ -3,6 +3,7 @@ import rough from 'roughjs/bundled/rough.esm'
 import Gizmo from './Gizmo'
 import { getStroke } from 'perfect-freehand'
 import { getSvgPathFromStroke } from './utils'
+import { useStore } from '../store'
 // onMouseDown => get element at position => getElementAtPos => getting the elementFormula and return element index
 
 const elementFormula = {
@@ -75,11 +76,14 @@ const createElement = (x1, y1, x2, y2, type, points) => {
         { type: type, x1, y1, x2, y2, points, path: roughElement }
 };
 
-const Select = (elements, setElements, contextRef) => {
+const Select = (contextRef) => {
     const [isMoving, setIsMoving] = useState(false)
     const [selectedElement, setSelectedElement] = useState(null)
     const [firstX, setFirstX] = useState(0)
     const [firstY, setFirstY] = useState(0)
+    const elements = useStore(state => state.elements)
+    const setElements = useStore(state => state.setElements)
+    const replaceLastElement = useStore(state => state.replaceLastElement)
 
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e

@@ -1,12 +1,16 @@
-const Text = (elements, setElements, focus) => {
+import { useStore } from '../store';
+
+const Text = (focus) => {
+    const elements = useStore((state) => state.elements);
+    const addElement = useStore((state) => state.addElement);
+    const removeLastElement = useStore((state) => state.removeLastElement);
+
     const startText = (e) => {
         // if the last element is text and it's empty, remove it
         if (elements.length >= 1 &&
             elements[elements.length - 1].type === 'text' &&
             elements[elements.length - 1].value === '') {
-            setElements((prevElements) => {
-                return [...prevElements.slice(0, -1)]
-            })
+            removeLastElement();
         }
         // focus on the text input
         focus();
@@ -27,9 +31,8 @@ const Text = (elements, setElements, focus) => {
             stroke: 'black',
             strokeWidth: 1,
         }
-        setElements((prevElements) => [...prevElements, newText])
+        addElement(newText)
     }
-    // const newText = elements[elements.length - 1];
     const chars = new Set([
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
         "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
@@ -61,9 +64,8 @@ const Text = (elements, setElements, focus) => {
         newText.width = newText.value.length * 20;
     }
     const stopText = (e) => {
-        setElements((prevElements) => {
-            return [...prevElements.slice(0, -1), newText]
-        })
+        removeLastElement();
+        addElement(newText);
     }
     return { startText, text, stopText }
 }

@@ -111,7 +111,7 @@ const Canvas = () => {
           });
           break;
         default:
-          roughCanvas.draw(element.roughElement);
+          element?.roughElement ? roughCanvas.draw(element.roughElement) : null;
           break;
       }
     };
@@ -156,6 +156,8 @@ const Canvas = () => {
             backgroundColor: "transparent",
             pointerEvents: "none",
             overflow: "hidden",
+            color: "transparent",
+            caretColor: "black",
           }}
           onKeyDown={text}
           onBlur={stopText}

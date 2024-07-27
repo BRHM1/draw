@@ -1,9 +1,10 @@
 import { useStore } from '../store';
 
-const Text = (focus) => {
+const Text = (focus , maxWidth) => {
     const elements = useStore((state) => state.elements);
     const addElement = useStore((state) => state.addElement);
     const removeLastElement = useStore((state) => state.removeLastElement);
+    const modifyLastElement = useStore((state) => state.modifyLastElement);
 
     const startText = (e) => {
         // if the last element is text and it's empty, remove it
@@ -45,23 +46,27 @@ const Text = (focus) => {
         "[", "]", "{", "}", "|", ";", ":", "'", "\"", ",",
         ".", "<", ">", "/", "?", "`", "~", "\\", 
     ])
-    const newText = elements[elements.length - 1];
+    const newText = elements[elements.length - 1]
     const text = (e) => {
         if (elements.length === 0) return;
         if (!chars.has(e.nativeEvent.key)) return;
         switch (e.nativeEvent.key) {
             case 'Enter':
-                newText.value += '\n';
+                 modifyLastElement("value" , newText.value + '\n');
                 break;
             case 'Backspace':
-                newText.value = newText.value.slice(0, -1);
+                modifyLastElement("value" ,newText.value.slice(0, -1));
+                break;
+            case ' ':
+                // TODO: check the width of the text if it exceeds the canvas width then don't add the space
+                modifyLastElement("value" , newText.value + ' ');
                 break;
             default:
-                newText.value += e.nativeEvent.key;
-                newText.x2 = newText.x + newText.value.length * 10;
+                modifyLastElement("value" , newText.value + e.nativeEvent.key);
+                modifyLastElement("x2" , newText.x + newText.value.length * 10);
                 break;
         }
-        newText.width = newText.value.length * 20;
+        modifyLastElement("width" , newText.value.length * 20);
     }
     const stopText = (e) => {
         removeLastElement();

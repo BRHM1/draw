@@ -95,8 +95,8 @@ const Canvas = () => {
           break;
         case "erase":
           context.clearRect(
-            element.x1,
-            element.y1,
+            element.x,
+            element.y,
             element.width,
             element.height
           );

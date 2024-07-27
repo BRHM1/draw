@@ -95,8 +95,8 @@ const Canvas = () => {
           break;
         case "erase":
           context.clearRect(
-            element.x,
-            element.y,
+            element.x1,
+            element.y1,
             element.width,
             element.height
           );
@@ -105,10 +105,10 @@ const Canvas = () => {
           context.font = element.font;
           context.strokeStyle = element.stroke;
           context.lineWidth = element.strokeWidth;
-          const maxLineWidth = canvasRef.current.width - element.x;
+          const maxLineWidth = canvasRef.current.width - element.x1;
           const lines = element.value.split("\n");
           wrappedLines(lines, maxLineWidth, context).forEach((line, i) => {
-            context.fillText(line, element.x, element.y + i * 25);
+            context.fillText(line, element.x1, element.y1 + i * 25);
           });
           break;
         default:
@@ -136,16 +136,16 @@ const Canvas = () => {
           style={{
             position: "absolute",
             top: `${
-              elements[elements.length - 1]?.y -
+              elements[elements.length - 1]?.y1 -
               elements[elements.length - 1]?.height +
               4
             }px`,
-            left: `${elements[elements.length - 1]?.x}px`,
+            left: `${elements[elements.length - 1]?.x1}px`,
             width: `${
-              canvasRef.current.width - elements[elements.length - 1].x
+              canvasRef.current.width - elements[elements.length - 1].x1
             }px`,
             height: `${
-              canvasRef.current.height - elements[elements.length - 1].y
+              canvasRef.current.height - elements[elements.length - 1].y1
             }px`,
             resize: "none",
             border: "none",

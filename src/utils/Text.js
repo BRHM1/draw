@@ -1,6 +1,6 @@
 import { useStore } from '../store';
 
-const Text = (focus , maxWidth) => {
+const Text = (focus) => {
     const elements = useStore((state) => state.elements);
     const addElement = useStore((state) => state.addElement);
     const removeLastElement = useStore((state) => state.removeLastElement);
@@ -21,8 +21,8 @@ const Text = (focus , maxWidth) => {
         const newText = {
             type: 'text',
             id,
-            x: clientX,
-            y: clientY,
+            x1: clientX,
+            y1: clientY,
             x2: clientX + 50,
             y2: clientY + 25,
             width: 50,
@@ -44,7 +44,7 @@ const Text = (focus , maxWidth) => {
         "4", "5", "6", "7", "8", "9", "!", "@", "#", "$",
         "%", "^", "&", "*", "(", ")", "-", "_", "+", "=",
         "[", "]", "{", "}", "|", ";", ":", "'", "\"", ",",
-        ".", "<", ">", "/", "?", "`", "~", "\\", 
+        ".", "<", ">", "/", "?", "`", "~", "\\",
     ])
     const newText = elements[elements.length - 1]
     const text = (e) => {
@@ -52,21 +52,21 @@ const Text = (focus , maxWidth) => {
         if (!chars.has(e.nativeEvent.key)) return;
         switch (e.nativeEvent.key) {
             case 'Enter':
-                 modifyLastElement("value" , newText.value + '\n');
+                modifyLastElement("value", newText.value + '\n');
                 break;
             case 'Backspace':
-                modifyLastElement("value" ,newText.value.slice(0, -1));
+                modifyLastElement("value", newText.value.slice(0, -1));
                 break;
             case ' ':
                 // TODO: check the width of the text if it exceeds the canvas width then don't add the space
-                modifyLastElement("value" , newText.value + ' ');
+                modifyLastElement("value", newText.value + ' ');
                 break;
             default:
-                modifyLastElement("value" , newText.value + e.nativeEvent.key);
-                modifyLastElement("x2" , newText.x + newText.value.length * 10);
+                modifyLastElement("value", newText.value + e.nativeEvent.key);
+                modifyLastElement("x2", newText.x1 + newText.value.length * 10);
                 break;
         }
-        modifyLastElement("width" , newText.value.length * 20);
+        modifyLastElement("width", newText.value.length * 10);
     }
     const stopText = (e) => {
         removeLastElement();

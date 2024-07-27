@@ -42,6 +42,10 @@ const elementFormula = {
         ctx.stroke(path)
         ctx.closePath()
         return ctx.isPointInPath(path, x, y) ? element : null
+    },
+    text: (x, y, element) => {
+        const { x1, y1, x2, y2 } = element
+        return x >= Math.min(x1, x2) && x <= Math.max(x1, x2) && y >= Math.min(y1 - 20, y2) && y <= Math.max(y1 - 20, y2 - 20) ? element : null
     }
 }
 
@@ -51,6 +55,9 @@ const getElementAtPos = (x, y, elements) => {
         const element = elements[i]
         if (elementFormula[element?.roughElement?.shape] && elementFormula[element?.roughElement?.shape](x, y, element)) return i
         if (element?.type === "path") {
+            if (elementFormula[element?.type](x, y, element)) return i
+        }
+        if(element?.type === "text") {
             if (elementFormula[element?.type](x, y, element)) return i
         }
     }
@@ -67,13 +74,22 @@ const TYPES = {
         const path = getSvgPathFromStroke(stroke);
         const myPath = new Path2D(path);
         return myPath;
+    },
+    text: (x1, y1, x2, y2, value) => {
+        return { value, font: '24px Arial', stroke: 'black', strokeWidth: 1 }
     }
 }
 const createElement = (x1, y1, x2, y2, type, points) => {
     const roughElement = TYPES[type](x1, y1, x2, y2, points)
-    return type !== "path" ?
-        { type: type, x1, y1, x2, y2, roughElement } :
-        { type: type, x1, y1, x2, y2, points, path: roughElement }
+    switch (type) {
+        case "path":
+            return { type: type, x1, y1, x2, y2, points, path: roughElement }
+        case "text":
+            console.log("from createElement", { type: type, x1, y1, x2, y2, ...roughElement })
+            return { type: type, x1, y1, x2, y2, ...roughElement }
+        default:
+            return { type: type, x1, y1, x2, y2, roughElement }
+    }      
 };
 
 const Select = (contextRef) => {
@@ -83,7 +99,6 @@ const Select = (contextRef) => {
     const [firstY, setFirstY] = useState(0)
     const elements = useStore(state => state.elements)
     const setElements = useStore(state => state.setElements)
-    const replaceLastElement = useStore(state => state.replaceLastElement)
 
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
@@ -92,8 +107,8 @@ const Select = (contextRef) => {
         if (element === null) return
 
         // 2- draw the gizmo around the selected element
-        const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2 })
-        gizmo.draw(contextRef)
+        const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2})
+        elements[element].type !== "text" && gizmo.draw(contextRef)
 
         // 3- set the selected element and the first position of the mouse
         setIsMoving(true)
@@ -122,6 +137,10 @@ const Select = (contextRef) => {
                 const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
                 // 6- create the updated path element
                 updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints)
+                break
+            case "text":
+                // 5- create the updated text element
+                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, element.value)
                 break
             default:
                 // 6- create the updated element

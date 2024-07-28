@@ -30,16 +30,30 @@ export const useStore = create((set) => ({
             state.elements[state.elements.length - 1][property] = value;
         }));
     },
+    insertElement: (element, index) => {
+        set(produce((state) => {
+            state.RedoStack.splice(index, 0, element);
+            state.elements.splice(index, 0, element);
+        }));
+    },
     Undo: () => {
         set(produce((state) => {
             if(!state.elements.length) return;
             const lastAction = state.elements.pop();
+            const lastElement = state.elements[state.elements.length - 1];
+            if(lastElement?.display) {
+            // if the last element has moved then show the instance of the last position if the user clicks undo
+                state.elements[state.elements.length - 1].display = false
+            }
             state.RedoStack.push(lastAction);
         }));
     },
     Redo: () => {
         set(produce((state) => {
             if(!state.RedoStack.length) return;
+            if(state.elements[state.elements.length - 1]?.hasOwnProperty('display') && !(state.elements[state.elements.length - 1]?.display)) {
+                state.elements[state.elements.length - 1].display = true
+            }
             state.elements.push(state.RedoStack.pop());
         }));
     },

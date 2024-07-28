@@ -117,7 +117,7 @@ const Canvas = () => {
       }
     };
 
-    elements.forEach((element) => drawElement(element));
+    elements.forEach((element) => element?.display ? '' : drawElement(element));
 
     console.log("elements are:", elements);
     contextRef.current = context;
@@ -153,7 +153,6 @@ const Canvas = () => {
             fontSize: "24px",
             fontFamily: "Arial",
             lineHeight: "25px",
-            color: "black",
             backgroundColor: "transparent",
             pointerEvents: "none",
             overflow: "hidden",

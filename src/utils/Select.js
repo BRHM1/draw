@@ -57,7 +57,7 @@ const getElementAtPos = (x, y, elements) => {
         if (element?.type === "path") {
             if (elementFormula[element?.type](x, y, element)) return i
         }
-        if(element?.type === "text") {
+        if (element?.type === "text") {
             if (elementFormula[element?.type](x, y, element)) return i
         }
     }
@@ -89,7 +89,7 @@ const createElement = (x1, y1, x2, y2, type, points) => {
             return { type: type, x1, y1, x2, y2, ...roughElement }
         default:
             return { type: type, x1, y1, x2, y2, roughElement }
-    }      
+    }
 };
 
 const Select = (contextRef) => {
@@ -97,17 +97,20 @@ const Select = (contextRef) => {
     const [selectedElement, setSelectedElement] = useState(null)
     const [firstX, setFirstX] = useState(0)
     const [firstY, setFirstY] = useState(0)
+    const [lastElement, setLastElement] = useState(null)
     const elements = useStore(state => state.elements)
     const setElements = useStore(state => state.setElements)
+    const insertElement = useStore(state => state.insertElement)
 
     const moveMouseDown = (e) => {
         const { clientX, clientY } = e
         // 1- get the element at the position of the mouse
         const element = getElementAtPos(clientX, clientY, elements)
         if (element === null) return
+        setLastElement(elements[element])
 
         // 2- draw the gizmo around the selected element
-        const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2})
+        const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2 })
         elements[element].type !== "text" && gizmo.draw(contextRef)
 
         // 3- set the selected element and the first position of the mouse
@@ -159,6 +162,7 @@ const Select = (contextRef) => {
 
     const moveMouseUp = (e) => {
         setIsMoving(false)
+        insertElement({...lastElement, display: "none"}, selectedElement)
         e.target.style.cursor = "default"
     }
 

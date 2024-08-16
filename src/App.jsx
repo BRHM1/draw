@@ -10,6 +10,8 @@ function App() {
   // BUG: All elements should have a defined structure
   // BUG: resizing window makes the canvas stretch
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
+  // BUG: Undo doesn't save the move action
+
   return (
     <div>
       <Canvas/>

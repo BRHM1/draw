@@ -80,7 +80,7 @@ const TYPES = {
     }
 }
 const createElement = (x1, y1, x2, y2, type, points) => {
-    const roughElement = TYPES[type](x2, y2, x1, y1, points)
+    const roughElement = TYPES[type](x1, y1, x2, y2, points)
     switch (type) {
         case "path":
             return { type: type, x1, y1, x2, y2, points, path: roughElement }

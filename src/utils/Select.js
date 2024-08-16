@@ -80,7 +80,7 @@ const TYPES = {
     }
 }
 const createElement = (x1, y1, x2, y2, type, points) => {
-    const roughElement = TYPES[type](x1, y1, x2, y2, points)
+    const roughElement = TYPES[type](x2, y2, x1, y1, points)
     switch (type) {
         case "path":
             return { type: type, x1, y1, x2, y2, points, path: roughElement }
@@ -132,6 +132,7 @@ const Select = (contextRef) => {
         const offsetX = clientX - firstX
         const offsetY = clientY - firstY
         const type = element?.roughElement?.shape || element?.type
+        console.log(type)
         let updatedElement
 
         switch (type) {
@@ -162,7 +163,7 @@ const Select = (contextRef) => {
 
     const moveMouseUp = (e) => {
         setIsMoving(false)
-        insertElement({...lastElement, display: "none"}, selectedElement)
+        // insertElement({...lastElement, display: "none"}, selectedElement)
         e.target.style.cursor = "default"
     }
 

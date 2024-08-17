@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef } from "react";
 import { CgBorderStyleDashed } from "react-icons/cg";
 import { TbLineDotted } from "react-icons/tb";
 import { TfiLayoutLineSolid } from "react-icons/tfi";
@@ -18,30 +18,116 @@ const OptionsToolbar = () => {
 };
 
 const StrokeOptions = () => {
+  const inputRef = useRef(null);
+  const [strokeColor, setStrokeColor] = useState("#000000");
+  const options = {
+    1: "#000000",
+    2: "#fde047",
+    3: "#ef4444",
+    4: "#3b82f6",
+    5: inputRef?.current?.value || "#000000",
+  };
+  const handleColorChange = (e) => {
+    let optionsId = e.target.id;
+    setStrokeColor(options[optionsId]);
+  };
   return (
     <div>
       <div className="">Stroke</div>
       <div className="flex items-center justify-start gap-1">
-        <div className="w-6 h-6 bg-black rounded-full"></div>
-        <div className="w-6 h-6 bg-yellow-300 rounded-full"></div>
-        <div className="w-6 h-6 bg-red-500 rounded-full"></div>
-        <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
-        <input type="color" className="ml-2" />
+        <button
+          onClick={handleColorChange}
+          id="1"
+          className={`w-6 h-6 bg-black rounded-full ${
+            strokeColor === "#000000" ? "scale-110 transition-all " : ""
+          }`}
+        ></button>
+        <button
+          onClick={handleColorChange}
+          id="2"
+          className={`w-6 h-6 bg-yellow-300 rounded-full ${
+            strokeColor === "#fde047" ? "scale-110 transition-all" : ""
+          }`}
+        ></button>
+        <button
+          onClick={handleColorChange}
+          id="3"
+          className={`w-6 h-6 bg-red-500 rounded-full ${
+            strokeColor === "#ef4444" ? "scale-110 transition-all" : ""
+          }`}
+        ></button>
+        <button
+          onClick={handleColorChange}
+          id="4"
+          className={`w-6 h-6 bg-blue-500 rounded-full ${
+            strokeColor === "#3b82f6" ? "scale-110 transition-all" : ""
+          }`}
+        ></button>
+        <input
+          onBlur={handleColorChange}
+          id="5"
+          type="color"
+          className="ml-2 hover:cursor-pointer"
+          ref={inputRef}
+        />
       </div>
     </div>
   );
 };
 
 const BackgroundOptions = () => {
+  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const inputRef = useRef(null);
+  const options = {
+    1: "#000000",
+    2: "#fde047",
+    3: "#ef4444",
+    4: "#3b82f6",
+    5: inputRef?.current?.value || "#000000",
+  };
+  const handleColorChange = (e) => {
+    let optionsId = e.target.id;
+    setBackgroundColor(options[optionsId]);
+  };
   return (
     <div className="mt-1">
       <div className="">Background</div>
       <div className="flex items-center justify-start gap-1">
-        <div className="w-6 h-6 bg-black rounded-full"></div>
-        <div className="w-6 h-6 bg-yellow-300 rounded-full"></div>
-        <div className="w-6 h-6 bg-red-500 rounded-full"></div>
-        <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
-        <input type="color" className="ml-2" />
+        <button
+          onClick={handleColorChange}
+          id="1"
+          className={`w-6 h-6 bg-black rounded-full ${
+            backgroundColor === "#000000" ? "scale-110 transition-all " : ""
+          }`}
+        ></button>
+        <button
+          onClick={handleColorChange}
+          id="2"
+          className={`w-6 h-6 bg-yellow-300 rounded-full ${
+            backgroundColor === "#fde047" ? "scale-110 transition-all " : ""
+          }`}
+        ></button>
+        <button
+          onClick={handleColorChange}
+          id="3"
+          className={`w-6 h-6 bg-red-500 rounded-full ${
+            backgroundColor === "#ef4444" ? "scale-110 transition-all " : ""
+          }`}
+        ></button>
+        <button
+          onClick={handleColorChange}
+          id="4"
+          className={`w-6 h-6 bg-blue-500 rounded-full ${
+            backgroundColor === "#3b82f6" ? "scale-110 transition-all " : ""
+          }`}
+        ></button>
+        <input
+          onBlur={handleColorChange}
+          id="5"
+          type="color"
+          className="ml-2 hover:cursor-pointer"
+          ref={inputRef}
+        />
       </div>
     </div>
   );
@@ -49,6 +135,17 @@ const BackgroundOptions = () => {
 
 // TODO: Add the fill options
 const FillOptions = () => {
+  const [fillStyle, setFillStyle] = useState("solid");
+  const options = {
+    1: "hachure",
+    2: "cross-hatch",
+    3: "solid",
+  };
+  const handleFillStyle = (e) => {
+    let optionsId = e.target.id;
+    console.log(optionsId);
+    setFillStyle(options[optionsId]);
+  };
   return (
     <div className="mt-1">
       <div>Fill</div>
@@ -57,14 +154,20 @@ const FillOptions = () => {
           type="button"
           title="Hachure (Alt-Click)"
           data-testid="fill-hachure"
-          className="active w-6 h-6"
+          id="1"
+          className={`w-6 h-6 ${
+            fillStyle === "hachure"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleFillStyle}
         >
           <svg
             aria-hidden="true"
             focusable="false"
             role="img"
             viewBox="0 0 20 20"
-            className=""
+            className="pointer-events-none"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -106,14 +209,20 @@ const FillOptions = () => {
           type="button"
           title="Cross-hatch"
           data-testid="fill-cross-hatch"
-          className="w-6 h-6"
+          id="2"
+          className={`w-6 h-6 ${
+            fillStyle === "cross-hatch"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleFillStyle}
         >
           <svg
             aria-hidden="true"
             focusable="false"
             role="img"
             viewBox="0 0 20 20"
-            className=""
+            className="pointer-events-none"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -160,14 +269,20 @@ const FillOptions = () => {
           type="button"
           title="Solid"
           data-testid="fill-solid"
-          className="w-6 h-6"
+          id="3"
+          className={`w-6 h-6 ${
+            fillStyle === "solid"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleFillStyle}
         >
           <svg
             aria-hidden="true"
             focusable="false"
             role="img"
             viewBox="0 0 20 20"
-            className=""
+            className="pointer-events-none"
             fill="currentColor"
             stroke="currentColor"
             strokeLinecap="round"
@@ -193,61 +308,141 @@ const FillOptions = () => {
 };
 
 const StrokeWidthOptions = () => {
+  const [strokeWidth, setStrokeWidth] = useState(1);
+  const options = {
+    1: 1,
+    2: 2,
+    3: 4,
+  };
+  const handleStrokeWidth = (e) => {
+    let optionsId = e.target.id;
+    setStrokeWidth(options[optionsId]);
+  };
   return (
     <div className="mt-1">
       <div>Stroke Width</div>
       <div className="flex items-center justify-start gap-2">
-        <div className="w-6 h-6 flex items-center justify-center">
-          <div className="h-[1px] w-3 bg-black"></div>
-        </div>
-        <div className="w-6 h-6 flex items-center justify-center">
-          <div className="h-[2px] w-3 bg-black"></div>
-        </div>
-        <div className="w-6 h-6 flex items-center justify-center">
-          <div className="h-[4px] w-3 bg-black"></div>
-        </div>
+        <button
+          className={`w-6 h-6 flex items-center justify-center ${
+            strokeWidth === 1
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          id="1"
+          onClick={handleStrokeWidth}
+        >
+          <div className="h-[1px] w-4 bg-black"></div>
+        </button>
+        <button
+          className={`w-6 h-6 flex items-center justify-center ${
+            strokeWidth === 2
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          id="2"
+          onClick={handleStrokeWidth}
+        >
+          <div className="h-[2px] w-4 bg-black"></div>
+        </button>
+        <button
+          className={`w-6 h-6 flex items-center justify-center ${
+            strokeWidth === 4
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          id="3"
+          onClick={handleStrokeWidth}
+        >
+          <div className="h-[4px] w-4 bg-black"></div>
+        </button>
       </div>
     </div>
   );
 };
 
 const StrokeStyleOptions = () => {
+  const [strokeStyle, setStrokeStyle] = useState("solid");
+  const options = {
+    1: "solid",
+    2: "dotted",
+    3: "dashed",
+  };
+  const handleStrokeStyle = (e) => {
+    let optionsId = e.target.id;
+    setStrokeStyle(options[optionsId]);
+  };
   return (
     <div className="mt-1">
       <div>Stroke Style</div>
       <div className="flex items-center justify-start gap-3">
-        <div className="w-6 h-6 flex items-center justify-center" value="solid">
-          <TfiLayoutLineSolid />
-        </div>
-        <div
-          className="w-6 h-6 flex items-center justify-center"
-          value="dotted"
+        <button
+          className={`w-6 h-6 flex items-center justify-center ${
+            strokeStyle === "solid"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleStrokeStyle}
+          id="1"
         >
-          <TbLineDotted />
-        </div>
-        <div
-          className="w-6 h-6 flex items-center justify-center"
-          value="dashed"
+          <TfiLayoutLineSolid className="pointer-events-none" />
+        </button>
+        <button
+          className={`w-6 h-6 flex items-center justify-center ${
+            strokeStyle === "dotted"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleStrokeStyle}
+          id="2"
         >
-          <CgBorderStyleDashed />
-        </div>
+          <TbLineDotted className="pointer-events-none" />
+        </button>
+        <button
+          className={`w-6 h-6 flex items-center justify-center ${
+            strokeStyle === "dashed"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleStrokeStyle}
+          id="3"
+        >
+          <CgBorderStyleDashed className="pointer-events-none" />
+        </button>
       </div>
     </div>
   );
 };
 
 const SloppinessOptions = () => {
+  const [Sloppiness, setSloppiness] = useState(1);
+  const options = {
+    1: 1,
+    2: 2,
+    3: 3,
+  };
+  const handleSloppiness = (e) => {
+    let optionsId = e.target.id;
+    setSloppiness(options[optionsId]);
+  };
   return (
     <div className="mt-1">
       <div>Sloppiness</div>
       <div className="flex items-center justify-start gap-3">
-        <div className="w-6 h-6 ">
+        <button
+          className={`w-6 h-6 ${
+            Sloppiness === 1
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleSloppiness}
+          id="1"
+        >
           <svg
             aria-hidden="true"
             focusable="false"
             role="img"
             viewBox="0 0 20 20"
-            className=""
+            className="pointer-events-none"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -258,14 +453,22 @@ const SloppinessOptions = () => {
               strokeWidth="1.25"
             ></path>
           </svg>
-        </div>
-        <div className="w-6 h-6 ">
+        </button>
+        <button
+          className={`w-6 h-6 ${
+            Sloppiness === 2
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleSloppiness}
+          id="2"
+        >
           <svg
             aria-hidden="true"
             focusable="false"
             role="img"
             viewBox="0 0 20 20"
-            className=""
+            className="pointer-events-none"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -276,14 +479,22 @@ const SloppinessOptions = () => {
               strokeWidth="1.25"
             ></path>
           </svg>
-        </div>
-        <div className="w-6 h-6 ">
+        </button>
+        <button
+          className={`w-6 h-6 ${
+            Sloppiness === 3
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          onClick={handleSloppiness}
+          id="3"
+        >
           <svg
             aria-hidden="true"
             focusable="false"
             role="img"
             viewBox="0 0 20 20"
-            className=""
+            className="pointer-events-none"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -294,18 +505,22 @@ const SloppinessOptions = () => {
               strokeWidth="1.25"
             ></path>
           </svg>
-        </div>
+        </button>
       </div>
     </div>
   );
 };
 
 const OpacitySlider = () => {
+  const [opacity, setOpacity] = useState(1);
+  const handleOpacity = (e) => {
+    setOpacity(e.target.value);
+  };
   return (
     <div className="mt-1">
       <div>Opacity</div>
       <div>
-        <input type="range" min="1" max="100" />
+        <input type="range" min="1" max="100" onChange={handleOpacity} />
       </div>
     </div>
   );

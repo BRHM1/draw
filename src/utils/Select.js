@@ -65,10 +65,10 @@ const getElementAtPos = (x, y, elements) => {
 }
 const generator = rough.generator()
 const TYPES = {
-    rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, { roughness: 2, fill: "black", }),
-    line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
-    circle: (x1, y1, x2, y2) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
-    ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
+    rectangle: (x1, y1, x2, y2, options) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, options),
+    line: (x1, y1, x2, y2, options) => generator.line(x1, y1, x2, y2, options),
+    circle: (x1, y1, x2, y2, options) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
+    ellipse: (x1, y1, x2, y2, options) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
     path: (x1, y1, x2, y2, updatedPoints) => {
         const stroke = getStroke(updatedPoints);
         const path = getSvgPathFromStroke(stroke);
@@ -79,8 +79,8 @@ const TYPES = {
         return { value, font: '24px Arial', stroke: 'black', strokeWidth: 1 }
     }
 }
-const createElement = (x1, y1, x2, y2, type, points) => {
-    const roughElement = TYPES[type](x1, y1, x2, y2, points)
+const createElement = (x1, y1, x2, y2, type, points, options) => {
+    const roughElement = TYPES[type](x1, y1, x2, y2, points, options)
     switch (type) {
         case "path":
             return { type: type, x1, y1, x2, y2, points, path: roughElement }
@@ -97,6 +97,7 @@ const Select = (contextRef) => {
     const [selectedElement, setSelectedElement] = useState(null)
     const [firstX, setFirstX] = useState(0)
     const [firstY, setFirstY] = useState(0)
+    const [elementOptions, setElementOptions] = useState({})
     const [lastElement, setLastElement] = useState(null)
     const elements = useStore(state => state.elements)
     const setElements = useStore(state => state.setElements)
@@ -108,11 +109,10 @@ const Select = (contextRef) => {
         const element = getElementAtPos(clientX, clientY, elements)
         if (element === null) return
         setLastElement(elements[element])
-
         // 2- draw the gizmo around the selected element
         const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2 })
         elements[element].type !== "text" && gizmo.draw(contextRef)
-
+        setElementOptions(elements[element]?.roughElement?.options)
         // 3- set the selected element and the first position of the mouse
         setIsMoving(true)
         setSelectedElement(prev => element)
@@ -148,7 +148,7 @@ const Select = (contextRef) => {
                 break
             default:
                 // 6- create the updated element
-                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type)
+                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, elementOptions)
                 break
         }
         // 7- update the elements array with the updated element to make the useEffect re-render the canvas

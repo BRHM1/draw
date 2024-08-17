@@ -1,23 +1,54 @@
 import { useState, useRef } from "react";
 import { CgBorderStyleDashed } from "react-icons/cg";
+import { PiEmptyLight } from "react-icons/pi";
 import { TbLineDotted } from "react-icons/tb";
+import { PiDotsNineBold } from "react-icons/pi";
 import { TfiLayoutLineSolid } from "react-icons/tfi";
 
-const OptionsToolbar = () => {
+const OptionsToolbar = ({ handleOptionsToolbarClick }) => {
+  const [options, setOptions] = useState({
+    bowing: 1,
+    curveFitting: 0.95,
+    curveStepCount: 9,
+    curveTightness: 0,
+    strokeLineDash: [1 , 0], // [length of dash, length of gap]
+    dashGap: -1,
+    dashOffset: -1,
+    disableMultiStroke: false,
+    disableMultiStrokeFill: false,
+    fill: "black",
+    fillShapeRoughnessGain: 0.8,
+    fillStyle: "hachure",
+    fillWeight: -1,
+    hachureAngle: -41,
+    hachureGap: -1,
+    maxRandomnessOffset: 2,
+    preserveVertices: false,
+    roughness: 1,
+    seed: 0,
+    stroke: "#892e89",
+    strokeWidth: 1,
+    zigzagOffset: -1,
+  });
+  const handleOptions = (pair) => {
+    let newOptions = { ...options, ...pair };
+    setOptions(newOptions);
+    handleOptionsToolbarClick(newOptions);
+  };
   return (
     <div className="bg-blue-200 w-52 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center">
-      <StrokeOptions />
-      <BackgroundOptions />
-      <FillOptions />
-      <StrokeWidthOptions />
-      <StrokeStyleOptions />
-      <SloppinessOptions />
-      <OpacitySlider />
+      <StrokeOptions handleOptions={handleOptions} />
+      <BackgroundOptions handleOptions={handleOptions} />
+      <FillOptions handleOptions={handleOptions} />
+      <StrokeWidthOptions handleOptions={handleOptions} />
+      <StrokeStyleOptions handleOptions={handleOptions} />
+      <SloppinessOptions handleOptions={handleOptions} />
+      <OpacitySlider handleOptions={handleOptions} />
     </div>
   );
 };
 
-const StrokeOptions = () => {
+const StrokeOptions = ({ handleOptions }) => {
   const inputRef = useRef(null);
   const [strokeColor, setStrokeColor] = useState("#000000");
   const options = {
@@ -30,6 +61,7 @@ const StrokeOptions = () => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setStrokeColor(options[optionsId]);
+    handleOptions({ stroke: options[optionsId] });
   };
   return (
     <div>
@@ -75,7 +107,7 @@ const StrokeOptions = () => {
   );
 };
 
-const BackgroundOptions = () => {
+const BackgroundOptions = ({ handleOptions }) => {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const inputRef = useRef(null);
   const options = {
@@ -88,6 +120,7 @@ const BackgroundOptions = () => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setBackgroundColor(options[optionsId]);
+    handleOptions({ fill: options[optionsId] });
   };
   return (
     <div className="mt-1">
@@ -134,16 +167,20 @@ const BackgroundOptions = () => {
 };
 
 // TODO: Add the fill options
-const FillOptions = () => {
+const FillOptions = ({ handleOptions }) => {
   const [fillStyle, setFillStyle] = useState("solid");
   const options = {
     1: "hachure",
     2: "cross-hatch",
     3: "solid",
+    4: "dots",
+    5: "transparent",
   };
   const handleFillStyle = (e) => {
     let optionsId = e.target.id;
-    console.log(optionsId);
+    if(options[optionsId] === "transparent") {
+      handleOptions({ fill: "" });
+    }else handleOptions({ fillStyle: options[optionsId] , fill: "#000000" });
     setFillStyle(options[optionsId]);
   };
   return (
@@ -302,12 +339,34 @@ const FillOptions = () => {
             </defs>
           </svg>
         </button>
+        <button
+          className={`w-6 h-6 flex items-center justify-center text-black ${
+            fillStyle === "dots"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          id="4"
+          onClick={handleFillStyle}
+        >
+          <PiDotsNineBold className="pointer-events-none w-5 h-5" />
+        </button>
+        <button
+          className={`w-6 h-6 flex items-center justify-center text-black ${
+            fillStyle === "transparent"
+              ? "border-2 border-blue-400 rounded-md transition-all"
+              : ""
+          }`}
+          id="5"
+          onClick={handleFillStyle}
+        >
+          <PiEmptyLight className="pointer-events-none w-5 h-5" />
+        </button>
       </div>
     </div>
   );
 };
 
-const StrokeWidthOptions = () => {
+const StrokeWidthOptions = ({ handleOptions }) => {
   const [strokeWidth, setStrokeWidth] = useState(1);
   const options = {
     1: 1,
@@ -317,6 +376,7 @@ const StrokeWidthOptions = () => {
   const handleStrokeWidth = (e) => {
     let optionsId = e.target.id;
     setStrokeWidth(options[optionsId]);
+    handleOptions({ strokeWidth: options[optionsId] });
   };
   return (
     <div className="mt-1">
@@ -360,16 +420,22 @@ const StrokeWidthOptions = () => {
   );
 };
 
-const StrokeStyleOptions = () => {
+const StrokeStyleOptions = ({ handleOptions }) => {
   const [strokeStyle, setStrokeStyle] = useState("solid");
   const options = {
     1: "solid",
     2: "dotted",
     3: "dashed",
   };
+  const map = {
+    solid: [1, 0],
+    dotted: [1, 2],
+    dashed: [4, 4],
+  };
   const handleStrokeStyle = (e) => {
     let optionsId = e.target.id;
     setStrokeStyle(options[optionsId]);
+    handleOptions({ strokeLineDash: map[options[optionsId]] });
   };
   return (
     <div className="mt-1">
@@ -413,16 +479,17 @@ const StrokeStyleOptions = () => {
   );
 };
 
-const SloppinessOptions = () => {
+const SloppinessOptions = ({ handleOptions }) => {
   const [Sloppiness, setSloppiness] = useState(1);
   const options = {
     1: 1,
     2: 2,
-    3: 3,
+    3: 4,
   };
   const handleSloppiness = (e) => {
     let optionsId = e.target.id;
     setSloppiness(options[optionsId]);
+    handleOptions({ roughness: options[optionsId] });
   };
   return (
     <div className="mt-1">
@@ -482,7 +549,7 @@ const SloppinessOptions = () => {
         </button>
         <button
           className={`w-6 h-6 ${
-            Sloppiness === 3
+            Sloppiness === 4
               ? "border-2 border-blue-400 rounded-md transition-all"
               : ""
           }`}
@@ -506,6 +573,8 @@ const SloppinessOptions = () => {
             ></path>
           </svg>
         </button>
+        {/* FUTURE: Add a number input for the sloppiness */}
+        {/* <input type="number" min={1} max={10} className="w-10 h-6"/> */}
       </div>
     </div>
   );
@@ -520,7 +589,13 @@ const OpacitySlider = () => {
     <div className="mt-1">
       <div>Opacity</div>
       <div>
-        <input type="range" min="1" max="100" onChange={handleOpacity} />
+        <input
+          type="range"
+          min="1"
+          max="100"
+          defaultValue={100}
+          onChange={handleOpacity}
+        />
       </div>
     </div>
   );

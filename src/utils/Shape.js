@@ -2,8 +2,33 @@ import { useState } from "react";
 import { useStore } from "../store";
 import rough from "roughjs/bundled/rough.esm"
 
+const options = {
+    bowing: 1,
+    curveFitting: 0.95,
+    curveStepCount: 9,
+    curveTightness: 0,
+    strokeLineDash: [1 , 0], // [length of dash, length of gap]
+    dashGap: -1,
+    dashOffset: -1,
+    disableMultiStroke: false,
+    disableMultiStrokeFill: false,
+    fill: "black",
+    fillShapeRoughnessGain: 0.8,
+    fillStyle: "hachure",
+    fillWeight: -1,
+    hachureAngle: -41,
+    hachureGap: -1,
+    maxRandomnessOffset: 2,
+    preserveVertices: false,
+    roughness: 1,
+    seed: 0,
+    stroke: "#892e89",
+    strokeWidth: 1,
+    zigzagOffset: -1,
+}
+
 // element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}
-const Shape = (type, action) => {
+const Shape = (type, action, options) => {
     const elements = useStore((state) => state.elements);
     const addElement = useStore((state) => state.addElement);
     const replaceLastElement = useStore((state) => state.replaceLastElement);
@@ -11,10 +36,10 @@ const Shape = (type, action) => {
     const [isDrawing, setIsDrawing] = useState(false)
     const generator = rough.generator();
     const TYPES = {
-        Rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, { roughness: 2, fill: "black", }),
-        Line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2),
-        Circle: (x1, y1, x2, y2) => generator.circle(x1 , y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2),
-        Ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1)),
+        Rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, options),
+        Line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2, options),
+        Circle: (x1, y1, x2, y2) => generator.circle(x1 , y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
+        Ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
     }
 
     const createElement = (x1, y1, x2, y2) => {

@@ -15,6 +15,7 @@ import OptionsToolbar from "./OptionsToolbar";
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
   const [type, setType] = useState("Rectangle");
+  const [options, setOptions] = useState({});
 
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
@@ -26,7 +27,7 @@ const Canvas = () => {
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
   const { startDrawing, draw, stopDrawing } = Draw();
   const { startErasing, Erasing, stopErasing } = Erase();
-  const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action);
+  const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action, options);
   let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(contextRef);
 
   const reFocus = () => {
@@ -40,6 +41,10 @@ const Canvas = () => {
   const handleToolbarClick = (selected, shape) => {
     setAction(selected);
     setType(shape);
+  };
+
+  const handleOptionsToolbarClick = (selected) => {
+    setOptions(selected);
   };
 
   // 2- create a key value pair to call the tool functions dynamically
@@ -178,7 +183,7 @@ const Canvas = () => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      <OptionsToolbar />
+      <OptionsToolbar handleOptionsToolbarClick={handleOptionsToolbarClick}/>
       <div className="w-40 flex justify-center items-center gap-2 mb-2 ml-2">
         <Button label="Undo" />
         <Button label="Redo" />

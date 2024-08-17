@@ -15,7 +15,30 @@ import OptionsToolbar from "./OptionsToolbar";
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
   const [type, setType] = useState("Rectangle");
-  const [options, setOptions] = useState({});
+  const [options, setOptions] = useState({
+    bowing: 1,
+    curveFitting: 0.95,
+    curveStepCount: 9,
+    curveTightness: 0,
+    strokeLineDash: [1, 0], // [length of dash, length of gap]
+    dashGap: -1,
+    dashOffset: -1,
+    disableMultiStroke: false,
+    disableMultiStrokeFill: false,
+    fill: "black",
+    fillShapeRoughnessGain: 0.8,
+    fillStyle: "dashed",
+    fillWeight: -1,
+    hachureAngle: -41,
+    hachureGap: -1,
+    maxRandomnessOffset: 2,
+    preserveVertices: false,
+    roughness: 1,
+    seed: 0,
+    stroke: "#892e89",
+    strokeWidth: 1,
+    zigzagOffset: -1,
+  });
 
   const canvasRef = useRef(null);
   const contextRef = useRef(null);

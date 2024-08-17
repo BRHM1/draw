@@ -11,14 +11,14 @@ const OptionsToolbar = ({ handleOptionsToolbarClick }) => {
     curveFitting: 0.95,
     curveStepCount: 9,
     curveTightness: 0,
-    strokeLineDash: [1 , 0], // [length of dash, length of gap]
+    strokeLineDash: [1, 0], // [length of dash, length of gap]
     dashGap: -1,
     dashOffset: -1,
     disableMultiStroke: false,
     disableMultiStrokeFill: false,
     fill: "black",
     fillShapeRoughnessGain: 0.8,
-    fillStyle: "hachure",
+    fillStyle: "dashed",
     fillWeight: -1,
     hachureAngle: -41,
     hachureGap: -1,
@@ -178,9 +178,9 @@ const FillOptions = ({ handleOptions }) => {
   };
   const handleFillStyle = (e) => {
     let optionsId = e.target.id;
-    if(options[optionsId] === "transparent") {
+    if (options[optionsId] === "transparent") {
       handleOptions({ fill: "" });
-    }else handleOptions({ fillStyle: options[optionsId] , fill: "#000000" });
+    } else handleOptions({ fillStyle: options[optionsId], fill: "#000000" });
     setFillStyle(options[optionsId]);
   };
   return (
@@ -580,10 +580,11 @@ const SloppinessOptions = ({ handleOptions }) => {
   );
 };
 
-const OpacitySlider = () => {
+const OpacitySlider = ({ handleOptions }) => {
   const [opacity, setOpacity] = useState(1);
   const handleOpacity = (e) => {
     setOpacity(e.target.value);
+    handleOptions({ fillWeight: Math.max(e.target.value / 100, 0.2), strokeWidth: Math.max(e.target.value / 100, 0.2) });
   };
   return (
     <div className="mt-1">
@@ -591,7 +592,7 @@ const OpacitySlider = () => {
       <div>
         <input
           type="range"
-          min="1"
+          min="10"
           max="100"
           defaultValue={100}
           onChange={handleOpacity}

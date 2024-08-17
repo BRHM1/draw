@@ -2,30 +2,6 @@ import { useState } from "react";
 import { useStore } from "../store";
 import rough from "roughjs/bundled/rough.esm"
 
-const options = {
-    bowing: 1,
-    curveFitting: 0.95,
-    curveStepCount: 9,
-    curveTightness: 0,
-    strokeLineDash: [1 , 0], // [length of dash, length of gap]
-    dashGap: -1,
-    dashOffset: -1,
-    disableMultiStroke: false,
-    disableMultiStrokeFill: false,
-    fill: "black",
-    fillShapeRoughnessGain: 0.8,
-    fillStyle: "hachure",
-    fillWeight: -1,
-    hachureAngle: -41,
-    hachureGap: -1,
-    maxRandomnessOffset: 2,
-    preserveVertices: false,
-    roughness: 1,
-    seed: 0,
-    stroke: "#892e89",
-    strokeWidth: 1,
-    zigzagOffset: -1,
-}
 
 // element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}
 const Shape = (type, action, options) => {

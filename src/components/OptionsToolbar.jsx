@@ -14,7 +14,7 @@ const OptionsToolbar = ({ handleOptionsToolbarClick }) => {
     strokeLineDash: [1, 0], // [length of dash, length of gap]
     dashGap: -1,
     dashOffset: -1,
-    disableMultiStroke: false,
+    disableMultiStroke: true,
     disableMultiStrokeFill: false,
     fill: "black",
     fillShapeRoughnessGain: 0.8,
@@ -24,7 +24,7 @@ const OptionsToolbar = ({ handleOptionsToolbarClick }) => {
     hachureGap: -1,
     maxRandomnessOffset: 2,
     preserveVertices: false,
-    roughness: 1,
+    roughness: -1,
     seed: 0,
     stroke: "#892e89",
     strokeWidth: 1,
@@ -43,7 +43,7 @@ const OptionsToolbar = ({ handleOptionsToolbarClick }) => {
       <StrokeWidthOptions handleOptions={handleOptions} />
       <StrokeStyleOptions handleOptions={handleOptions} />
       <SloppinessOptions handleOptions={handleOptions} />
-      <OpacitySlider handleOptions={handleOptions} />
+      <RandomnessSlider handleOptions={handleOptions} />
     </div>
   );
 };
@@ -124,7 +124,7 @@ const BackgroundOptions = ({ handleOptions }) => {
   };
   return (
     <div className="mt-1">
-      <div className="">Background</div>
+      <div className="">Fill Color</div>
       <div className="flex items-center justify-start gap-1">
         <button
           onClick={handleColorChange}
@@ -185,7 +185,7 @@ const FillOptions = ({ handleOptions }) => {
   };
   return (
     <div className="mt-1">
-      <div>Fill</div>
+      <div>Fill Style</div>
       <div className="flex items-center justify-start gap-1">
         <button
           type="button"
@@ -580,22 +580,20 @@ const SloppinessOptions = ({ handleOptions }) => {
   );
 };
 
-const OpacitySlider = ({ handleOptions }) => {
-  const [opacity, setOpacity] = useState(1);
-  const handleOpacity = (e) => {
-    setOpacity(e.target.value);
-    handleOptions({ fillWeight: Math.max(e.target.value / 100, 0.2), strokeWidth: Math.max(e.target.value / 100, 0.2) });
+const RandomnessSlider = ({ handleOptions }) => {
+  const handleRandomness = (e) => {
+    handleOptions({ maxRandomnessOffset: Math.floor((e.target.value / 100) * 10) });
   };
   return (
     <div className="mt-1">
-      <div>Opacity</div>
+      <div>Randomness</div>
       <div>
         <input
           type="range"
-          min="10"
+          min="0"
           max="100"
-          defaultValue={100}
-          onChange={handleOpacity}
+          defaultValue={0}
+          onChange={handleRandomness}
         />
       </div>
     </div>

@@ -11,35 +11,55 @@ import Text from "../utils/Text";
 import Toolbar from "./Toolbar";
 import Button from "./Button";
 import OptionsToolbar from "./OptionsToolbar";
+import PenOptionsToolbar from "./PenOptionsToolbar";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
-  const [type, setType] = useState("Rectangle");
+  const [type, setType] = useState("draw");
   const [options, setOptions] = useState({
-    bowing: 1,
+    bowing: -1,
     curveFitting: 0.95,
     curveStepCount: 9,
     curveTightness: 0,
     strokeLineDash: [1, 0], // [length of dash, length of gap]
     dashGap: -1,
     dashOffset: -1,
-    disableMultiStroke: false,
-    disableMultiStrokeFill: false,
+    disableMultiStroke: true,
+    disableMultiStrokeFill: true,
     fill: "black",
     fillShapeRoughnessGain: 0.8,
     fillStyle: "dashed",
     fillWeight: -1,
     hachureAngle: -41,
     hachureGap: -1,
-    maxRandomnessOffset: 2,
+    maxRandomnessOffset: 0,
     preserveVertices: false,
-    roughness: 1,
+    roughness: -1,
     seed: 0,
     stroke: "#892e89",
     strokeWidth: 1,
     zigzagOffset: -1,
   });
-
+  const [penOptions, setPenOptions] = useState({
+    size: 8,
+    thinning: 0,
+    smoothing: 0.5,
+    streamline: 0.5,
+    easing: t => (t -= .5) < 0 ? (.02 + .01 / t) * Math.sin(50 * t) : (.02 - .01 / t) * Math.sin(50 * t) + 1,
+    simulatePressure: true,
+    last: true,
+    start: {
+      cap: true,
+      taper: 0.7,
+      easing: (t) => t,
+    },
+    end: {
+      cap: true,
+      taper: 0,
+      easing: (t) => t,
+    },
+  });
+  const shapes = new Set(["Rectangle", "Ellipse", "Line", "Circle"]);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const textRef = useRef(null);
@@ -48,7 +68,7 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing } = Draw();
+  const { startDrawing, draw, stopDrawing } = Draw(penOptions);
   const { startErasing, Erasing, stopErasing } = Erase();
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action, options);
   let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(contextRef);
@@ -68,6 +88,11 @@ const Canvas = () => {
 
   const handleOptionsToolbarClick = (selected) => {
     setOptions(selected);
+  };
+
+  const handlePenOptionsToolbarClick = (selected) => {
+    console.log("penOptions", selected);
+    setPenOptions(selected);
   };
 
   // 2- create a key value pair to call the tool functions dynamically
@@ -146,7 +171,9 @@ const Canvas = () => {
       }
     };
 
-    elements.forEach((element) => element?.display ? '' : drawElement(element));
+    elements.forEach((element) =>
+      element?.display ? "" : drawElement(element)
+    );
 
     console.log("elements are:", elements);
     contextRef.current = context;
@@ -206,7 +233,14 @@ const Canvas = () => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      <OptionsToolbar handleOptionsToolbarClick={handleOptionsToolbarClick}/>
+      {shapes.has(type) && (
+        <OptionsToolbar handleOptionsToolbarClick={handleOptionsToolbarClick} />
+      )}
+      {type === "draw" && (
+        <PenOptionsToolbar
+          handlePenOptionsToolbarClick={handlePenOptionsToolbarClick}
+        />
+      )}
       <div className="w-40 flex justify-center items-center gap-2 mb-2 ml-2">
         <Button label="Undo" />
         <Button label="Redo" />

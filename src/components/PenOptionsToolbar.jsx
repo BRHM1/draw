@@ -7,22 +7,16 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
     thinning: 0,
     smoothing: 0.5,
     streamline: 0.5,
-    easing: (t) =>
-      (t -= 0.5) < 0
-        ? (0.02 + 0.01 / t) * Math.sin(50 * t)
-        : (0.02 - 0.01 / t) * Math.sin(50 * t) + 1,
+    easing: (t) => t,
     simulatePressure: true,
     last: true,
     start: {
-      cap: true,
+      cap: false,
       taper: 0.7,
-      easing: (t) =>
-        (t -= 0.5) < 0
-          ? (0.02 + 0.01 / t) * Math.sin(50 * t)
-          : (0.02 - 0.01 / t) * Math.sin(50 * t) + 1,
+      easing: (t) => t,
     },
     end: {
-      cap: true,
+      cap: false,
       taper: 0,
       easing: (t) => t,
     },
@@ -35,9 +29,33 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
     { property: "streamline", min: 0, max: 100, defaultValue: 0.8, ratio: 100 },
   ];
 
+  const optionsOptions = [
+    {
+      id: "start",
+      min: 0,
+      max: 100,
+      defaultValue: 0.5,
+      ratio: 100,
+      label: "Start Options",
+      options: options.start,
+      property: "start",
+    },
+    {
+      id: "end",
+      min: 0,
+      max: 100,
+      defaultValue: 0.5,
+      ratio: 100,
+      label: "End Options",
+      options: options.end,
+      property: "end",
+    },
+  ];
+
   const handleOptions = (pair) => {
     let newOptions = { ...options, ...pair };
     setOptions(newOptions);
+    console.log("newOptions are: " , newOptions )
     handlePenOptionsToolbarClick(newOptions);
   };
   return (
@@ -55,23 +73,20 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
         />
       ))}
 
-      <Options
-        handleOptions={handleOptions}
-        min={0}
-        max={100}
-        defaultValue={0.5}
-        ratio={100}
-        label={"Start Options"}
-      />
-      <Options
-        handleOptions={handleOptions}
-        min={0}
-        max={100}
-        defaultValue={0.5}
-        ratio={100}
-        label={"End Options"}
-      />
-      
+      {optionsOptions.map((option) => (
+        <Options
+          handleOptions={handleOptions}
+          min={option.min}
+          max={option.max}
+          defaultValue={option.defaultValue}
+          ratio={option.ratio}
+          label={option.label}
+          options={options[option.id]}
+          property={option.property}
+          key={option.id}
+        />
+      ))}
+
       {/* <div className="flex items-center justify-center">
         <label>Simulate Pressure</label>
         <Toggler handleOptions={handleOptions} />
@@ -81,20 +96,19 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
   );
 };
 
-const Slider = ({
-  handleOptions,
-  min,
-  max,
-  property,
-  defaultValue,
-  ratio,
-}) => {
+const Slider = ({ handleOptions, min, max, property, defaultValue, ratio, options }) => {
   const handleChange = (e) => {
     if (!property) return;
-    let obj = {};
-    console.log(ratio)
-    obj[property] = e.target.value ;
-    handleOptions(obj);
+    if (property === "end" || property === "start") {
+      let obj = {};
+      obj[property] = { ...options };
+      obj[property].taper = e.target.value / ratio;
+      handleOptions(obj);
+    } else {
+      let obj = {};
+      obj[property] = e.target.value / ratio;
+      handleOptions(obj);
+    }
   };
 
   return (
@@ -113,48 +127,62 @@ const Slider = ({
   );
 };
 
-const Options = ({ handleOptions, min, max, defaultValue, ratio, label }) => {
+const Options = ({
+  handleOptions,
+  min,
+  max,
+  defaultValue,
+  ratio,
+  label,
+  options,
+  property,
+}) => {
   return (
     <div className="mt-2">
       <label>{label}</label>
       <div className="flex items-center justify-start gap-8 ml-2">
         <label>Cap</label>
-        <Toggler handleOptions={handleOptions} />
+        <Toggler
+          handleOptions={handleOptions}
+          options={options}
+          property={property}
+        />
       </div>
       <div className="flex items-center justify-start gap-4 ml-2">
-        <label>Taper</label>
         <Slider
           handleOptions={handleOptions}
           min={min}
           max={max}
+          property={property}
           defaultValue={defaultValue}
           ratio={ratio}
+          options={options}
         />
       </div>
     </div>
   );
 };
 
-const Toggler = ({handleOptions}) => {
+const Toggler = ({ handleOptions, options, property }) => {
   const [isChecked, setIsChecked] = useState(false);
-  
+
   const handleToggle = () => {
-      setIsChecked(last => !last);
-      handleOptions({ cap: isChecked });
+    setIsChecked((last) => !last);
+    let obj = {};
+    obj[property] = { ...options };
+    obj[property].cap = !isChecked;
+    handleOptions(obj);
   };
 
   return (
     <div>
       <label
-        htmlFor="toggle"
         className={`relative inline-block w-8 h-4 bg-gray-300 rounded-full transition-transform duration-1000 ease-in-out transform ${
           isChecked ? "bg-[#3b82f680]" : ""
         }`}
       >
         <input
           type="checkbox"
-          name="toggle"
-          id="toggle"
           className={`absolute top-0 left-0 w-4 h-4 bg-white rounded-full appearance-none cursor-pointer transition-transform duration-300 ease-in-out transform ${
             isChecked ? " translate-x-4" : ""
           }`}

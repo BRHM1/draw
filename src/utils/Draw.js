@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getStroke } from "perfect-freehand";
 import { getSvgPathFromStroke } from "./utils";
 import { useStore } from "../store";
+import { PiEnvelopeOpen } from "react-icons/pi";
 
 // element = {type: "path", points: [[x, y, pressure], ...], path: Path2D, x1: x, y1: y, x2: x, y2: y}
 const Draw = (penOptions) => {
@@ -17,7 +18,6 @@ const Draw = (penOptions) => {
     setPoints([[e.pageX, e.pageY, e.pressure]]);
     addElement({ type: "path", points: [], path: new Path2D(), x1: Infinity, y1: Infinity, x2: 0, y2: 0 });
   };
-  
   const stroke = getStroke(points, penOptions);
   const path = getSvgPathFromStroke(stroke);
   const myPath = new Path2D(path);

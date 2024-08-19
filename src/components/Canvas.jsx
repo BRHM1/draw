@@ -45,17 +45,17 @@ const Canvas = () => {
     thinning: 0,
     smoothing: 0.5,
     streamline: 0.5,
-    easing: t => (t -= .5) < 0 ? (.02 + .01 / t) * Math.sin(50 * t) : (.02 - .01 / t) * Math.sin(50 * t) + 1,
+    easing: t => t,
     simulatePressure: true,
     last: true,
     start: {
-      cap: true,
-      taper: 0.7,
+      cap: false,
+      taper: 0.1,
       easing: (t) => t,
     },
     end: {
-      cap: true,
-      taper: 0,
+      cap: false,
+      taper: 0.1,
       easing: (t) => t,
     },
   });
@@ -91,7 +91,6 @@ const Canvas = () => {
   };
 
   const handlePenOptionsToolbarClick = (selected) => {
-    console.log("penOptions", selected);
     setPenOptions(selected);
   };
 

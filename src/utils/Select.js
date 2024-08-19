@@ -5,6 +5,8 @@ import { getStroke } from 'perfect-freehand'
 import { getSvgPathFromStroke } from './utils'
 import { useStore } from '../store'
 // onMouseDown => get element at position => getElementAtPos => getting the elementFormula and return element index
+// TODO: add the fillFlag, fillStyle, strokeStyle from the penToolbar to match the original element
+
 
 const elementFormula = {
     rectangle: (x, y, element) => {
@@ -69,8 +71,9 @@ const TYPES = {
     line: (x1, y1, x2, y2, options) => generator.line(x1, y1, x2, y2, options),
     circle: (x1, y1, x2, y2, options) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
     ellipse: (x1, y1, x2, y2, options) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
-    path: (x1, y1, x2, y2, updatedPoints) => {
-        const stroke = getStroke(updatedPoints);
+    path: (x1, y1, x2, y2, updatedPoints, penOptions) => {
+        console.log("from TYPES(path)",penOptions)
+        const stroke = getStroke(updatedPoints, penOptions);
         const path = getSvgPathFromStroke(stroke);
         const myPath = new Path2D(path);
         return myPath;
@@ -83,9 +86,8 @@ const createElement = (x1, y1, x2, y2, type, points, options) => {
     const roughElement = TYPES[type](x1, y1, x2, y2, points, options)
     switch (type) {
         case "path":
-            return { type: type, x1, y1, x2, y2, points, path: roughElement }
+            return { type: type, x1, y1, x2, y2, points, path: roughElement, options }
         case "text":
-            console.log("from createElement", { type: type, x1, y1, x2, y2, ...roughElement })
             return { type: type, x1, y1, x2, y2, ...roughElement }
         default:
             return { type: type, x1, y1, x2, y2, roughElement }
@@ -112,7 +114,7 @@ const Select = (contextRef) => {
         // 2- draw the gizmo around the selected element
         const gizmo = new Gizmo({ minX: elements[element].x1, minY: elements[element].y1, maxX: elements[element].x2, maxY: elements[element].y2 })
         elements[element].type !== "text" && gizmo.draw(contextRef)
-        setElementOptions(elements[element]?.roughElement?.options)
+        setElementOptions(elements[element]?.roughElement?.options || elements[element]?.options)
         // 3- set the selected element and the first position of the mouse
         setIsMoving(true)
         setSelectedElement(prev => element)
@@ -132,7 +134,6 @@ const Select = (contextRef) => {
         const offsetX = clientX - firstX
         const offsetY = clientY - firstY
         const type = element?.roughElement?.shape || element?.type
-        console.log(type)
         let updatedElement
 
         switch (type) {
@@ -140,7 +141,9 @@ const Select = (contextRef) => {
                 // 5- update the points of the path element
                 const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
                 // 6- create the updated path element
-                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints)
+                console.log(elementOptions)
+                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints, elementOptions )
+                console.log("updated element",updatedElement)
                 break
             case "text":
                 // 5- create the updated text element
@@ -153,6 +156,7 @@ const Select = (contextRef) => {
         }
         // 7- update the elements array with the updated element to make the useEffect re-render the canvas
         const elementsCopy = [...elements]
+        console.log("elementsCopy" , elementsCopy)
         elementsCopy[selectedElement] = updatedElement
         setElements(elementsCopy)
 

@@ -50,12 +50,12 @@ const Canvas = () => {
     last: true,
     start: {
       cap: false,
-      taper: 0.1,
+      taper: 0,
       easing: (t) => t,
     },
     end: {
       cap: false,
-      taper: 0.1,
+      taper: 0,
       easing: (t) => t,
     },
   });
@@ -144,7 +144,9 @@ const Canvas = () => {
     const drawElement = (element) => {
       switch (element?.type) {
         case "path":
-          context.stroke(element.path);
+          context.strokeStyle = element.stroke;
+          context.fillStyle = element.fillStyle;
+          element.fillFlag === 1 ? context.fill(element.path) : context.stroke(element.path);
           break;
         case "erase":
           context.clearRect(

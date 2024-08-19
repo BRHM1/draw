@@ -12,7 +12,7 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
     last: true,
     start: {
       cap: false,
-      taper: 0.7,
+      taper: 0,
       easing: (t) => t,
     },
     end: {

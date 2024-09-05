@@ -15,6 +15,8 @@ import PenOptionsToolbar from "./PenOptionsToolbar";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
+  const [positionX, setPositionX] = useState(0);
+  const [positionY, setPositionY] = useState(0);
   const [type, setType] = useState("draw");
   const [options, setOptions] = useState({
     bowing: -1,
@@ -72,6 +74,11 @@ const Canvas = () => {
   const { startErasing, Erasing, stopErasing } = Erase();
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action, options);
   let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(contextRef);
+
+  document.addEventListener('mousemove', (e) => {
+    setPositionX(e.clientX);
+    setPositionY(e.clientY);
+  });
 
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
@@ -187,6 +194,9 @@ const Canvas = () => {
         onToolbarClick={handleToolbarClick}
         contextRef={contextRef}
       />
+      <div className="absolute top-0 left-2">
+        {`X: ${positionX} Y: ${positionY}`}
+      </div>
       {action === "text" && elements[elements.length - 1]?.type === "text" && (
         <textarea
           ref={textRef}

@@ -25,7 +25,7 @@ const elementFormula = {
     },
     circle: (x, y, element) => {
         const { x1, y1, x2, y2 } = element
-        const center = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 }
+        const center = { x: x1 , y: y1 }
         const distance = Math.hypot(Math.abs(x - center.x), Math.abs(y - center.y))
         return distance <= Math.abs(x2 - x1) * 1.5 ? element : null
     },
@@ -69,7 +69,7 @@ const generator = rough.generator()
 const TYPES = {
     rectangle: (x1, y1, x2, y2, options) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, options),
     line: (x1, y1, x2, y2, options) => generator.line(x1, y1, x2, y2, options),
-    circle: (x1, y1, x2, y2, options) => generator.circle(x1, y1, Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
+    circle: (x1, y1, x2, y2, options) => generator.circle(x1, y1, (x1 - x2) * 3, options),
     ellipse: (x1, y1, x2, y2, options) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
     path: (x1, y1, x2, y2, updatedPoints, penOptions) => {
         console.log("from TYPES(path)",penOptions)

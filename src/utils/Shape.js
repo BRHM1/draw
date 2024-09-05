@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useStore } from "../store";
 import rough from "roughjs/bundled/rough.esm"
 
-
+// NOTE: generator.circle(centerX, centerY, diameter, options)
 // element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}
 const Shape = (type, action, options) => {
     const elements = useStore((state) => state.elements);
@@ -14,7 +14,7 @@ const Shape = (type, action, options) => {
     const TYPES = {
         Rectangle: (x1, y1, x2, y2) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, options),
         Line: (x1, y1, x2, y2) => generator.line(x1, y1, x2, y2, options),
-        Circle: (x1, y1, x2, y2) => generator.circle(x1 , y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
+        Circle: (x1, y1, x2, y2) => generator.circle(x1, y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
         Ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
     }
 

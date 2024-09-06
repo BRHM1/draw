@@ -11,7 +11,18 @@ function App() {
   // BUG: resizing window makes the canvas stretch
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
+  // BUG: Gizmo coordinates are not correct
 
+  // TODO: add color and fill options for the pen tool 
+  // TODO: add the erased elements to the undo stack
+  // TODO: make the canvas persistent
+  // TODO: resizing Elements
+  // TODO: layering
+  // TODO: add Grouping to the selection tool
+  // TODO: add text tool bar with font size and font family
+  // TODO: add panning tool
+  // TODO: add zooming tool
+  // TODO: make the DB Model for the application
   return (
     <div>
       <Canvas/>

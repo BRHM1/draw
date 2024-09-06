@@ -82,11 +82,12 @@ const TYPES = {
         return { value, font: '24px Arial', stroke: 'black', strokeWidth: 1 }
     }
 }
-const createElement = (x1, y1, x2, y2, type, points, options) => {
+const createElement = (x1, y1, x2, y2, type, points, options, color) => {
+    console.log("from create element" ,color)
     const roughElement = TYPES[type](x1, y1, x2, y2, points, options)
     switch (type) {
         case "path":
-            return { type: type, x1, y1, x2, y2, points, path: roughElement, options }
+            return { type: type, x1, y1, x2, y2, color, points, path: roughElement, options }
         case "text":
             return { type: type, x1, y1, x2, y2, ...roughElement }
         default:
@@ -141,9 +142,7 @@ const Select = (contextRef) => {
                 // 5- update the points of the path element
                 const updatedPoints = points.map(point => [point[0] + offsetX, point[1] + offsetY, point[2]])
                 // 6- create the updated path element
-                console.log(elementOptions)
-                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints, elementOptions )
-                console.log("updated element",updatedElement)
+                updatedElement = createElement(x1 + offsetX, y1 + offsetY, x2 + offsetX, y2 + offsetY, type, updatedPoints, elementOptions , element.color)
                 break
             case "text":
                 // 5- create the updated text element

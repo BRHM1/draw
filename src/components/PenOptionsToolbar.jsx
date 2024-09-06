@@ -55,12 +55,20 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
   const handleOptions = (pair) => {
     let newOptions = { ...options, ...pair };
     setOptions(newOptions);
-    console.log("newOptions are: " , newOptions )
+    console.log("newOptions are: " , newOptions)
     handlePenOptionsToolbarClick(newOptions);
   };
+
+  const handleColorChange = (e) => {
+    handlePenOptionsToolbarClick(options, e.target.value);
+  }
   return (
-    <div className="bg-blue-200 w-56 h-[70%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center">
+    <div className="bg-blue-200 w-56 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center">
       <div className="text-lg font-bold">Pen Options</div>
+      <div className="flex items-center justify-start">
+        <label>Color</label>
+        <input type="color" className="ml-8" onChange={handleColorChange} />
+      </div>
       {sliders.map((slider) => (
         <Slider
           key={slider.property}

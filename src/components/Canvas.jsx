@@ -18,6 +18,7 @@ const Canvas = () => {
   const [positionX, setPositionX] = useState(0);
   const [positionY, setPositionY] = useState(0);
   const [type, setType] = useState("draw");
+  const [penColor, setPenColor] = useState("#000000");
   const [options, setOptions] = useState({
     bowing: -1,
     curveFitting: 0.95,
@@ -70,7 +71,7 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing } = Draw(penOptions);
+  const { startDrawing, draw, stopDrawing } = Draw(penOptions, penColor);
   const { startErasing, Erasing, stopErasing } = Erase();
   const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action, options);
   let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(contextRef);
@@ -97,8 +98,9 @@ const Canvas = () => {
     setOptions(selected);
   };
 
-  const handlePenOptionsToolbarClick = (selected) => {
+  const handlePenOptionsToolbarClick = (selected, color) => {
     setPenOptions(selected);
+    setPenColor(color);
   };
 
   // 2- create a key value pair to call the tool functions dynamically
@@ -152,8 +154,8 @@ const Canvas = () => {
       switch (element?.type) {
         case "path":
           context.strokeStyle = element.stroke;
-          context.fillStyle = element.fillStyle;
-          element.fillFlag === 1 ? context.fill(element.path) : context.stroke(element.path);
+          context.fillStyle = element.color;
+          context.fill(element.path)
           break;
         case "erase":
           context.clearRect(

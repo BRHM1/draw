@@ -57,5 +57,10 @@ export const useStore = create((set) => ({
             state.elements.push(state.RedoStack.pop());
         }));
     },
-    
+
+    addToREDO: (element) => {
+        set(produce((state) => {
+            state.RedoStack.push(element);
+        }));
+    },
 }));

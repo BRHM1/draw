@@ -2,6 +2,7 @@ import { useStore } from '../store'
 const Erase = () => {
     const elements = useStore((state) => state.elements);
     const setElements = useStore((state) => state.setElements);
+    const addToREDO = useStore((state) => state.addToREDO);
     const elementFormula = {
         rectangle: (x, y, element) => {
             const { x1, y1, x2, y2 } = element
@@ -63,8 +64,10 @@ const Erase = () => {
             return null
         }
         
-        console.log(getElementAtPos(e.pageX, e.pageY, elements))
-        const newElements = elements.filter((_, idx) => idx !== getElementAtPos(e.pageX, e.pageY, elements))
+        const selectedElement = getElementAtPos(e.pageX, e.pageY, elements)
+        if(selectedElement === null) return
+        addToREDO(elements[selectedElement])
+        const newElements = elements.filter((_, idx) => idx !== selectedElement)
         setElements(newElements)
     }
     const stopErasing = () => {}

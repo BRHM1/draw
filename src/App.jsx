@@ -13,8 +13,8 @@ function App() {
   // BUG: Undo doesn't save the move action
   // BUG: Gizmo coordinates are not correct
 
-  // TODO: add color and fill options for the pen tool 
-  // TODO: add the erased elements to the undo stack
+  // TODO: add color options for the pen tool ---> DONE
+  // TODO: add the erased elements to the undo stack ---> DONE
   // TODO: make the canvas persistent
   // TODO: resizing Elements
   // TODO: layering

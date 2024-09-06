@@ -12,6 +12,7 @@ function App() {
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
   // BUG: Gizmo coordinates are not correct
+  // BUG: Circle sucks
 
   // TODO: add color options for the pen tool ---> DONE
   // TODO: add the erased elements to the undo stack ---> DONE

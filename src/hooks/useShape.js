@@ -4,11 +4,13 @@ import rough from "roughjs/bundled/rough.esm"
 
 // NOTE: generator.circle(centerX, centerY, diameter, options)
 // element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}
-const Shape = (type, action, options) => {
+const useShape = (type, action, options) => {
     const elements = useStore((state) => state.elements);
     const addElement = useStore((state) => state.addElement);
     const replaceLastElement = useStore((state) => state.replaceLastElement);
 
+
+    console.log("Shape is re-rendering");
     const [isDrawing, setIsDrawing] = useState(false)
     const generator = rough.generator();
     const TYPES = {
@@ -17,6 +19,7 @@ const Shape = (type, action, options) => {
         Circle: (x1, y1, x2, y2) => generator.circle(x1, y1 , Math.sqrt(Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2)) * 2, options),
         Ellipse: (x1, y1, x2, y2) => generator.ellipse((x1 + x2) / 2, (y1 + y2) /2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
     }
+
 
     const createElement = (x1, y1, x2, y2) => {
         const roughElement = TYPES[type](x1, y1, x2, y2)
@@ -47,4 +50,4 @@ const Shape = (type, action, options) => {
     return { onMouseDown, onMouseMove, onMouseUp }
 }
 
-export default Shape
+export default useShape

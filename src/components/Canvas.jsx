@@ -1,17 +1,19 @@
-import React, { useRef, useLayoutEffect, useState } from "react";
+import React, { useRef, useLayoutEffect, useState, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
 import rough from "roughjs/bundled/rough.esm";
 import { useStore } from "../store";
 
-import Draw from "../utils/Draw";
-import Erase from "../utils/Erase";
-import Shape from "../utils/Shape";
-import Select from "../utils/Select";
-import Text from "../utils/Text";
+import useDraw from "../hooks/useDraw";
+import useErase from "../hooks/useErase";
+import Shape from "../hooks/useShape";
+import useSelect from "../hooks/useSelect";
+import useText from "../hooks/useText";
 import Toolbar from "./Toolbar";
 import Button from "./Button";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
+
+import { drawElement } from "../utils/utils";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
@@ -48,7 +50,7 @@ const Canvas = () => {
     thinning: 0,
     smoothing: 0.5,
     streamline: 0.5,
-    easing: t => t,
+    easing: (t) => t,
     simulatePressure: true,
     last: true,
     start: {
@@ -71,15 +73,11 @@ const Canvas = () => {
   const [action, setAction] = useState("draw");
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-  const { startDrawing, draw, stopDrawing } = Draw(penOptions, penColor);
-  const { startErasing, Erasing, stopErasing } = Erase();
-  const { onMouseDown, onMouseMove, onMouseUp } = Shape(type, action, options);
-  let { moveMouseDown, moveMouseMove, moveMouseUp } = Select(contextRef);
 
-  document.addEventListener('mousemove', (e) => {
-    setPositionX(e.clientX);
-    setPositionY(e.clientY);
-  });
+  // document.addEventListener('mousemove', (e) => {
+  //   setPositionX(e.clientX);
+  //   setPositionY(e.clientY);
+  // });
 
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
@@ -87,7 +85,7 @@ const Canvas = () => {
       textRef?.current?.focus();
     }, 0);
   };
-  const { startText, text, stopText } = Text(reFocus);
+  const { startText, text, stopText } = useText(reFocus, canvasRef);
 
   const handleToolbarClick = (selected, shape) => {
     setAction(selected);
@@ -105,42 +103,25 @@ const Canvas = () => {
 
   // 2- create a key value pair to call the tool functions dynamically
   const actionTypes = {
-    draw: [startDrawing, draw, stopDrawing],
-    erase: [startErasing, Erasing, stopErasing],
-    shape: [onMouseDown, onMouseMove, onMouseUp],
-    select: [moveMouseDown, moveMouseMove, moveMouseUp],
-    text: [startText, text, stopText],
+    draw: useDraw(penOptions, penColor),
+    erase: useErase(),
+    shape: Shape(type, action, options),
+    select: useSelect(contextRef),
+    text: useText(reFocus, canvasRef),
   };
 
   let Down = (e) => {
-      actionTypes[action][0](e);
+      const [down, _, __] = Object.values(actionTypes[action]);
+      down(e);
     },
     Move = (e) => {
-      actionTypes[action][1](e);
+      const [_, move, __] = Object.values(actionTypes[action]);
+      move(e);
     },
     Up = (e) => {
-      actionTypes[action][2](e);
+      const [_, __, up] = Object.values(actionTypes[action]);
+      up(e);
     };
-
-  const wrappedLines = (lines, maxLineWidth, ctx) => {
-    const wrapped = [];
-    for (let i = 0; i < lines.length; i++) {
-      const words = lines[i].split(" ");
-      let currentLine = words[0];
-      for (let j = 1; j < words.length; j++) {
-        const word = words[j];
-        const width = ctx.measureText(currentLine + " " + word).width;
-        if (width < maxLineWidth) {
-          currentLine += " " + word;
-        } else {
-          wrapped.push(currentLine);
-          currentLine = word;
-        }
-      }
-      wrapped.push(currentLine);
-    }
-    return wrapped;
-  };
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -150,39 +131,9 @@ const Canvas = () => {
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const roughCanvas = rough.canvas(canvas);
-    const drawElement = (element) => {
-      switch (element?.type) {
-        case "path":
-          context.strokeStyle = element.stroke;
-          context.fillStyle = element.color;
-          context.fill(element.path)
-          break;
-        case "erase":
-          context.clearRect(
-            element.x,
-            element.y,
-            element.width,
-            element.height
-          );
-          break;
-        case "text":
-          context.font = element.font;
-          context.strokeStyle = element.stroke;
-          context.lineWidth = element.strokeWidth;
-          const maxLineWidth = canvasRef.current.width - element.x1;
-          const lines = element.value.split("\n");
-          wrappedLines(lines, maxLineWidth, context).forEach((line, i) => {
-            context.fillText(line, element.x1, element.y1 + i * 25);
-          });
-          break;
-        default:
-          element?.roughElement ? roughCanvas.draw(element.roughElement) : null;
-          break;
-      }
-    };
 
     elements.forEach((element) =>
-      element?.display ? "" : drawElement(element)
+      element?.display ? "" : drawElement(element, context, roughCanvas, canvasRef)
     );
 
     console.log("elements are:", elements);

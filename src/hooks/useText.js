@@ -1,6 +1,6 @@
 import { useStore } from '../store';
 
-const Text = (focus) => {
+const useText = (focus, canvasRef) => {
     const elements = useStore((state) => state.elements);
     const addElement = useStore((state) => state.addElement);
     const removeLastElement = useStore((state) => state.removeLastElement);
@@ -75,4 +75,4 @@ const Text = (focus) => {
     return { startText, text, stopText }
 }
 
-export default Text
+export default useText

@@ -32,3 +32,55 @@ export function getSvgPathFromStroke(points, closed = true) {
 
   return result
 }
+
+
+const wrappedLines = (lines, maxLineWidth, ctx) => {
+  const wrapped = [];
+  for (let i = 0; i < lines.length; i++) {
+    const words = lines[i].split(" ");
+    let currentLine = words[0];
+    for (let j = 1; j < words.length; j++) {
+      const word = words[j];
+      const width = ctx.measureText(currentLine + " " + word).width;
+      if (width < maxLineWidth) {
+        currentLine += " " + word;
+      } else {
+        wrapped.push(currentLine);
+        currentLine = word;
+      }
+    }
+    wrapped.push(currentLine);
+  }
+  return wrapped;
+};
+
+export function drawElement (element, context , roughCanvas, canvasRef) {
+  switch (element?.type) {
+    case "path":
+      context.strokeStyle = element.stroke;
+      context.fillStyle = element.color;
+      context.fill(element.path)
+      break;
+    case "erase":
+      context.clearRect(
+        element.x,
+        element.y,
+        element.width,
+        element.height
+      );
+      break;
+    case "text":
+      context.font = element.font;
+      context.strokeStyle = element.stroke;
+      context.lineWidth = element.strokeWidth;
+      const maxLineWidth = canvasRef.current.width - element.x1;
+      const lines = element.value.split("\n");
+      wrappedLines(lines, maxLineWidth, context).forEach((line, i) => {
+        context.fillText(line, element.x1, element.y1 + i * 25);
+      });
+      break;
+    default:
+      element?.roughElement ? roughCanvas.draw(element.roughElement) : null;
+      break;
+  }
+};

@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import rough from 'roughjs/bundled/rough.esm'
-import Gizmo from './Gizmo'
+import Gizmo from '../utils/Gizmo'
 import { getStroke } from 'perfect-freehand'
-import { getSvgPathFromStroke } from './utils'
+import { getSvgPathFromStroke } from '../utils/utils'
 import { useStore } from '../store'
 // onMouseDown => get element at position => getElementAtPos => getting the elementFormula and return element index
 // TODO: add the fillFlag, fillStyle, strokeStyle from the penToolbar to match the original element
 
-
+console.log("Select is re-rendering");
 const elementFormula = {
     rectangle: (x, y, element) => {
         const { x1, y1, x2, y2 } = element
@@ -95,7 +95,7 @@ const createElement = (x1, y1, x2, y2, type, points, options, color) => {
     }
 };
 
-const Select = (contextRef) => {
+const useSelect = (contextRef) => {
     const [isMoving, setIsMoving] = useState(false)
     const [selectedElement, setSelectedElement] = useState(null)
     const [firstX, setFirstX] = useState(0)
@@ -179,4 +179,4 @@ const Select = (contextRef) => {
     }
     return { moveMouseDown, moveMouseMove, moveMouseUp }
 }
-export default Select
+export default useSelect

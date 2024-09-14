@@ -24,6 +24,9 @@ function App() {
   // TODO: add panning tool
   // TODO: add zooming tool
   // TODO: make the DB Model for the application
+
+  // -------------------- TODAY --------------------
+  // refactor and move the global state to the zustand
   return (
     <div>
       <Canvas/>

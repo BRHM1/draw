@@ -1,5 +1,5 @@
 import { useStore } from '../store'
-const Erase = () => {
+const useErase = () => {
     const elements = useStore((state) => state.elements);
     const setElements = useStore((state) => state.setElements);
     const addToREDO = useStore((state) => state.addToREDO);
@@ -47,6 +47,7 @@ const Erase = () => {
     }
     const startErasing = (e) => {
     }
+    console.log("Erase is re-rendering");
     const Erasing = (e) => {
         if(!e.buttons) return
         const getElementAtPos = (x, y, elements) => {
@@ -74,4 +75,4 @@ const Erase = () => {
     return { startErasing, Erasing, stopErasing }
 }
 
-export default Erase
+export default useErase

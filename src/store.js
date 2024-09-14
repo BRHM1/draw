@@ -28,6 +28,26 @@ export const useStore = create((set) => ({
         strokeWidth: 1,
         zigzagOffset: -1,
     },
+    penOptions: {
+        size: 8,
+        thinning: 0,
+        smoothing: 0.5,
+        streamline: 0.5,
+        easing: (t) => t,
+        simulatePressure: true,
+        last: true,
+        start: {
+            cap: false,
+            taper: 0,
+            easing: (t) => t,
+        },
+        end: {
+            cap: false,
+            taper: 0,
+            easing: (t) => t,
+        },
+    },
+    penColor: "#000000",
     elements: [],
     RedoStack: [],   // when undo is called, store the last action in undo
     addElement: (element) =>
@@ -101,5 +121,12 @@ export const useStore = create((set) => ({
         set(produce((state) => {
             state.options[field] = value;
         })),
-    
+    setFieldInPenOptions: (field, value) =>
+        set(produce((state) => {
+            state.penOptions[field] = value
+        })),
+    setPenColor: (color) =>
+        set(produce((state) => {
+            state.penColor = color;
+        })),
 }));

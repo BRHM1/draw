@@ -17,33 +17,13 @@ import { drawElement } from "../utils/utils";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
-  const [positionX, setPositionX] = useState(0);
-  const [positionY, setPositionY] = useState(0);
-  const [penColor, setPenColor] = useState("#000000");
-  
-  const options = useStore((state) => state.options);
-  // options should be moved to the store and maintained by the options toolbar
 
-  // penOptions should be moved to the store and maintained by the pen options toolbar
-  const [penOptions, setPenOptions] = useState({
-    size: 8,
-    thinning: 0,
-    smoothing: 0.5,
-    streamline: 0.5,
-    easing: (t) => t,
-    simulatePressure: true,
-    last: true,
-    start: {
-      cap: false,
-      taper: 0,
-      easing: (t) => t,
-    },
-    end: {
-      cap: false,
-      taper: 0,
-      easing: (t) => t,
-    },
-  });
+  const options = useStore((state) => state.options);
+
+  const penOptions = useStore((state) => state.penOptions);
+  const penColor = useStore((state) => state.penColor);
+
+
   const shapes = new Set(["Rectangle", "Ellipse", "Line", "Circle"]);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
@@ -53,13 +33,6 @@ const Canvas = () => {
   const action = useStore((state) => state.action);
   const type = useStore((state) => state.type);
 
-  // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
-
-  // document.addEventListener('mousemove', (e) => {
-  //   setPositionX(e.clientX);
-  //   setPositionY(e.clientY);
-  // });
-
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
@@ -67,12 +40,8 @@ const Canvas = () => {
     }, 0);
   };
 
-  const handlePenOptionsToolbarClick = (selected, color) => {
-    setPenOptions(selected);
-    setPenColor(color);
-  };
-
-  // 2- create a key value pair to call the tool functions dynamically
+  // ISSUE: Hooks are called each time this component re-renders and this affects the performance
+  // CRITICAL TODO: change the way those functions invoked ---------------------------------------------------------------
   const actionTypes = {
     draw: useDraw(penOptions, penColor),
     erase: useErase(),
@@ -93,6 +62,7 @@ const Canvas = () => {
       const [_, __, up] = Object.values(actionTypes[action]);
       up(e);
     };
+  // CRITICAL TODO: change the way those functions invoked ---------------------------------------------------------------
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -104,7 +74,9 @@ const Canvas = () => {
     const roughCanvas = rough.canvas(canvas);
 
     elements.forEach((element) =>
-      element?.display ? "" : drawElement(element, context, roughCanvas, canvasRef)
+      element?.display
+        ? ""
+        : drawElement(element, context, roughCanvas, canvasRef)
     );
 
     console.log("elements are:", elements);
@@ -117,9 +89,6 @@ const Canvas = () => {
         className={"row-start-1 col-start-1 justify-self-center left-1/4"}
         contextRef={contextRef}
       />
-      <div className="absolute top-0 left-2">
-        {`X: ${positionX} Y: ${positionY}`}
-      </div>
       {action === "text" && elements[elements.length - 1]?.type === "text" && (
         <textarea
           ref={textRef}
@@ -167,14 +136,8 @@ const Canvas = () => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      {shapes.has(type) && (
-        <OptionsToolbar />
-      )}
-      {type === "draw" && (
-        <PenOptionsToolbar
-          handlePenOptionsToolbarClick={handlePenOptionsToolbarClick}
-        />
-      )}
+      {shapes.has(type) && <OptionsToolbar />}
+      {type === "draw" && <PenOptionsToolbar />}
       <div className="w-40 flex justify-center items-center gap-2 mb-2 ml-2">
         <Button label="Undo" />
         <Button label="Redo" />

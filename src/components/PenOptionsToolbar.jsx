@@ -1,26 +1,10 @@
-import { stringify } from "postcss";
 import { useState } from "react";
+import { useStore } from "../store";
 
-const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
-  const [options, setOptions] = useState({
-    size: 8,
-    thinning: 0,
-    smoothing: 0.5,
-    streamline: 0.5,
-    easing: (t) => t,
-    simulatePressure: true,
-    last: true,
-    start: {
-      cap: false,
-      taper: 0,
-      easing: (t) => t,
-    },
-    end: {
-      cap: false,
-      taper: 0,
-      easing: (t) => t,
-    },
-  });
+const PenOptionsToolbar = () => {
+
+  const setFieldInPenOptions = useStore((state) => state.setFieldInPenOptions);
+  const penColor = useStore((state) => state.setPenColor);
 
   const sliders = [
     { property: "size", min: 1, max: 100, defaultValue: 8, ratio: 1 },
@@ -37,7 +21,6 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
       defaultValue: 0.5,
       ratio: 100,
       label: "Start Options",
-      options: options.start,
       property: "start",
     },
     {
@@ -47,21 +30,15 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
       defaultValue: 0.5,
       ratio: 100,
       label: "End Options",
-      options: options.end,
       property: "end",
     },
   ];
 
-  const handleOptions = (pair) => {
-    let newOptions = { ...options, ...pair };
-    setOptions(newOptions);
-    console.log("newOptions are: " , newOptions)
-    handlePenOptionsToolbarClick(newOptions);
-  };
 
   const handleColorChange = (e) => {
-    handlePenOptionsToolbarClick(options, e.target.value);
-  }
+    penColor(e.target.value);
+  };
+
   return (
     <div className="bg-blue-200 w-56 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center">
       <div className="text-lg font-bold">Pen Options</div>
@@ -72,7 +49,7 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
       {sliders.map((slider) => (
         <Slider
           key={slider.property}
-          handleOptions={handleOptions}
+          handleOptions={setFieldInPenOptions}
           min={slider.min}
           max={slider.max}
           property={slider.property}
@@ -83,13 +60,12 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
 
       {optionsOptions.map((option) => (
         <Options
-          handleOptions={handleOptions}
+          handleOptions={setFieldInPenOptions}
           min={option.min}
           max={option.max}
           defaultValue={option.defaultValue}
           ratio={option.ratio}
           label={option.label}
-          options={options[option.id]}
           property={option.property}
           key={option.id}
         />
@@ -104,18 +80,26 @@ const PenOptionsToolbar = ({ handlePenOptionsToolbarClick }) => {
   );
 };
 
-const Slider = ({ handleOptions, min, max, property, defaultValue, ratio, options }) => {
+const Slider = ({
+  handleOptions,
+  min,
+  max,
+  property,
+  defaultValue,
+  ratio,
+}) => {
+  const penOptions = useStore((state) => state.penOptions);
   const handleChange = (e) => {
     if (!property) return;
     if (property === "end" || property === "start") {
-      let obj = {};
-      obj[property] = { ...options };
-      obj[property].taper = e.target.value / ratio;
-      handleOptions(obj);
+      let obj = {...penOptions[property]};
+      obj.taper = e.target.value / ratio;
+      handleOptions(property, obj);
     } else {
       let obj = {};
       obj[property] = e.target.value / ratio;
-      handleOptions(obj);
+      const [key, value] = Object.entries(obj)[0];
+      handleOptions(key, value);
     }
   };
 
@@ -142,7 +126,6 @@ const Options = ({
   defaultValue,
   ratio,
   label,
-  options,
   property,
 }) => {
   return (
@@ -152,7 +135,6 @@ const Options = ({
         <label>Cap</label>
         <Toggler
           handleOptions={handleOptions}
-          options={options}
           property={property}
         />
       </div>
@@ -164,22 +146,20 @@ const Options = ({
           property={property}
           defaultValue={defaultValue}
           ratio={ratio}
-          options={options}
         />
       </div>
     </div>
   );
 };
 
-const Toggler = ({ handleOptions, options, property }) => {
+const Toggler = ({ handleOptions, property }) => {
   const [isChecked, setIsChecked] = useState(false);
-
+  const penOptions = useStore((state) => state.penOptions);
   const handleToggle = () => {
     setIsChecked((last) => !last);
-    let obj = {};
-    obj[property] = { ...options };
-    obj[property].cap = !isChecked;
-    handleOptions(obj);
+    let obj = {...penOptions[property]};
+    obj.cap = !isChecked;
+    handleOptions(property ,obj);
   };
 
   return (

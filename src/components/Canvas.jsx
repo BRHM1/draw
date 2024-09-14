@@ -19,7 +19,6 @@ const Canvas = () => {
   const elements = useStore((state) => state.elements);
   const [positionX, setPositionX] = useState(0);
   const [positionY, setPositionY] = useState(0);
-  const [type, setType] = useState("draw");
   const [penColor, setPenColor] = useState("#000000");
   const [options, setOptions] = useState({
     bowing: -1,
@@ -70,7 +69,8 @@ const Canvas = () => {
   const textRef = useRef(null);
 
   // this is the logic behind the toolbar connection with the canvas 17 - 46
-  const [action, setAction] = useState("draw");
+  const action = useStore((state) => state.action);
+  const type = useStore((state) => state.type);
 
   // 1- call the tool to distruct the MouseDown, MouseMove, MouseUp functions
 
@@ -86,11 +86,6 @@ const Canvas = () => {
     }, 0);
   };
   const { startText, text, stopText } = useText(reFocus, canvasRef);
-
-  const handleToolbarClick = (selected, shape) => {
-    setAction(selected);
-    setType(shape);
-  };
 
   const handleOptionsToolbarClick = (selected) => {
     setOptions(selected);
@@ -144,7 +139,6 @@ const Canvas = () => {
     <div className="w-full h-screen grid">
       <Toolbar
         className={"row-start-1 col-start-1 justify-self-center left-1/4"}
-        onToolbarClick={handleToolbarClick}
         contextRef={contextRef}
       />
       <div className="absolute top-0 left-2">

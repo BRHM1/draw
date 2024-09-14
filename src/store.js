@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 
 export const useStore = create((set) => ({
+    action: "draw",
+    type: "draw",
     elements: [],
     RedoStack: [],   // when undo is called, store the last action in undo
     addElement: (element) =>
@@ -63,4 +65,12 @@ export const useStore = create((set) => ({
             state.RedoStack.push(element);
         }));
     },
+    setAction: (action) =>
+        set(produce((state) => {
+            state.action = action;
+        })),
+    setType: (type) =>
+        set(produce((state) => {
+            state.type = type;
+        })),
 }));

@@ -8,8 +8,12 @@ import { PiCursorClickBold , PiTextT  } from "react-icons/pi";
 
 import { twMerge } from "tailwind-merge";
 
+import { useStore } from "../store";
+
 const Toolbar = (props) => {
-  const [selected, setSelected] = useState("draw");
+  const setAction = useStore((state) => state.setAction)
+  const selectedType = useStore((state) => state.type)
+  const setType = useStore((state) => state.setType)
   const buttons = [
     {
       name: "draw",
@@ -63,12 +67,12 @@ const Toolbar = (props) => {
         <button
           key={index}
           onClick={() => {
-            props.onToolbarClick(button.name, button.type);
-            setSelected(button.type);
+            setAction(button.name);
+            setType(button.type);
           }}
           className={twMerge(
             `w-10 h-8 grid place-content-center justify-self-center rounded-md `,
-            selected === button.type
+            selectedType === button.type
               ? "bg-blue-200"
               : "bg-blue-50 hover:bg-blue-100",
             button.type === "Ellipse" ? "text-2xl" : ""

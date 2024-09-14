@@ -20,30 +20,11 @@ const Canvas = () => {
   const [positionX, setPositionX] = useState(0);
   const [positionY, setPositionY] = useState(0);
   const [penColor, setPenColor] = useState("#000000");
-  const [options, setOptions] = useState({
-    bowing: -1,
-    curveFitting: 0.95,
-    curveStepCount: 9,
-    curveTightness: 0,
-    strokeLineDash: [1, 0], // [length of dash, length of gap]
-    dashGap: -1,
-    dashOffset: -1,
-    disableMultiStroke: true,
-    disableMultiStrokeFill: true,
-    fill: "black",
-    fillShapeRoughnessGain: 0.8,
-    fillStyle: "dashed",
-    fillWeight: -1,
-    hachureAngle: -41,
-    hachureGap: -1,
-    maxRandomnessOffset: 0,
-    preserveVertices: false,
-    roughness: -1,
-    seed: 0,
-    stroke: "#892e89",
-    strokeWidth: 1,
-    zigzagOffset: -1,
-  });
+  
+  const options = useStore((state) => state.options);
+  // options should be moved to the store and maintained by the options toolbar
+
+  // penOptions should be moved to the store and maintained by the pen options toolbar
   const [penOptions, setPenOptions] = useState({
     size: 8,
     thinning: 0,
@@ -84,11 +65,6 @@ const Canvas = () => {
     setTimeout(() => {
       textRef?.current?.focus();
     }, 0);
-  };
-  const { startText, text, stopText } = useText(reFocus, canvasRef);
-
-  const handleOptionsToolbarClick = (selected) => {
-    setOptions(selected);
   };
 
   const handlePenOptionsToolbarClick = (selected, color) => {
@@ -173,8 +149,8 @@ const Canvas = () => {
             color: "transparent",
             caretColor: "black",
           }}
-          onKeyDown={text}
-          onBlur={stopText}
+          onKeyDown={Move}
+          onBlur={Up}
         />
       )}
       <CanvasElement
@@ -192,7 +168,7 @@ const Canvas = () => {
         // onMouseEnter={Move}
       />
       {shapes.has(type) && (
-        <OptionsToolbar handleOptionsToolbarClick={handleOptionsToolbarClick} />
+        <OptionsToolbar />
       )}
       {type === "draw" && (
         <PenOptionsToolbar

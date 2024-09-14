@@ -4,46 +4,20 @@ import { PiEmptyLight } from "react-icons/pi";
 import { TbLineDotted } from "react-icons/tb";
 import { PiDotsNineBold } from "react-icons/pi";
 import { TfiLayoutLineSolid } from "react-icons/tfi";
+import { useStore } from "../store";
 
-const OptionsToolbar = ({ handleOptionsToolbarClick }) => {
-  const [options, setOptions] = useState({
-    bowing: 1,
-    curveFitting: 0.95,
-    curveStepCount: 9,
-    curveTightness: 0,
-    strokeLineDash: [1, 0], // [length of dash, length of gap]
-    dashGap: -1,
-    dashOffset: -1,
-    disableMultiStroke: true,
-    disableMultiStrokeFill: false,
-    fill: "black",
-    fillShapeRoughnessGain: 0.8,
-    fillStyle: "dashed",
-    fillWeight: -1,
-    hachureAngle: -41,
-    hachureGap: -1,
-    maxRandomnessOffset: 2,
-    preserveVertices: false,
-    roughness: -1,
-    seed: 0,
-    stroke: "#892e89",
-    strokeWidth: 1,
-    zigzagOffset: -1,
-  });
-  const handleOptions = (pair) => {
-    let newOptions = { ...options, ...pair };
-    setOptions(newOptions);
-    handleOptionsToolbarClick(newOptions);
-  };
+const OptionsToolbar = () => {
+  const setFeildInOptions = useStore((state) => state.setFeildInOptions);
+
   return (
     <div className="bg-blue-200 w-52 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center">
-      <StrokeOptions handleOptions={handleOptions} />
-      <BackgroundOptions handleOptions={handleOptions} />
-      <FillOptions handleOptions={handleOptions} />
-      <StrokeWidthOptions handleOptions={handleOptions} />
-      <StrokeStyleOptions handleOptions={handleOptions} />
-      <SloppinessOptions handleOptions={handleOptions} />
-      <RandomnessSlider handleOptions={handleOptions} />
+      <StrokeOptions handleOptions={setFeildInOptions} />
+      <BackgroundOptions handleOptions={setFeildInOptions} />
+      <FillOptions handleOptions={setFeildInOptions} />
+      <StrokeWidthOptions handleOptions={setFeildInOptions} />
+      <StrokeStyleOptions handleOptions={setFeildInOptions} />
+      <SloppinessOptions handleOptions={setFeildInOptions} />
+      <RandomnessSlider handleOptions={setFeildInOptions} />
     </div>
   );
 };
@@ -61,7 +35,7 @@ const StrokeOptions = ({ handleOptions }) => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setStrokeColor(options[optionsId]);
-    handleOptions({ stroke: options[optionsId] });
+    handleOptions("stroke", options[optionsId]);
   };
   return (
     <div>
@@ -120,7 +94,7 @@ const BackgroundOptions = ({ handleOptions }) => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setBackgroundColor(options[optionsId]);
-    handleOptions({ fill: options[optionsId] });
+    handleOptions("fill", options[optionsId]);
   };
   return (
     <div className="mt-1">
@@ -179,8 +153,11 @@ const FillOptions = ({ handleOptions }) => {
   const handleFillStyle = (e) => {
     let optionsId = e.target.id;
     if (options[optionsId] === "transparent") {
-      handleOptions({ fill: "" });
-    } else handleOptions({ fillStyle: options[optionsId], fill: "#000000" });
+      handleOptions("fill", "");
+    } else {
+      handleOptions("fill", "#000000");
+      handleOptions("fillStyle", options[optionsId]);
+    }
     setFillStyle(options[optionsId]);
   };
   return (
@@ -376,7 +353,7 @@ const StrokeWidthOptions = ({ handleOptions }) => {
   const handleStrokeWidth = (e) => {
     let optionsId = e.target.id;
     setStrokeWidth(options[optionsId]);
-    handleOptions({ strokeWidth: options[optionsId] });
+    handleOptions("strokeWidth", options[optionsId]);
   };
   return (
     <div className="mt-1">
@@ -435,7 +412,7 @@ const StrokeStyleOptions = ({ handleOptions }) => {
   const handleStrokeStyle = (e) => {
     let optionsId = e.target.id;
     setStrokeStyle(options[optionsId]);
-    handleOptions({ strokeLineDash: map[options[optionsId]] });
+    handleOptions("strokeLineDash", map[options[optionsId]]);
   };
   return (
     <div className="mt-1">
@@ -489,7 +466,7 @@ const SloppinessOptions = ({ handleOptions }) => {
   const handleSloppiness = (e) => {
     let optionsId = e.target.id;
     setSloppiness(options[optionsId]);
-    handleOptions({ roughness: options[optionsId] });
+    handleOptions("roughness", options[optionsId]);
   };
   return (
     <div className="mt-1">
@@ -582,7 +559,7 @@ const SloppinessOptions = ({ handleOptions }) => {
 
 const RandomnessSlider = ({ handleOptions }) => {
   const handleRandomness = (e) => {
-    handleOptions({ maxRandomnessOffset: Math.floor((e.target.value / 100) * 10) });
+    handleOptions( "maxRandomnessOffset", Math.floor((e.target.value / 100) * 10));
   };
   return (
     <div className="mt-1">

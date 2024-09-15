@@ -7,7 +7,7 @@ import { useStore } from '../store'
 // onMouseDown => get element at position => getElementAtPos => getting the elementFormula and return element index
 // TODO: add the fillFlag, fillStyle, strokeStyle from the penToolbar to match the original element
 
-console.log("Select is re-rendering");
+// console.log("Select is re-rendering");
 const elementFormula = {
     rectangle: (x, y, element) => {
         const { x1, y1, x2, y2 } = element
@@ -25,9 +25,9 @@ const elementFormula = {
     },
     circle: (x, y, element) => {
         const { x1, y1, x2, y2 } = element
-        const center = { x: x1 , y: y1 }
+        const center = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 }
         const distance = Math.hypot(Math.abs(x - center.x), Math.abs(y - center.y))
-        return distance <= Math.abs(x2 - x1) * 1.5 ? element : null
+        return distance <= Math.abs(x2 - x1 - 30) ? element : null
     },
     ellipse: (x, y, element) => {
         const { x1, y1, x2, y2 } = element
@@ -69,7 +69,7 @@ const generator = rough.generator()
 const TYPES = {
     rectangle: (x1, y1, x2, y2, options) => generator.rectangle(x1, y1, x2 - x1, y2 - y1, options),
     line: (x1, y1, x2, y2, options) => generator.line(x1, y1, x2, y2, options),
-    circle: (x1, y1, x2, y2, options) => generator.circle(x1, y1, (x1 - x2) * 3, options),
+    circle: (x1, y1, x2, y2, options) => generator.circle(x1 + ((x2 - x1) / 2), y1 + ((y2 - y1 ) / 2) , x1 - x2, options),
     ellipse: (x1, y1, x2, y2, options) => generator.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1), Math.abs(y2 - y1), options),
     path: (x1, y1, x2, y2, updatedPoints, penOptions) => {
         console.log("from TYPES(path)",penOptions)
@@ -83,7 +83,6 @@ const TYPES = {
     }
 }
 const createElement = (x1, y1, x2, y2, type, points, options, color) => {
-    console.log("from create element" ,color)
     const roughElement = TYPES[type](x1, y1, x2, y2, points, options)
     switch (type) {
         case "path":

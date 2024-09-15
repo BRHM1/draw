@@ -47,7 +47,7 @@ const useErase = () => {
     }
     const startErasing = (e) => {
     }
-    console.log("Erase is re-rendering");
+    // console.log("Erase is re-rendering");
     const Erasing = (e) => {
         if(!e.buttons) return
         const getElementAtPos = (x, y, elements) => {

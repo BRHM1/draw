@@ -13,15 +13,20 @@ import Button from "./Button";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
 
+
+
 import { drawElement } from "../utils/utils";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
-
   const shapes = new Set(["Rectangle", "Ellipse", "Line", "Circle"]);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const textRef = useRef(null);
+
+  const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
+  const fn = (e) => {setCordinates({ x: e.clientX, y: e.clientY })}
+  window.addEventListener("mousemove", fn);
 
   // this is the logic behind the toolbar connection with the canvas 17 - 46
   const action = useStore((state) => state.action);
@@ -75,6 +80,7 @@ const Canvas = () => {
 
     console.log("elements are:", elements);
     contextRef.current = context;
+    // return () => window.removeEventListener("mousemove", fn);
   }, [elements]);
 
   return (
@@ -83,6 +89,8 @@ const Canvas = () => {
         className={"row-start-1 col-start-1 justify-self-center left-1/4"}
         contextRef={contextRef}
       />
+      <div className="absolute top-10 left-3"> x: {cordinates.x} y: {cordinates.y} </div>
+
       {action === "text" && elements[elements.length - 1]?.type === "text" && (
         <textarea
           ref={textRef}

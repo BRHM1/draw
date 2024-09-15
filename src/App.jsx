@@ -14,8 +14,6 @@ function App() {
   // BUG: Gizmo coordinates are not correct
   // BUG: Circle sucks
 
-  // TODO: add color options for the pen tool ---> DONE
-  // TODO: add the erased elements to the undo stack ---> DONE
   // TODO: make the canvas persistent
   // TODO: resizing Elements
   // TODO: layering
@@ -26,7 +24,9 @@ function App() {
   // TODO: make the DB Model for the application
 
   // -------------------- TODAY --------------------
-  // refactor and move the global state to the zustand
+  // editing circle 
+  // editing line mirror
+  // resizing elements 
   return (
     <div>
       <Canvas/>

@@ -13,7 +13,7 @@ const useDraw = () => {
 
   const penOptions = useStore((state) => state.penOptions);
   const color = useStore((state) => state.penColor);
-  console.log("Draw is re-rendering");
+  // console.log("Draw is re-rendering");
   const [points, setPoints] = useState([]);
   const [xy, setXY] = useState([Infinity, Infinity, 0, 0]);
 

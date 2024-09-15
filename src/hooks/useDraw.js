@@ -5,11 +5,14 @@ import { useStore } from "../store";
 
 // TODO: change fillFlag, fillStyle, strokeStyle from the penToolbar
 // element = {type: "path", points: [[x, y, pressure], ...], path: Path2D, x1: x, y1: y, x2: x, y2: y}
-const useDraw = (penOptions, color) => {
+const useDraw = () => {
   const elements = useStore((state) => state.elements);
   const addElement = useStore((state) => state.addElement);
   const replaceLastElement = useStore((state) => state.replaceLastElement);
   const removeLastElement = useStore((state) => state.removeLastElement);
+
+  const penOptions = useStore((state) => state.penOptions);
+  const color = useStore((state) => state.penColor);
   console.log("Draw is re-rendering");
   const [points, setPoints] = useState([]);
   const [xy, setXY] = useState([Infinity, Infinity, 0, 0]);

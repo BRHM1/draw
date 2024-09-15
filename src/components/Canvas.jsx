@@ -5,7 +5,7 @@ import { useStore } from "../store";
 
 import useDraw from "../hooks/useDraw";
 import useErase from "../hooks/useErase";
-import Shape from "../hooks/useShape";
+import useShape from "../hooks/useShape";
 import useSelect from "../hooks/useSelect";
 import useText from "../hooks/useText";
 import Toolbar from "./Toolbar";
@@ -17,12 +17,6 @@ import { drawElement } from "../utils/utils";
 
 const Canvas = () => {
   const elements = useStore((state) => state.elements);
-
-  const options = useStore((state) => state.options);
-
-  const penOptions = useStore((state) => state.penOptions);
-  const penColor = useStore((state) => state.penColor);
-
 
   const shapes = new Set(["Rectangle", "Ellipse", "Line", "Circle"]);
   const canvasRef = useRef(null);
@@ -43,9 +37,9 @@ const Canvas = () => {
   // ISSUE: Hooks are called each time this component re-renders and this affects the performance
   // CRITICAL TODO: change the way those functions invoked ---------------------------------------------------------------
   const actionTypes = {
-    draw: useDraw(penOptions, penColor),
+    draw: useDraw(),
     erase: useErase(),
-    shape: Shape(type, action, options),
+    shape: useShape(),
     select: useSelect(contextRef),
     text: useText(reFocus, canvasRef),
   };

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useStore } from "../store";
 import rough from "roughjs/bundled/rough.esm"
+import { Circle } from "./elementModule";
 
 // NOTE: generator.circle(centerX, centerY, diameter, options)
 // element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}

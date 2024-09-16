@@ -83,13 +83,14 @@ export class Rectangle extends Shape {
     draw(roughCanvas) {
         roughCanvas.draw(this.roughElement)
     }
-    initialX = this.x1
-    initialY = this.y1
-    updateDimensions(x2, y2) {
-        this.x1 = Number((Math.min(this.x1, x2)).toFixed(2))
-        this.y1 = Number((Math.min(this.y1, y2)).toFixed(2))
-        this.width = Number((Math.abs(x2 - this.initialX)).toFixed(2))
-        this.height = Number((Math.abs(y2 - this.initialY)).toFixed(2))
+
+    updateDimensions(x2, y2, generator) {
+        this.width = Number((x2 - this.x1).toFixed(2))
+        this.height = Number((y2 - this.y1).toFixed(2))
+        this.#updateRoughElement(generator)
+    }
+    #updateRoughElement(generator) {
+        this.roughElement = generator.rectangle(this.x1, this.y1, this.width, this.height, this.options)
     }
 }
 

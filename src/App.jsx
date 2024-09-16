@@ -23,10 +23,12 @@ function App() {
   // TODO: add zooming tool
   // TODO: make the DB Model for the application
 
+
+  // new flow
+  // 1. onMouseDown creates instance of the shape
+  // 2. onMouseMove updates the dimensions of the shape
+  // 3. onMouseUp finalizes the shape and adds it to the elements array 
   // -------------------- TODAY --------------------
-  // editing circle 
-  // editing line mirror
-  // resizing elements 
   return (
     <div>
       <Canvas/>

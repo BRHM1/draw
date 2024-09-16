@@ -25,8 +25,8 @@ const Canvas = () => {
   const textRef = useRef(null);
 
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
-  // const fn = (e) => {setCordinates({ x: e.clientX, y: e.clientY })}
-  // window.addEventListener("mousemove", fn);
+  const fn = (e) => {setCordinates({ x: e.clientX, y: e.clientY })}
+  window.addEventListener("mousemove", fn);
 
   // this is the logic behind the toolbar connection with the canvas 17 - 46
   const action = useStore((state) => state.action);

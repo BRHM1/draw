@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useStore } from "../store";
 import rough from "roughjs/bundled/rough.esm"
-import { Circle } from "./elementModule";
+import { Circle, Rectangle } from "./elementModule";
+import { useRef } from "react";
 
 // NOTE: generator.circle(centerX, centerY, diameter, options)
 // element = {type: "shape" , x1: x, y1: y, x2: x, y2: y, roughElement: {shape: "rectangle", options: {roughness: 2, fill: "black"}}}
@@ -13,7 +14,7 @@ const useShape = () => {
     const options = useStore((state) => state.options);
     const type = useStore((state) => state.type)
     const action = useStore((state) => state.action)
-
+    const shapeRef = useRef(null)
     // console.log("Shape is re-rendering");
     const [isDrawing, setIsDrawing] = useState(false)
     const generator = rough.generator();
@@ -32,6 +33,7 @@ const useShape = () => {
     const onMouseDown = (e) => {
         setIsDrawing(true);
         const { clientX, clientY } = e;
+        shapeRef.current = new Circle(clientX, clientY, 0, options, generator.circle(clientX, clientY, 0, options), clientX, clientY, 0)
         const element = createElement(clientX, clientY, clientX, clientY)
         addElement(element);
     };
@@ -41,6 +43,8 @@ const useShape = () => {
         const { clientX, clientY } = e;
         const index = elements.length - 1;
         const { x1, y1, roughElement } = elements[index] ?? 1;
+        shapeRef.current.updateDimensions(clientX, clientY)
+        console.log(shapeRef.current);
         const diameter = roughElement.shape === "circle" ? Math.sqrt(Math.abs(clientX - x1) ** 2 + Math.abs(clientY - y1) ** 2) * 2 : 0
         const updatedElement = createElement(x1, y1, clientX, clientY, diameter)
         replaceLastElement(updatedElement);
@@ -48,6 +52,7 @@ const useShape = () => {
 
     const onMouseUp = () => {
         setIsDrawing(false);
+        console.log(shapeRef.current);
         if (elements.length === 0) return;
         let { type, x1, y1, x2, y2, roughElement, diameter } = elements[elements.length - 1]
         const newX1 = roughElement.shape === "circle" ? Math.min(x1, x2) - diameter / 2 : Math.min(x1, x2)

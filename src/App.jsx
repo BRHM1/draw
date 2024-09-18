@@ -23,11 +23,16 @@ function App() {
   // TODO: add zooming tool
   // TODO: make the DB Model for the application
 
-
-  // new flow
+  // TODO: Perfromance improvements
   // 1. onMouseDown creates instance of the shape
   // 2. onMouseMove updates the dimensions of the shape
   // 3. onMouseUp finalizes the shape and adds it to the elements array 
+  // 4- onMouseMove should not trigger if the mouse is not down
+  // 5- two separate canvas for drawing and rendering
+  // 6- use requestAnimationFrame for rendering
+  // 7- use useMemo for elements
+  // 8- use useCallback for functions
+
   // -------------------- TODAY --------------------
   return (
     <div>

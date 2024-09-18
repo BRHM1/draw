@@ -13,8 +13,6 @@ import Button from "./Button";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
 
-
-
 import { drawElement } from "../utils/utils";
 
 const Canvas = () => {
@@ -25,8 +23,10 @@ const Canvas = () => {
   const textRef = useRef(null);
 
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
-  const fn = (e) => {setCordinates({ x: e.clientX, y: e.clientY })}
-  window.addEventListener("mousemove", fn);
+  // const fn = (e) => {
+  //   setCordinates({ x: e.clientX, y: e.clientY });
+  // };
+  // window.addEventListener("mousemove", fn);
 
   // this is the logic behind the toolbar connection with the canvas 17 - 46
   const action = useStore((state) => state.action);
@@ -66,8 +66,20 @@ const Canvas = () => {
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+
+    const dpr = window.devicePixelRatio;
+    const rect = canvas.getBoundingClientRect();
+
+    // Set the "actual" size of the canvas
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    // Scale the context to ensure correct drawing operations
+    context.scale(dpr, dpr);
+
+    // Set the "drawn" size of the canvas
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const roughCanvas = rough.canvas(canvas);
@@ -89,7 +101,10 @@ const Canvas = () => {
         className={"row-start-1 col-start-1 justify-self-center left-1/4"}
         contextRef={contextRef}
       />
-      <div className="absolute top-10 left-3"> x: {cordinates.x} y: {cordinates.y} </div>
+      <div className="absolute top-10 left-3">
+        {" "}
+        x: {cordinates.x} y: {cordinates.y}{" "}
+      </div>
 
       {action === "text" && elements[elements.length - 1]?.type === "text" && (
         <textarea

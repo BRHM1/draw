@@ -1,3 +1,6 @@
+import { getSvgPathFromStroke } from "../utils/utils"
+import { getStroke } from "perfect-freehand";
+
 export class Shape {
     constructor(x1, y1, width, height, options, rotation) {
         this.x1 = x1
@@ -15,7 +18,7 @@ export class Shape {
 
 
 export class Circle extends Shape {
-    constructor(x1, y1, radius, options, roughElement, centerX, centerY,rotation ) {
+    constructor(x1, y1, radius, options, roughElement, centerX, centerY, rotation) {
         super(x1, y1, radius * 2, radius * 2, options, rotation)
         this.roughElement = roughElement
         this.centerX = centerX
@@ -28,12 +31,16 @@ export class Circle extends Shape {
     }
     // x1 = centerX - radius
     // y1 = centerY - radius
-    updateDimensions(x2, y2) {
+    updateDimensions(x2, y2, generator) {
         this.radius = Number(Math.sqrt(Math.pow(this.centerX - x2, 2) + Math.pow(this.centerY - y2, 2)).toFixed(2))
         this.x1 = Number((this.centerX - this.radius).toFixed(2))
         this.y1 = Number((this.centerY - this.radius).toFixed(2))
         this.width = Number((this.radius * 2).toFixed(2))
         this.height = Number((this.radius * 2).toFixed(2))
+        this.#updateRoughElement(generator)
+    }
+    #updateRoughElement(generator) {
+        this.roughElement = generator.circle(this.centerX, this.centerY, this.radius, this.options)
     }
 }
 
@@ -48,11 +55,15 @@ export class Ellipse extends Shape {
     }
     initialX = this.x1
     initialY = this.y1
-    updateDimensions(x2, y2) {
+    updateDimensions(x2, y2, generator) {
         this.x1 = Number((Math.min(this.x1, x2)).toFixed(2))
         this.y1 = Number((Math.max(this.y1, y2)).toFixed(2))
         this.width = Number((Math.abs(this.initialX - x2)).toFixed(2))
         this.height = Number((Math.abs(this.initialY - y2)).toFixed(2))
+        this.#updateRoughElement(generator)
+    }
+    #updateRoughElement(generator) {
+        this.roughElement = generator.ellipse(this.initialX, this.initialY, this.width, this.height, this.options)
     }
 }
 
@@ -65,11 +76,17 @@ export class Line extends Shape {
     draw(roughCanvas) {
         roughCanvas.draw(this.roughElement)
     }
-    updateDimensions(x2, y2) {
+    initialX = this.x1
+    initialY = this.y1
+    updateDimensions(x2, y2, generator) {
         this.x1 = Number((Math.min(this.x1, x2)).toFixed(2))
         this.y1 = Number((Math.min(this.y1, y2)).toFixed(2))
         this.x2 = Number((Math.max(this.x1, x2)).toFixed(2))
         this.y2 = Number((Math.max(this.y1, y2)).toFixed(2))
+        this.#updateRoughElement(generator)
+    }
+    #updateRoughElement(generator) {
+        this.roughElement = generator.line(this.initialX, this.initialY, this.x2, this.y2, this.options)
     }
 }
 
@@ -109,6 +126,9 @@ export class Path extends Shape {
     draw(context) {
         context.strokeStyle = this.strokeStyle
         context.fillStyle = this.fillStyle
+        const stroke = getStroke(this.points, this.options)
+        const path = getSvgPathFromStroke(stroke);
+        this.path = new Path2D(path);
         context.fill(this.path)
     }
     updateDimensions(x2, y2) {
@@ -116,5 +136,6 @@ export class Path extends Shape {
         this.y1 = Number(Math.min(this.y1, y2).toFixed(2))
         this.x2 = Number(Math.max(this.x1, x2).toFixed(2))
         this.y2 = Number(Math.max(this.y1, y2).toFixed(2))
+        this.points.push({ x: x2, y: y2 })
     }
 }

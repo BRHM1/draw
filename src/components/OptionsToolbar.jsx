@@ -10,7 +10,7 @@ const OptionsToolbar = () => {
   const setFeildInOptions = useStore((state) => state.setFeildInOptions);
 
   return (
-    <div className="bg-blue-200 w-52 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center">
+    <div className="bg-blue-200 w-52 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
       <StrokeOptions handleOptions={setFeildInOptions} />
       <BackgroundOptions handleOptions={setFeildInOptions} />
       <FillOptions handleOptions={setFeildInOptions} />

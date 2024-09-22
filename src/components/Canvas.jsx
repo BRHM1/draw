@@ -35,10 +35,10 @@ const Canvas = () => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  // const fn = (e) => {
-  //   setCordinates({ x: e.clientX, y: e.clientY });
-  // };
-  // window.addEventListener("mousemove", fn);
+  const fn = (e) => {
+    setCordinates({ x: e.clientX, y: e.clientY });
+  };
+  window.addEventListener("mousemove", fn);
 
 
   const reFocus = () => {
@@ -50,6 +50,7 @@ const Canvas = () => {
 
   let Down = (e) => {
       // based on the type an object of that type will be created
+      console.log("initX: ", e.clientX, "initY: ", e.clientY);  
       switch (type) {
         case "Rectangle":
           shapeRef.current = new Rectangle(

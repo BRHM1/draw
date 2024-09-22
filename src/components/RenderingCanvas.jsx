@@ -30,6 +30,7 @@ const RenderingCanvas = () => {
         ? element.draw(roughCanvas)
         : element.draw(renderingContextRef.current);
     });
+    console.log(elements)
     renderingContextRef.current = renderingCanvasContext;
   }, [elements]);
 

@@ -32,38 +32,38 @@ export class Circle extends Shape {
     // x1 = centerX - radius
     // y1 = centerY - radius
     updateDimensions(x2, y2, generator) {
-        this.radius = Number(Math.sqrt(Math.pow(this.centerX - x2, 2) + Math.pow(this.centerY - y2, 2)).toFixed(2))
-        this.x1 = Number((this.centerX - this.radius).toFixed(2))
-        this.y1 = Number((this.centerY - this.radius).toFixed(2))
-        this.width = Number((this.radius * 2).toFixed(2))
-        this.height = Number((this.radius * 2).toFixed(2))
+        this.radius = Math.floor(Math.sqrt((this.centerX - x2) ** 2 + (this.centerY - y2) ** 2))
+        this.x1 = (this.centerX - this.radius)
+        this.y1 = (this.centerY - this.radius)
+        this.width = this.radius * 2
+        this.height = this.radius * 2
         this.#updateRoughElement(generator)
     }
     #updateRoughElement(generator) {
-        this.roughElement = generator.circle(this.centerX, this.centerY, this.radius, this.options)
+        this.roughElement = generator.circle(this.centerX, this.centerY, this.radius * 2, this.options)
     }
 }
 
 export class Ellipse extends Shape {
-    constructor(x1, y1, width, height, options, roughElement, rotation) {
+    constructor(x1, y1, width, height, options, roughElement, rotation, centerX, centerY) {
         super(x1, y1, width, height, options, rotation)
         this.roughElement = roughElement
+        this.centerX = this.x1 + this.width / 2
+        this.centerY = this.y1 + this.height / 2
         this.type = "ellipse"
     }
     draw(roughCanvas) {
         roughCanvas.draw(this.roughElement)
     }
-    initialX = this.x1
-    initialY = this.y1
     updateDimensions(x2, y2, generator) {
-        this.x1 = Number((Math.min(this.x1, x2)).toFixed(2))
-        this.y1 = Number((Math.max(this.y1, y2)).toFixed(2))
-        this.width = Number((Math.abs(this.initialX - x2)).toFixed(2))
-        this.height = Number((Math.abs(this.initialY - y2)).toFixed(2))
-        this.#updateRoughElement(generator)
+        this.centerX = Math.floor(this.x1 + this.width / 2)
+        this.centerY = Math.floor(this.y1 + this.height / 2)
+        this.width = x2 - this.x1 
+        this.height = y2 - this.y1 
+        this.#updateRoughElement(generator) 
     }
     #updateRoughElement(generator) {
-        this.roughElement = generator.ellipse(this.initialX, this.initialY, this.width, this.height, this.options)
+        this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
     }
 }
 

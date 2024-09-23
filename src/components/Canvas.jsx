@@ -27,6 +27,7 @@ const Canvas = () => {
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [showTextArea , setShowTextArea] = useState(false); 
+  const [buttonDown , setButtonDown] = useState(false);
 
   const removeLastElement = useStore((state) => state.removeLastElement);
   const setElements = useStore((state) => state.setElements);
@@ -54,6 +55,7 @@ const Canvas = () => {
 
   let Down = useCallback(
       (e) => {
+        setButtonDown(true);
         // based on the type an object of that type will be created
         switch (type) {
           case "text":
@@ -184,11 +186,12 @@ const Canvas = () => {
       },
       [type, isDrawing]
     ),
-    Up = useCallback(() => {
+    Up = () => {
       // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
+      setButtonDown(false);
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       addElement(shapeRef.current);
-    }, [type]);
+    }
 
   const KeyDown = () => {
     setTimeout(() => {
@@ -226,17 +229,14 @@ const Canvas = () => {
     const roughCanvas = rough.canvas(canvas);
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    shapeRef.current &&
+    shapeRef.current && buttonDown &&
       shapes.has(shapeRef.current.type) &&
       shapeRef.current.draw(roughCanvas);
-    shapeRef.current &&
+    shapeRef.current && buttonDown &&
       !shapes.has(shapeRef.current.type) &&
       shapeRef.current.draw(context);
 
     contextRef.current = context;
-    // return () => {
-    //   window.removeEventListener("mousemove", fn);
-    // };
   }, [isDrawing]);
 
   return (

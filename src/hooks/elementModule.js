@@ -1,6 +1,6 @@
 import { getSvgPathFromStroke } from "../utils/utils"
 import { getStroke } from "perfect-freehand";
-
+import { wrappedLines } from "../utils/utils";
 export class Shape {
     constructor(x1, y1, width, height, options, rotation) {
         this.x1 = x1
@@ -58,9 +58,9 @@ export class Ellipse extends Shape {
     updateDimensions(x2, y2, generator) {
         this.centerX = Math.floor(this.x1 + this.width / 2)
         this.centerY = Math.floor(this.y1 + this.height / 2)
-        this.width = x2 - this.x1 
-        this.height = y2 - this.y1 
-        this.#updateRoughElement(generator) 
+        this.width = x2 - this.x1
+        this.height = y2 - this.y1
+        this.#updateRoughElement(generator)
     }
     #updateRoughElement(generator) {
         this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
@@ -76,17 +76,13 @@ export class Line extends Shape {
     draw(roughCanvas) {
         roughCanvas.draw(this.roughElement)
     }
-    initialX = this.x1
-    initialY = this.y1
     updateDimensions(x2, y2, generator) {
-        this.x1 = Number((Math.min(this.x1, x2)).toFixed(2))
-        this.y1 = Number((Math.min(this.y1, y2)).toFixed(2))
-        this.x2 = Number((Math.max(this.x1, x2)).toFixed(2))
-        this.y2 = Number((Math.max(this.y1, y2)).toFixed(2))
+        this.x2 = x2
+        this.y2 = y2
         this.#updateRoughElement(generator)
     }
     #updateRoughElement(generator) {
-        this.roughElement = generator.line(this.initialX, this.initialY, this.x2, this.y2, this.options)
+        this.roughElement = generator.line(this.x1, this.y1, this.x2, this.y2, this.options)
     }
 }
 
@@ -137,5 +133,30 @@ export class Path extends Shape {
         this.x2 = Number(Math.max(this.x1, x2).toFixed(2))
         this.y2 = Number(Math.max(this.y1, y2).toFixed(2))
         this.points.push({ x: x2, y: y2 })
+    }
+}
+
+export class Text extends Shape {
+    constructor(x1, y1, text, options, rotation, width, height) {
+        super(x1, y1, 0, 0, options, rotation)
+        this.text = text
+        this.width = width
+        this.height = height
+        this.type = "text"
+    }
+    draw(context) {
+        context.font = this.options.font;
+        const lines = this.text.split("\n");
+        // TODO: use the wrappedLines function in the utils file so that the text wraps without the need for \n
+        lines.forEach((line, i) => {
+            context.fillText(line, this.x1, this.y1 + (i + 1) * 24);
+        });
+    }
+    updateDimensions() {
+        this.width = this.x1 + Number(this.options.font.slice(0, 2)) * this.text.length
+        this.height = this.y1 + Number(this.options.font.slice(0, 2)) * this.text.length
+    }
+    updateText(text) {
+        this.text = text
     }
 }

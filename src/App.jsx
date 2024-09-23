@@ -33,6 +33,10 @@ function App() {
   // 7- use useMemo for elements
   // 8- use useCallback for functions
 
+  // Text flow:
+  // 1. onClick intiates an instance of Text class + a textarea
+  // 2. onKeyDown updates the text
+  // 3. onBlur removes the textarea and adds the text to the elements array
   // -------------------- TODAY --------------------
   return (
     <div>

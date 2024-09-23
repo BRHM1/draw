@@ -76,6 +76,11 @@ export const useStore = create((set) => ({
             state.elements[state.elements.length - 1][property] = value;
         }));
     },
+    removeElementById: (id) => {
+        set(produce((state) => {
+            state.elements.filter((element) => element.id !== id);
+        }));
+    },
     insertElement: (element, index) => {
         set(produce((state) => {
             state.RedoStack.splice(index, 0, element);

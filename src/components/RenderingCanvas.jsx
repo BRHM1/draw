@@ -26,12 +26,13 @@ const RenderingCanvas = () => {
     
     renderingCanvasContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
     elements.forEach((element) => {
+      if(!element?.type) return;
       shapes.has(element.type)
         ? element.draw(roughCanvas)
         : element.draw(renderingContextRef.current);
     });
-    console.log(elements)
     renderingContextRef.current = renderingCanvasContext;
+    console.log(elements)
   }, [elements]);
 
   return (

@@ -1,20 +1,23 @@
-import React, {
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useLayoutEffect, useRef, useState, useCallback } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
 
-import { Circle, Ellipse, Line, Path, Rectangle } from "../hooks/elementModule";
+import {
+  Circle,
+  Ellipse,
+  Line,
+  Path,
+  Rectangle,
+  Text,
+} from "../hooks/elementModule";
 
 import Button from "./Button";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
 import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
-
+import { getElementAtPos } from "../utils/utils";
 
 const Canvas = () => {
   const canvasRef = useRef(null);
@@ -23,15 +26,17 @@ const Canvas = () => {
   const shapeRef = useRef(null);
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
+  const [showTextArea , setShowTextArea] = useState(false); 
 
+  const removeLastElement = useStore((state) => state.removeLastElement);
+  const setElements = useStore((state) => state.setElements);
   const options = useStore((state) => state.options);
   const penOptions = useStore((state) => state.penOptions);
   const addElement = useStore((state) => state.addElement);
   const elements = useStore((state) => state.elements);
   const action = useStore((state) => state.action);
   const type = useStore((state) => state.type);
-  
-  
+
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
@@ -40,7 +45,6 @@ const Canvas = () => {
   };
   window.addEventListener("mousemove", fn);
 
-
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
@@ -48,82 +52,158 @@ const Canvas = () => {
     }, 0);
   };
 
-  let Down = (e) => {
-      // based on the type an object of that type will be created
-      console.log("initX: ", e.clientX, "initY: ", e.clientY);  
-      switch (type) {
-        case "Rectangle":
-          shapeRef.current = new Rectangle(
-            e.clientX,
-            e.clientY,
-            0,
-            0,
-            options,
-            generator.rectangle(e.clientX, e.clientY, 0, 0, options),
-            0
-          );
-          break;
-        case "Circle":
-          shapeRef.current = new Circle(
-            e.clientX,
-            e.clientY,
-            0,
-            options,
-            generator.circle(e.clientX, e.clientY, 0, options),
-            e.clientX,
-            e.clientY,
-            0
-          );
-          break;
-        case "Ellipse":
-          shapeRef.current = new Ellipse(
-            e.clientX,
-            e.clientY,
-            0,
-            0,
-            options,
-            generator.ellipse(e.clientX, e.clientY, 0, 0, options),
-            0
-          );
-          break;
-        case "Line":
-          shapeRef.current = new Line(
-            e.clientX,
-            e.clientY,
-            e.clientX,
-            e.clientY,
-            options,
-            generator.line(e.clientX, e.clientY, e.clientX, e.clientY, options),
-            0
-          );
-          break;
-        case "draw":
-          shapeRef.current = new Path(
-            e.clientX,
-            e.clientY,
-            e.clientX,
-            e.clientY,
-            new Path2D(),
-            penOptions,
-            "red",
-            0,
-            0,
-            [{ x: e.clientX, y: e.clientY, pressure: 1 }],
-            "fill",
-            0
-          );
-      }
-    },
-    Move = (e) => {
-      if (e.buttons !== 1) return;
-      shapeRef.current.updateDimensions(e.clientX, e.clientY, generator);
-      setIsDrawing(!isDrawing);
-    },
-    Up = (e) => {
+  let Down = useCallback(
+      (e) => {
+        // based on the type an object of that type will be created
+        switch (type) {
+          case "text":
+            shapeRef.current = new Text(
+              e.clientX,
+              e.clientY,
+              "",
+              { font: "24px Arial", fill: "black" },
+              0,
+              0,
+              0
+            );
+            // addElement(shapeRef.current);
+            textRef.current.style.display = "block";
+            textRef.current.style.top = `${e.clientY}px`;
+            textRef.current.style.left = `${e.clientX}px`;
+            textRef.current.style.width = `${
+              window.innerWidth - e.clientX
+            }px`;
+            textRef.current.style.height = `${
+              window.innerHeight - e.clientY
+            }px`;
+            reFocus();
+            break;
+          case "Rectangle":
+            shapeRef.current = new Rectangle(
+              e.clientX,
+              e.clientY,
+              0,
+              0,
+              options,
+              generator.rectangle(e.clientX, e.clientY, 0, 0, options),
+              0
+            );
+            break;
+          case "Circle":
+            shapeRef.current = new Circle(
+              e.clientX,
+              e.clientY,
+              0,
+              options,
+              generator.circle(e.clientX, e.clientY, 0, options),
+              e.clientX,
+              e.clientY,
+              0
+            );
+            break;
+          case "Ellipse":
+            shapeRef.current = new Ellipse(
+              e.clientX,
+              e.clientY,
+              0,
+              0,
+              options,
+              generator.ellipse(e.clientX, e.clientY, 0, 0, options),
+              0
+            );
+            break;
+          case "Line":
+            shapeRef.current = new Line(
+              e.clientX,
+              e.clientY,
+              e.clientX,
+              e.clientY,
+              options,
+              generator.line(
+                e.clientX,
+                e.clientY,
+                e.clientX,
+                e.clientY,
+                options
+              ),
+              0
+            );
+            break;
+          case "draw":
+            shapeRef.current = new Path(
+              e.clientX,
+              e.clientY,
+              e.clientX,
+              e.clientY,
+              new Path2D(),
+              penOptions,
+              "red",
+              0,
+              0,
+              [{ x: e.clientX, y: e.clientY, pressure: 1 }],
+              "fill",
+              0
+            );
+        }
+      },
+      [type, options, penOptions]
+    ),
+    Move = useCallback(
+      (e) => {
+        if (e.buttons !== 1) return;
+        switch (type) {
+          case "draw":
+            shapeRef.current.updateDimensions(e.clientX, e.clientY, generator);
+            setIsDrawing(!isDrawing);
+            break;
+          case "Rectangle":
+            shapeRef.current.updateDimensions(e.clientX, e.clientY, generator);
+            setIsDrawing(!isDrawing);
+            break;
+          case "Circle":
+            shapeRef.current.updateDimensions(e.clientX, e.clientY, generator);
+            setIsDrawing(!isDrawing);
+            break;
+          case "Ellipse":
+            shapeRef.current.updateDimensions(e.clientX, e.clientY, generator);
+            setIsDrawing(!isDrawing);
+            break;
+          case "Line":
+            shapeRef.current.updateDimensions(e.clientX, e.clientY, generator);
+            setIsDrawing(!isDrawing);
+            break;
+          case "erase":
+            const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
+            if (selectedElement === null) return;
+            // addToREDO(elements[selectedElement]);
+            const newElements = elements.filter(
+              (element) => element.id !== selectedElement
+            );
+            setElements(newElements);
+        }
+      },
+      [type, isDrawing]
+    ),
+    Up = useCallback(() => {
+      // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       addElement(shapeRef.current);
-    };
+    }, [type]);
 
+  const KeyDown = () => {
+    setTimeout(() => {
+      contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      shapeRef.current.updateText(textRef.current.value);
+      shapeRef.current.draw(contextRef.current);
+      shapeRef.current.updateDimensions();
+    }, 0);
+  };
+
+  const onBlur = () => {
+    if(elements[elements.length - 1].text === ""){
+      removeLastElement();
+    }
+  };
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -142,17 +222,22 @@ const Canvas = () => {
     // Set the "drawn" size of the canvas
     canvas.style.width = `${rect.width}px`;
     canvas.style.height = `${rect.height}px`;
-  
 
     const roughCanvas = rough.canvas(canvas);
-    
+
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    shapeRef.current && shapes.has(shapeRef.current.type) && shapeRef.current.draw(roughCanvas);
-    shapeRef.current && !shapes.has(shapeRef.current.type) && shapeRef.current.draw(context);
+    shapeRef.current &&
+      shapes.has(shapeRef.current.type) &&
+      shapeRef.current.draw(roughCanvas);
+    shapeRef.current &&
+      !shapes.has(shapeRef.current.type) &&
+      shapeRef.current.draw(context);
 
     contextRef.current = context;
+    // return () => {
+    //   window.removeEventListener("mousemove", fn);
+    // };
   }, [isDrawing]);
-
 
   return (
     <div className="w-full h-screen grid">
@@ -165,23 +250,11 @@ const Canvas = () => {
         x: {cordinates.x} y: {cordinates.y}{" "}
       </div>
 
-      {action === "text" && elements[elements.length - 1]?.type === "text" && (
         <textarea
           ref={textRef}
           style={{
             position: "absolute",
-            top: `${
-              elements[elements.length - 1]?.y1 -
-              elements[elements.length - 1]?.height +
-              4
-            }px`,
-            left: `${elements[elements.length - 1]?.x1}px`,
-            width: `${
-              canvasRef.current.width - elements[elements.length - 1].x1
-            }px`,
-            height: `${
-              canvasRef.current.height - elements[elements.length - 1].y1
-            }px`,
+            display: "none",
             resize: "none",
             border: "none",
             outline: "none",
@@ -191,13 +264,13 @@ const Canvas = () => {
             backgroundColor: "transparent",
             pointerEvents: "none",
             overflow: "hidden",
-            color: "transparent",
             caretColor: "black",
+            color: "transparent",
+            zIndex: 11,
           }}
-          onKeyDown={Move}
-          onBlur={Up}
+          onKeyDown={KeyDown}
+          onBlur={onBlur}
         />
-      )}
       <CanvasElement
         className={twMerge(
           "row-start-1 col-start-1 min-w-full min-h-full overflow-hidden z-10",
@@ -212,7 +285,7 @@ const Canvas = () => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      <RenderingCanvas />      
+      <RenderingCanvas />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
       <div className="w-40 flex justify-center items-center gap-2 mb-2 ml-2">

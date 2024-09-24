@@ -149,13 +149,14 @@ export class Text extends Shape {
         const { width } = canvasRef.current.getBoundingClientRect()
         const maxLineWidth = width - this.x1;
         const lines = this.text.split("\n");
-        wrappedLines(lines, maxLineWidth, context).forEach((line, i) => {
+        const allLines = wrappedLines(lines, maxLineWidth, context)
+        this.height = allLines.length * 25
+        this.width = allLines.reduce((acc, line) => {
+            return Math.max(acc, context.measureText(line).width)
+        }, 0)
+        allLines.forEach((line, i) => {
             context.fillText(line, this.x1, this.y1 + (i + 1) * 24);
         });
-    }
-    updateDimensions() {
-        this.width = this.x1 + Number(this.options.font.slice(0, 2)) * this.text.length
-        this.height = this.y1 + Number(this.options.font.slice(0, 2)) * this.text.length
     }
     updateText(text) {
         this.text = text

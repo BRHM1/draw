@@ -145,6 +145,7 @@ const Canvas = () => {
               "fill",
               0
             );
+            break;
         }
       },
       [type, options, penOptions]
@@ -177,10 +178,11 @@ const Canvas = () => {
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
             if (selectedElement === null) return;
             // addToREDO(elements[selectedElement]);
-            const newElements = elements.filter(
-              (element) => element.id !== selectedElement
-            );
-            setElements(newElements);
+            console.log(selectedElement);
+            // const newElements = elements.filter(
+            //   (element) => element.id !== selectedElement
+            // );
+            // setElements(newElements);
         }
       },
       [type, isDrawing]
@@ -189,7 +191,7 @@ const Canvas = () => {
       // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
       setButtonDown(false);
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      addElement(shapeRef.current);
+      type !== "erase" && addElement(shapeRef.current);
     }
 
   const KeyDown = () => {
@@ -198,7 +200,6 @@ const Canvas = () => {
       shapeRef.current.updateText(textRef.current.value);
       
       shapeRef.current.draw(contextRef.current, canvasRef);
-      shapeRef.current.updateDimensions();
     }, 0);
   };
 

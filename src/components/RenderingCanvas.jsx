@@ -29,7 +29,7 @@ const RenderingCanvas = () => {
       if(!element?.type) return;
       shapes.has(element.type)
         ? element.draw(roughCanvas)
-        : element.draw(renderingContextRef.current);
+        : element.draw(renderingContextRef.current, renderingCanvasRef);
     });
     renderingContextRef.current = renderingCanvasContext;
     console.log(elements)

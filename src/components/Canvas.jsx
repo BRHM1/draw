@@ -26,7 +26,6 @@ const Canvas = () => {
   const shapeRef = useRef(null);
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
-  const [showTextArea , setShowTextArea] = useState(false); 
   const [buttonDown , setButtonDown] = useState(false);
 
   const removeLastElement = useStore((state) => state.removeLastElement);
@@ -197,13 +196,14 @@ const Canvas = () => {
     setTimeout(() => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       shapeRef.current.updateText(textRef.current.value);
-      shapeRef.current.draw(contextRef.current);
+      
+      shapeRef.current.draw(contextRef.current, canvasRef);
       shapeRef.current.updateDimensions();
     }, 0);
   };
 
   const onBlur = () => {
-    if(elements[elements.length - 1].text === ""){
+    if(elements[elements.length - 1]?.text === ""){
       removeLastElement();
     }
   };
@@ -234,8 +234,9 @@ const Canvas = () => {
       shapeRef.current.draw(roughCanvas);
     shapeRef.current && buttonDown &&
       !shapes.has(shapeRef.current.type) &&
-      shapeRef.current.draw(context);
-
+      shapeRef.current.draw(context, canvasRef)
+    // shapeRef.current && shapeRef.current.type === "text" && shapeRef.current.draw(context, canvasRef)
+    console.log("typing writing") 
     contextRef.current = context;
   }, [isDrawing]);
 

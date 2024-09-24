@@ -144,11 +144,12 @@ export class Text extends Shape {
         this.height = height
         this.type = "text"
     }
-    draw(context) {
+    draw(context, canvasRef) {
         context.font = this.options.font;
+        const { width } = canvasRef.current.getBoundingClientRect()
+        const maxLineWidth = width - this.x1;
         const lines = this.text.split("\n");
-        // TODO: use the wrappedLines function in the utils file so that the text wraps without the need for \n
-        lines.forEach((line, i) => {
+        wrappedLines(lines, maxLineWidth, context).forEach((line, i) => {
             context.fillText(line, this.x1, this.y1 + (i + 1) * 24);
         });
     }

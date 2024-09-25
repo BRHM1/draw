@@ -29,9 +29,8 @@ const Canvas = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [buttonDown, setButtonDown] = useState(false);
   let selectionBox = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
-  const selectedElements = [];
+  const selectedElements = useRef([]);
 
-  const [test, setTest] = useState("");
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
   const addToREDO = useStore((state) => state.addToREDO);
@@ -45,10 +44,10 @@ const Canvas = () => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  const fn = (e) => {
-    setCordinates({ x: e.clientX, y: e.clientY });
-  };
-  window.addEventListener("mousemove", fn);
+  // const fn = (e) => {
+  //   setCordinates({ x: e.clientX, y: e.clientY });
+  // };
+  // window.addEventListener("mousemove", fn);
 
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
@@ -68,15 +67,18 @@ const Canvas = () => {
             // if the click is outside the last drawn selection rectangle you should clear the selection rectangle and the selected elements
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
             const isClickInsideSelectionRectangle =
-              e.pageX > selectionBox.x1 &&
-              e.pageX < selectionBox.x2 &&
-              e.pageY > selectionBox.y1 &&
-              e.pageY < selectionBox.y2;
-            if (isClickInsideSelectionRectangle) return;
-            selectedElements.length = 0;
+              e.pageX > selectionBox.current.x1 &&
+              e.pageX < selectionBox.current.x2 &&
+              e.pageY > selectionBox.current.y1 &&
+              e.pageY < selectionBox.current.y2;
+            if (isClickInsideSelectionRectangle) return 1 && console.log("inside");
+            selectedElements.current.length = 0;
             if (selectedElement) {
-              selectedElements.push(selectedElement);
-              console.log("selectedElements sdfsare", selectedElements);
+              selectedElements.current.push(selectedElement);
+              const { x1, y1, width, height } = selectedElement;
+              const gizmo = new Gizmo(x1, y1, x1 + width, y1 + height, "transparent");
+              gizmo.draw(contextRef);
+              console.log("selectedElements.current sdfsare", selectedElements.current);
             } else {
               selectionBox.current = {
                 ...selectionBox.current,
@@ -207,8 +209,10 @@ const Canvas = () => {
             removeElementById(selectedElement.id);
             break;
           case "select":
-            if (selectedElements.length > 0) {
+            console.log(selectedElements.current.length)
+            if (selectedElements.current.length > 0) {
               // start updating the selected elements
+              console.log("you're missing with the selected elements")
             } else {
               selectionBox.current = {
                 ...selectionBox.current,
@@ -240,14 +244,12 @@ const Canvas = () => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       if (type === "select") {
         // this logic should be in the UP function
-        selectedElements.push(
+        selectedElements.current.push(
           ...getElementsInsideSelectionBox(selectionBox.current, elements)
         );
-        console.log(selectedElements);
-        selectedElements.forEach((element) => {
+        selectedElements.current.forEach((element) => {
           const { x1, y1, width, height } = element;
           const gizmo = new Gizmo(x1 , y1, x1 + width, y1 + height, "transparent");
-          console.log("gizmo drawed");
           gizmo.draw(contextRef);
         });
         // get the elements inside the selection rectangle

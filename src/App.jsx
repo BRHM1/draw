@@ -12,7 +12,7 @@ function App() {
   // BUG: Undo doesn't save the move action
   // BUG: Gizmo coordinates are not correct
   // BUG: Path coordinates are not correct
-  
+  // BUG: selection box works only when you drag from top left to bottom right
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements

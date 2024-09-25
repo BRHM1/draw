@@ -73,6 +73,7 @@ const Canvas = () => {
             selectedElements.length = 0
             if(selectedElement){
               selectedElements.push(selectedElement)
+              console.log("selectedElements sdfsare" , selectedElements)
             }else {
               selectionBox.current = { ...selectionBox.current , x1: e.pageX, y1: e.pageY}
             }

@@ -79,6 +79,8 @@ export class Line extends Shape {
     updateDimensions(x2, y2, generator) {
         this.x2 = x2
         this.y2 = y2
+        this.width = x2 - this.x1
+        this.height = y2 - this.y1
         this.#updateRoughElement(generator)
     }
     #updateRoughElement(generator) {
@@ -110,7 +112,7 @@ export class Rectangle extends Shape {
 export class Path extends Shape {
     // in this case x1, y1, x2, y2 are the bounding box of the path
     constructor(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation) {
-        super(x1, y1, x2, y2, options, rotation)
+        super(x1, y1, x2 - x1, y2 - y1, options, rotation)
         this.path = path
         this.type = "path"
         this.color = color
@@ -128,17 +130,19 @@ export class Path extends Shape {
         context.fill(this.path)
     }
     updateDimensions(x2, y2) {
-        this.x1 = Number(Math.min(this.x1, x2).toFixed(2))
-        this.y1 = Number(Math.min(this.y1, y2).toFixed(2))
-        this.x2 = Number(Math.max(this.x1, x2).toFixed(2))
-        this.y2 = Number(Math.max(this.y1, y2).toFixed(2))
+        this.x1 = Math.min(this.x1, x2)
+        this.y1 = Math.min(this.y1, y2)
+        this.width = x2 - this.x1
+        this.height = y2 - this.y1
+        this.x2 = Math.max(this.x1, x2)
+        this.y2 = Math.max(this.y1, y2)
         this.points.push({ x: x2, y: y2 })
     }
 }
 
 export class Text extends Shape {
     constructor(x1, y1, text, options, rotation, width, height) {
-        super(x1, y1, 0, 0, options, rotation)
+        super(x1, y1, width, height, options, rotation)
         this.text = text
         this.width = width
         this.height = height

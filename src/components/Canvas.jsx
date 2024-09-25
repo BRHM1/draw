@@ -11,13 +11,14 @@ import {
   Rectangle,
   Text,
 } from "../hooks/elementModule";
+import Gizmo from "../utils/Gizmo";
 
 import Button from "./Button";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
 import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
-import { getElementAtPos } from "../utils/utils";
+import { getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
 
 const Canvas = () => {
   const canvasRef = useRef(null);
@@ -27,6 +28,8 @@ const Canvas = () => {
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [buttonDown , setButtonDown] = useState(false);
+  let selectionRectangle = {x1: 0, y1: 0, x2: 0, y2: 0}
+  const selectedElements = []
 
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
@@ -58,6 +61,22 @@ const Canvas = () => {
         setButtonDown(true);
         // based on the type an object of that type will be created
         switch (type) {
+          case "select":
+            // there are two paths if mouse on element and if mouse is not on element
+            // note if the click is inside the last drawn selection rectangle you should return 
+            // if the click is outside the last drawn selection rectangle you should clear the selection rectangle and the selected elements
+            const selectedElement = getElementAtPos(e.pageX, e.pageY, elements)
+            const isClickInsideSelectionRectangle = e.pageX > selectionRectangle.x1 && e.pageX < selectionRectangle.x2 && e.pageY > selectionRectangle.y1 && e.pageY < selectionRectangle.y2
+            if(isClickInsideSelectionRectangle) return 
+            selectedElements.length = 0
+            if(selectedElement){
+              selectedElements.push(selectedElement)
+            }else {
+              selectionRectangle = {x1: e.pageX, y1: e.pageY, x2: e.pageX, y2: e.pageY}
+            }
+            console.log(selectedElements)
+            console.log(selectionRectangle)
+            break;
           case "text":
             shapeRef.current = new Text(
               e.clientX,
@@ -179,8 +198,22 @@ const Canvas = () => {
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
             if (selectedElement === null) return;
             // addToREDO(elements[selectedElement]);
-            removeElementById(selectedElement);
+            removeElementById(selectedElement.id);
             break;
+          case "select":
+            if(selectedElements.length > 0){
+                // start updating the selected elements
+            }else {
+              selectionRectangle.x2 = e.pageX
+              selectionRectangle.y2 = e.pageY
+              // draw the selection rectangle
+              const gizmo = new Gizmo(selectionRectangle.x1, selectionRectangle.y1, selectionRectangle.x2, selectionRectangle.y2)
+              contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+              gizmo.draw(contextRef)
+              // get the elements inside the selection rectangle
+              console.log(getElementsInsideSelectionBox(selectionRectangle, elements))
+              selectedElements.push(...getElementsInsideSelectionBox(selectionRectangle, elements))
+            }
         }
       },
       [type, isDrawing]
@@ -189,7 +222,7 @@ const Canvas = () => {
       // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
       setButtonDown(false);
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      type !== "erase" && addElement(shapeRef.current);
+      type !== "erase" && type !== "select" && addElement(shapeRef.current);
     }
 
   const KeyDown = () => {

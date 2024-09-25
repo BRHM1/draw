@@ -7,12 +7,10 @@ function App() {
   // });
   
   // BUG: The line mirrors when you move it 
-  // BUG: All elements should have a defined structure
   // BUG: resizing window makes the canvas stretch
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
   // BUG: Gizmo coordinates are not correct
-  // BUG: Circle sucks
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements
@@ -24,14 +22,7 @@ function App() {
   // TODO: make the DB Model for the application
 
   // TODO: Perfromance improvements
-  // 1. onMouseDown creates instance of the shape
-  // 2. onMouseMove updates the dimensions of the shape
-  // 3. onMouseUp finalizes the shape and adds it to the elements array 
-  // 4- onMouseMove should not trigger if the mouse is not down
-  // 5- two separate canvas for drawing and rendering
-  // 6- use requestAnimationFrame for rendering
-  // 7- use useMemo for elements
-  // 8- use useCallback for functions
+  // 1- store functions can be improved
 
   // Text flow:
   // 1. onClick intiates an instance of Text class + a textarea

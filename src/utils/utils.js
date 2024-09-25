@@ -99,10 +99,27 @@ export function getElementAtPos (x, y, elements) {
   if (elements?.length === 0) return null
   for (let i = elements?.length - 1; i >= 0; i--) {
       const element = elements[i]
-      if (pointInsideElementFormula[element.type](x, y, element)) return element.id
+      if (pointInsideElementFormula[element.type](x, y, element)) return element
   }
   return null
 }
+
+export function getElementsInsideSelectionBox (selectionBox, elements) {
+  const { x1: Bounding_x1, y1: Bounding_y1, x2: Bounding_x2, y2: Bounding_y2 } = selectionBox
+  const elementsInside = []
+  for (let i = 0; i < elements.length; i++) {
+      const { x1, y1, width, height } = elements[i]
+      const minX = Math.min(x1, x1 + width)
+      const maxX = Math.max(x1, x1 + width)
+      const minY = Math.min(y1, y1 + height)
+      const maxY = Math.max(y1, y1 + height)
+      if (minX >= Bounding_x1 && maxX <= Bounding_x2 && minY >= Bounding_y1 && maxY <= Bounding_y2) {
+          elementsInside.push(elements[i])
+      }
+  }
+  return elementsInside
+}
+
 
 export function drawElement (element, context , roughCanvas, canvasRef) {
   switch (element?.type) {

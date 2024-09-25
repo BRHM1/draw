@@ -29,7 +29,8 @@ const Canvas = () => {
   const [buttonDown , setButtonDown] = useState(false);
 
   const removeLastElement = useStore((state) => state.removeLastElement);
-  const setElements = useStore((state) => state.setElements);
+  const removeElementById = useStore((state) => state.removeElementById);
+  const addToREDO = useStore((state) => state.addToREDO);
   const options = useStore((state) => state.options);
   const penOptions = useStore((state) => state.penOptions);
   const addElement = useStore((state) => state.addElement);
@@ -178,11 +179,8 @@ const Canvas = () => {
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
             if (selectedElement === null) return;
             // addToREDO(elements[selectedElement]);
-            console.log(selectedElement);
-            // const newElements = elements.filter(
-            //   (element) => element.id !== selectedElement
-            // );
-            // setElements(newElements);
+            removeElementById(selectedElement);
+            break;
         }
       },
       [type, isDrawing]

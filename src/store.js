@@ -53,7 +53,7 @@ export const useStore = create((set) => ({
     addElement: (element) =>
         set(produce((state) => {
             state.RedoStack = [];  // clear the redo stack
-            state.elements.push(element);
+            state.elements.push(element); // dont change the reference of the elements array
         })),
     removeLastElement: () =>
         set(produce((state) => {
@@ -78,7 +78,7 @@ export const useStore = create((set) => ({
     },
     removeElementById: (id) => {
         set(produce((state) => {
-            state.elements.filter((element) => element.id !== id);
+            state.elements = state.elements.filter((element) => element.id !== id);
         }));
     },
     insertElement: (element, index) => {

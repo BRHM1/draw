@@ -28,9 +28,11 @@ const Canvas = () => {
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [buttonDown , setButtonDown] = useState(false);
-  let selectionRectangle = {x1: 0, y1: 0, x2: 0, y2: 0}
+  let selectionBox = useRef({x1: 0, y1: 0, x2: 0, y2: 0})
   const selectedElements = []
 
+
+  const [test , setTest] = useState("")
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
   const addToREDO = useStore((state) => state.addToREDO);
@@ -66,16 +68,14 @@ const Canvas = () => {
             // note if the click is inside the last drawn selection rectangle you should return 
             // if the click is outside the last drawn selection rectangle you should clear the selection rectangle and the selected elements
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements)
-            const isClickInsideSelectionRectangle = e.pageX > selectionRectangle.x1 && e.pageX < selectionRectangle.x2 && e.pageY > selectionRectangle.y1 && e.pageY < selectionRectangle.y2
+            const isClickInsideSelectionRectangle = e.pageX > selectionBox.x1 && e.pageX < selectionBox.x2 && e.pageY > selectionBox.y1 && e.pageY < selectionBox.y2
             if(isClickInsideSelectionRectangle) return 
             selectedElements.length = 0
             if(selectedElement){
               selectedElements.push(selectedElement)
             }else {
-              selectionRectangle = {x1: e.pageX, y1: e.pageY, x2: e.pageX, y2: e.pageY}
+              selectionBox.current = { ...selectionBox.current , x1: e.pageX, y1: e.pageY}
             }
-            console.log(selectedElements)
-            console.log(selectionRectangle)
             break;
           case "text":
             shapeRef.current = new Text(
@@ -202,24 +202,28 @@ const Canvas = () => {
             break;
           case "select":
             if(selectedElements.length > 0){
-                // start updating the selected elements
+              // start updating the selected elements
+              
             }else {
-              selectionRectangle.x2 = e.pageX
-              selectionRectangle.y2 = e.pageY
+              selectionBox.current = {...selectionBox.current, x2: e.pageX, y2: e.pageY}
               // draw the selection rectangle
-              const gizmo = new Gizmo(selectionRectangle.x1, selectionRectangle.y1, selectionRectangle.x2, selectionRectangle.y2)
+              const gizmo = new Gizmo(selectionBox.current.x1, selectionBox.current.y1, selectionBox.current.x2, selectionBox.current.y2)
               contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
               gizmo.draw(contextRef)
-              // get the elements inside the selection rectangle
-              console.log(getElementsInsideSelectionBox(selectionRectangle, elements))
-              selectedElements.push(...getElementsInsideSelectionBox(selectionRectangle, elements))
             }
-        }
-      },
-      [type, isDrawing]
-    ),
-    Up = () => {
-      // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
+          }
+        },
+        [type, isDrawing]
+      ),
+      Up = () => {
+        // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
+      
+      if (type === "select") {
+         // this logic should be in the UP function
+         selectedElements.push(...getElementsInsideSelectionBox(selectionBox.current, elements))
+         console.log("selectedElements are" , selectedElements)
+         // get the elements inside the selection rectangle
+         }
       setButtonDown(false);
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       type !== "erase" && type !== "select" && addElement(shapeRef.current);

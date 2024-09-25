@@ -11,6 +11,8 @@ function App() {
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
   // BUG: Gizmo coordinates are not correct
+  // BUG: Path coordinates are not correct
+  
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements

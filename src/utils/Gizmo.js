@@ -10,7 +10,7 @@ class Gizmo {
         const ctx = context.current;
         ctx.save();
         ctx.beginPath();
-        ctx.rect(this.x1 - 15, this.y1 - 15 , this.x2 - this.x1 + 30, this.y2 - this.y1 + 30);
+        ctx.rect(this.x1 , this.y1 , this.x2 - this.x1 , this.y2 - this.y1 );
         ctx.strokeStyle = "orange";
         ctx.lineWidth = 3;
         ctx.setLineDash([5, 5]);

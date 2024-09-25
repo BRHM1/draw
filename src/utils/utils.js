@@ -34,7 +34,7 @@ export function getSvgPathFromStroke(points, closed = true) {
 }
 
 
-export function wrappedLines (lines, maxLineWidth, ctx) {
+export function wrappedLines(lines, maxLineWidth, ctx) {
   const wrapped = [];
   for (let i = 0; i < lines.length; i++) {
     const words = lines[i].split(" ");
@@ -57,37 +57,37 @@ export function wrappedLines (lines, maxLineWidth, ctx) {
 
 const pointInsideElementFormula = {
   rectangle: (x, y, element) => {
-      const { x1, y1, width, height } = element
-      return x >= Math.min(x1, x1 + width) && x <= Math.max(x1, x1 + width) && y >= Math.min(y1, y1 + height) && y <= Math.max(y1, y1 + height) ? element : null
+    const { x1, y1, width, height } = element
+    return x >= Math.min(x1, x1 + width) && x <= Math.max(x1, x1 + width) && y >= Math.min(y1, y1 + height) && y <= Math.max(y1, y1 + height) ? element : null
   }, // works fine
   line: (x, y, element) => {
-      const { x1, y1, x2, y2 } = element
-      const a = { x: x1, y: y1 } // start point
-      const b = { x: x2, y: y2 } // end point
-      const c = { x, y } // point to check(mouse position)
-      const offset = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2))
-      const a1 = Math.sqrt(Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2))
-      const a2 = Math.sqrt(Math.pow(c.x - b.x, 2) + Math.pow(c.y - b.y, 2))
-      return a1 + a2 >= offset - 0.5 && a1 + a2 <= offset + 0.5 ? element : null
+    const { x1, y1, x2, y2 } = element
+    const a = { x: x1, y: y1 } // start point
+    const b = { x: x2, y: y2 } // end point
+    const c = { x, y } // point to check(mouse position)
+    const offset = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2))
+    const a1 = Math.sqrt(Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2))
+    const a2 = Math.sqrt(Math.pow(c.x - b.x, 2) + Math.pow(c.y - b.y, 2))
+    return a1 + a2 >= offset - 0.5 && a1 + a2 <= offset + 0.5 ? element : null
   }, // works fine
   circle: (x, y, element) => {
-      // calculate distance between center of circle and mouse position if distance is less than radius then point is inside circle
-      const { centerX, centerY, radius} = element
-      const distance = Math.hypot(Math.abs(x - centerX), Math.abs(y - centerY))
-      return distance <= radius ? element : null
+    // calculate distance between center of circle and mouse position if distance is less than radius then point is inside circle
+    const { centerX, centerY, radius } = element
+    const distance = Math.hypot(Math.abs(x - centerX), Math.abs(y - centerY))
+    return distance <= radius ? element : null
   }, // works fine
   ellipse: (x, y, element) => {
     // ((x - centerX)^2 / semiMajorAxis^2) + ((y - centerY)^2 / semiMinorAxis^2) <= 1
-      const { width, height , centerX, centerY } = element
-      const semiMajorAxis = Math.abs(width / 2)
-      const semiMinorAxis = Math.abs(height / 2) 
-      const isInside = ((x - centerX) ** 2 / semiMajorAxis ** 2) + ((y - centerY )** 2 / semiMinorAxis ** 2) <= 1
-      return isInside ? element : null
+    const { width, height, centerX, centerY } = element
+    const semiMajorAxis = Math.abs(width / 2)
+    const semiMinorAxis = Math.abs(height / 2)
+    const isInside = ((x - centerX) ** 2 / semiMajorAxis ** 2) + ((y - centerY) ** 2 / semiMinorAxis ** 2) <= 1
+    return isInside ? element : null
   }, // works fine
   path: (x, y, element) => {
-      const { path } = element
-      const ctx = document.createElement("canvas").getContext("2d")
-      return ctx.isPointInPath(path, x, y) ? element : null
+    const { path } = element
+    const ctx = document.createElement("canvas").getContext("2d")
+    return ctx.isPointInPath(path, x, y) ? element : null
   }, // works fine 
   text: (x, y, element) => {
     const { x1, y1, width, height } = element
@@ -95,33 +95,38 @@ const pointInsideElementFormula = {
   }, // works fine 
 }
 
-export function getElementAtPos (x, y, elements) {
+export function getElementAtPos(x, y, elements) {
   if (elements?.length === 0) return null
   for (let i = elements?.length - 1; i >= 0; i--) {
-      const element = elements[i]
-      if (pointInsideElementFormula[element.type](x, y, element)) return element
+    const element = elements[i]
+    if (pointInsideElementFormula[element.type](x, y, element)) return element
   }
   return null
 }
 
-export function getElementsInsideSelectionBox (selectionBox, elements) {
-  const { x1: Bounding_x1, y1: Bounding_y1, x2: Bounding_x2, y2: Bounding_y2 } = selectionBox
+export function getElementsInsideSelectionBox(selectionBox, elements) {
+  const { x1, y1, x2, y2 } = selectionBox
+  console.log(x1, y1, x2, y2)
+  const Bounding_x1 = Math.min(x1, x2)
+  const Bounding_x2 = Math.max(x1, x2)
+  const Bounding_y1 = Math.min(y1, y2)
+  const Bounding_y2 = Math.max(y1, y2)
   const elementsInside = []
   for (let i = 0; i < elements.length; i++) {
-      const { x1, y1, width, height } = elements[i]
-      const minX = Math.min(x1, x1 + width)
-      const maxX = Math.max(x1, x1 + width)
-      const minY = Math.min(y1, y1 + height)
-      const maxY = Math.max(y1, y1 + height)
-      if (minX >= Bounding_x1 && maxX <= Bounding_x2 && minY >= Bounding_y1 && maxY <= Bounding_y2) {
-          elementsInside.push(elements[i])
-      }
+    const { x1, y1, width, height } = elements[i]
+    const minX = Math.min(x1, x1 + width)
+    const maxX = Math.max(x1, x1 + width)
+    const minY = Math.min(y1, y1 + height)
+    const maxY = Math.max(y1, y1 + height)
+    if (minX >= Bounding_x1 && maxX <= Bounding_x2 && minY >= Bounding_y1 && maxY <= Bounding_y2) {
+      elementsInside.push(elements[i])
+    }
   }
   return elementsInside
 }
 
 
-export function drawElement (element, context , roughCanvas, canvasRef) {
+export function drawElement(element, context, roughCanvas, canvasRef) {
   switch (element?.type) {
     case "path":
       context.strokeStyle = element.stroke;

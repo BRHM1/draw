@@ -27,12 +27,11 @@ const Canvas = () => {
   const shapeRef = useRef(null);
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
-  const [buttonDown , setButtonDown] = useState(false);
-  let selectionBox = useRef({x1: 0, y1: 0, x2: 0, y2: 0})
-  const selectedElements = []
+  const [buttonDown, setButtonDown] = useState(false);
+  let selectionBox = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
+  const selectedElements = [];
 
-
-  const [test , setTest] = useState("")
+  const [test, setTest] = useState("");
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
   const addToREDO = useStore((state) => state.addToREDO);
@@ -65,17 +64,25 @@ const Canvas = () => {
         switch (type) {
           case "select":
             // there are two paths if mouse on element and if mouse is not on element
-            // note if the click is inside the last drawn selection rectangle you should return 
+            // note if the click is inside the last drawn selection rectangle you should return
             // if the click is outside the last drawn selection rectangle you should clear the selection rectangle and the selected elements
-            const selectedElement = getElementAtPos(e.pageX, e.pageY, elements)
-            const isClickInsideSelectionRectangle = e.pageX > selectionBox.x1 && e.pageX < selectionBox.x2 && e.pageY > selectionBox.y1 && e.pageY < selectionBox.y2
-            if(isClickInsideSelectionRectangle) return 
-            selectedElements.length = 0
-            if(selectedElement){
-              selectedElements.push(selectedElement)
-              console.log("selectedElements sdfsare" , selectedElements)
-            }else {
-              selectionBox.current = { ...selectionBox.current , x1: e.pageX, y1: e.pageY}
+            const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
+            const isClickInsideSelectionRectangle =
+              e.pageX > selectionBox.x1 &&
+              e.pageX < selectionBox.x2 &&
+              e.pageY > selectionBox.y1 &&
+              e.pageY < selectionBox.y2;
+            if (isClickInsideSelectionRectangle) return;
+            selectedElements.length = 0;
+            if (selectedElement) {
+              selectedElements.push(selectedElement);
+              console.log("selectedElements sdfsare", selectedElements);
+            } else {
+              selectionBox.current = {
+                ...selectionBox.current,
+                x1: e.pageX,
+                y1: e.pageY,
+              };
             }
             break;
           case "text":
@@ -92,9 +99,7 @@ const Canvas = () => {
             textRef.current.style.display = "block";
             textRef.current.style.top = `${e.clientY}px`;
             textRef.current.style.left = `${e.clientX}px`;
-            textRef.current.style.width = `${
-              window.innerWidth - e.clientX
-            }px`;
+            textRef.current.style.width = `${window.innerWidth - e.clientX}px`;
             textRef.current.style.height = `${
               window.innerHeight - e.clientY
             }px`;
@@ -202,45 +207,66 @@ const Canvas = () => {
             removeElementById(selectedElement.id);
             break;
           case "select":
-            if(selectedElements.length > 0){
+            if (selectedElements.length > 0) {
               // start updating the selected elements
-              
-            }else {
-              selectionBox.current = {...selectionBox.current, x2: e.pageX, y2: e.pageY}
+            } else {
+              selectionBox.current = {
+                ...selectionBox.current,
+                x2: e.pageX,
+                y2: e.pageY,
+              };
               // draw the selection rectangle
-              const gizmo = new Gizmo(selectionBox.current.x1, selectionBox.current.y1, selectionBox.current.x2, selectionBox.current.y2)
-              contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
-              gizmo.draw(contextRef)
+              const gizmo = new Gizmo(
+                selectionBox.current.x1,
+                selectionBox.current.y1,
+                selectionBox.current.x2,
+                selectionBox.current.y2
+              );
+              contextRef.current.clearRect(
+                0,
+                0,
+                window.innerWidth,
+                window.innerHeight
+              );
+              gizmo.draw(contextRef);
             }
-          }
-        },
-        [type, isDrawing]
-      ),
-      Up = () => {
-        // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up") 
-      
-      if (type === "select") {
-         // this logic should be in the UP function
-         selectedElements.push(...getElementsInsideSelectionBox(selectionBox.current, elements))
-         console.log("selectedElements are" , selectedElements)
-         // get the elements inside the selection rectangle
-         }
-      setButtonDown(false);
+        }
+      },
+      [type, isDrawing]
+    ),
+    Up = () => {
+      // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up")
+
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      if (type === "select") {
+        // this logic should be in the UP function
+        selectedElements.push(
+          ...getElementsInsideSelectionBox(selectionBox.current, elements)
+        );
+        console.log(selectedElements);
+        selectedElements.forEach((element) => {
+          const { x1, y1, width, height } = element;
+          const gizmo = new Gizmo(x1 , y1, x1 + width, y1 + height, "transparent");
+          console.log("gizmo drawed");
+          gizmo.draw(contextRef);
+        });
+        // get the elements inside the selection rectangle
+      }
+      setButtonDown(false);
       type !== "erase" && type !== "select" && addElement(shapeRef.current);
-    }
+    };
 
   const KeyDown = () => {
     setTimeout(() => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       shapeRef.current.updateText(textRef.current.value);
-      
+
       shapeRef.current.draw(contextRef.current, canvasRef);
     }, 0);
   };
 
   const onBlur = () => {
-    if(elements[elements.length - 1]?.text === ""){
+    if (elements[elements.length - 1]?.text === "") {
       removeLastElement();
     }
   };
@@ -266,14 +292,16 @@ const Canvas = () => {
     const roughCanvas = rough.canvas(canvas);
 
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    shapeRef.current && buttonDown &&
+    shapeRef.current &&
+      buttonDown &&
       shapes.has(shapeRef.current.type) &&
       shapeRef.current.draw(roughCanvas);
-    shapeRef.current && buttonDown &&
+    shapeRef.current &&
+      buttonDown &&
       !shapes.has(shapeRef.current.type) &&
-      shapeRef.current.draw(context, canvasRef)
+      shapeRef.current.draw(context, canvasRef);
     // shapeRef.current && shapeRef.current.type === "text" && shapeRef.current.draw(context, canvasRef)
-    console.log("typing writing") 
+    console.log("typing writing");
     contextRef.current = context;
   }, [isDrawing]);
 
@@ -288,27 +316,27 @@ const Canvas = () => {
         x: {cordinates.x} y: {cordinates.y}{" "}
       </div>
 
-        <textarea
-          ref={textRef}
-          style={{
-            position: "absolute",
-            display: "none",
-            resize: "none",
-            border: "none",
-            outline: "none",
-            fontSize: "24px",
-            fontFamily: "Arial",
-            lineHeight: "25px",
-            backgroundColor: "transparent",
-            pointerEvents: "none",
-            overflow: "hidden",
-            caretColor: "black",
-            color: "transparent",
-            zIndex: 11,
-          }}
-          onKeyDown={KeyDown}
-          onBlur={onBlur}
-        />
+      <textarea
+        ref={textRef}
+        style={{
+          position: "absolute",
+          display: "none",
+          resize: "none",
+          border: "none",
+          outline: "none",
+          fontSize: "24px",
+          fontFamily: "Arial",
+          lineHeight: "25px",
+          backgroundColor: "transparent",
+          pointerEvents: "none",
+          overflow: "hidden",
+          caretColor: "black",
+          color: "transparent",
+          zIndex: 11,
+        }}
+        onKeyDown={KeyDown}
+        onBlur={onBlur}
+      />
       <CanvasElement
         className={twMerge(
           "row-start-1 col-start-1 min-w-full min-h-full overflow-hidden z-10",

@@ -39,6 +39,13 @@ export class Circle extends Shape {
         this.height = this.radius * 2
         this.#updateRoughElement(generator)
     }
+    Move(dx, dy, generator) {
+        this.x1 += dx
+        this.y1 += dy
+        this.centerX += dx
+        this.centerY += dy
+        this.#updateRoughElement(generator)
+    }
     #updateRoughElement(generator) {
         this.roughElement = generator.circle(this.centerX, this.centerY, this.radius * 2, this.options)
     }
@@ -62,6 +69,13 @@ export class Ellipse extends Shape {
         this.height = y2 - this.y1
         this.#updateRoughElement(generator)
     }
+    Move(dx, dy, generator) {
+        this.x1 += dx
+        this.y1 += dy
+        this.centerX += dx
+        this.centerY += dy
+        this.#updateRoughElement(generator)
+    }
     #updateRoughElement(generator) {
         this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
     }
@@ -83,6 +97,13 @@ export class Line extends Shape {
         this.height = y2 - this.y1
         this.#updateRoughElement(generator)
     }
+    Move(dx, dy, generator) {
+        this.x1 += dx
+        this.y1 += dy
+        this.x2 += dx
+        this.y2 += dy
+        this.#updateRoughElement(generator)
+    }
     #updateRoughElement(generator) {
         this.roughElement = generator.line(this.x1, this.y1, this.x2, this.y2, this.options)
     }
@@ -102,6 +123,12 @@ export class Rectangle extends Shape {
     updateDimensions(x2, y2, generator) {
         this.width = Number((x2 - this.x1).toFixed(2))
         this.height = Number((y2 - this.y1).toFixed(2))
+        this.#updateRoughElement(generator)
+    }
+
+    Move(dx, dy, generator) {
+        this.x1 += dx
+        this.y1 += dy
         this.#updateRoughElement(generator)
     }
     #updateRoughElement(generator) {

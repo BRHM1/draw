@@ -23,6 +23,7 @@ import { getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
 const Canvas = () => {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
+  const roughCanvasRef = useRef(null);
   const textRef = useRef(null);
   const shapeRef = useRef(null);
   const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
@@ -30,10 +31,14 @@ const Canvas = () => {
   const [buttonDown, setButtonDown] = useState(false);
   let selectionBox = useRef({ x1: 0, y1: 0, x2: 0, y2: 0 });
   const selectedElements = useRef([]);
+  const initCoords = useRef({ x: 0, y: 0 });
+  const lastdx = useRef(0);
+  const lastdy = useRef(0);
+  const startedActionAfterSelection = useRef(false);
+  const isSelectedElementRemoved = useRef(true);
 
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
-  const addToREDO = useStore((state) => state.addToREDO);
   const options = useStore((state) => state.options);
   const penOptions = useStore((state) => state.penOptions);
   const addElement = useStore((state) => state.addElement);
@@ -44,10 +49,10 @@ const Canvas = () => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  // const fn = (e) => {
-  //   setCordinates({ x: e.clientX, y: e.clientY });
-  // };
-  // window.addEventListener("mousemove", fn);
+  const fn = (e) => {
+    setCordinates({ x: e.clientX, y: e.clientY });
+  };
+  window.addEventListener("mousemove", fn);
 
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
@@ -56,30 +61,46 @@ const Canvas = () => {
     }, 0);
   };
 
+
   let Down = useCallback(
       (e) => {
         setButtonDown(true);
         // based on the type an object of that type will be created
         switch (type) {
           case "select":
-            // there are two paths if mouse on element and if mouse is not on element
-            // note if the click is inside the last drawn selection rectangle you should return
-            // if the click is outside the last drawn selection rectangle you should clear the selection rectangle and the selected elements
+            // 1- get the element at the position of the mouse
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
+            // 2- check if the mouse is inside a selectedBox or not
             const isClickInsideSelectionRectangle =
               e.pageX > selectionBox.current.x1 &&
               e.pageX < selectionBox.current.x2 &&
               e.pageY > selectionBox.current.y1 &&
               e.pageY < selectionBox.current.y2;
-            if (isClickInsideSelectionRectangle) return 1 && console.log("inside");
+
+            // 3- check if the mouse inside a selectedBox then start an action and return 
+            if (isClickInsideSelectionRectangle) {
+              initCoords.current = { x: e.pageX, y: e.pageY };
+              startedActionAfterSelection.current = true;
+              return;
+            }
+
+            // 4- if the mouse isn't inside a selectedBox then clear the selected Elements
             selectedElements.current.length = 0;
+            // 5- if the mouse is inside an element then add it to the selected elements and draw a gizmo around it
             if (selectedElement) {
               selectedElements.current.push(selectedElement);
+              initCoords.current = { x: e.pageX, y: e.pageY };
               const { x1, y1, width, height } = selectedElement;
-              const gizmo = new Gizmo(x1, y1, x1 + width, y1 + height, "transparent");
+              startedActionAfterSelection.current = true;
+              const gizmo = new Gizmo(
+                x1,
+                y1,
+                x1 + width,
+                y1 + height,
+                "transparent"
+              );
               gizmo.draw(contextRef);
-              console.log("selectedElements.current sdfsare", selectedElements.current);
-            } else {
+            } else { // 6- in this point the mouse is not inside elements or selectionBox so we start drawing a selectionBox
               selectionBox.current = {
                 ...selectionBox.current,
                 x1: e.pageX,
@@ -209,11 +230,31 @@ const Canvas = () => {
             removeElementById(selectedElement.id);
             break;
           case "select":
-            console.log(selectedElements.current.length)
+            // 1- if we've started an action then we should remove the selected Elements from the rendering canvas then after the action
+            // we should add them again
+            if(startedActionAfterSelection.current && isSelectedElementRemoved.current) {
+              isSelectedElementRemoved.current = false;
+              selectedElements.current.forEach((element) => {
+                removeElementById(element.id);
+              })
+            }
+            // 2- if we have selected elements then we should move them
             if (selectedElements.current.length > 0) {
-              // start updating the selected elements
-              console.log("you're missing with the selected elements")
-            } else {
+              const dx = e.pageX - initCoords.current.x ;
+              const dy = e.pageY - initCoords.current.y ;
+              contextRef.current.clearRect(
+                0,
+                0,
+                window.innerWidth,
+                window.innerHeight
+              );
+              selectedElements.current.forEach((element) => {
+                element.Move(dx - lastdx.current, dy - lastdy.current, generator);
+                element.draw(roughCanvasRef.current);
+              });
+              lastdx.current = dx ;
+              lastdy.current = dy ;
+            } else { // 3- if we don't have selected elements then we should draw the selectionBox
               selectionBox.current = {
                 ...selectionBox.current,
                 x2: e.pageX,
@@ -242,14 +283,33 @@ const Canvas = () => {
       // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up")
 
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      lastdx.current = 0;
+      lastdy.current = 0;
       if (type === "select") {
-        // this logic should be in the UP function
+        // 1- after the action is done we should add the selected elements again to the rendering canvas
+        if(startedActionAfterSelection.current) { 
+          selectionBox.current = { x1: 0, y1: 0, x2: 0, y2: 0 };
+          selectedElements.current.forEach((element) => {
+            addElement(element);
+          });
+          selectedElements.current.length = 0;
+          startedActionAfterSelection.current = false;
+          isSelectedElementRemoved.current = true;
+          contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+        // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
         selectedElements.current.push(
           ...getElementsInsideSelectionBox(selectionBox.current, elements)
         );
         selectedElements.current.forEach((element) => {
           const { x1, y1, width, height } = element;
-          const gizmo = new Gizmo(x1 , y1, x1 + width, y1 + height, "transparent");
+          const gizmo = new Gizmo(
+            x1,
+            y1,
+            x1 + width,
+            y1 + height,
+            "transparent"
+          );
           gizmo.draw(contextRef);
         });
         // get the elements inside the selection rectangle
@@ -292,7 +352,7 @@ const Canvas = () => {
     canvas.style.height = `${rect.height}px`;
 
     const roughCanvas = rough.canvas(canvas);
-
+    roughCanvasRef.current = roughCanvas;
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     shapeRef.current &&
       buttonDown &&

@@ -249,8 +249,32 @@ const Canvas = () => {
                 window.innerHeight
               );
               selectedElements.current.forEach((element) => {
-                element.Move(dx - lastdx.current, dy - lastdy.current, generator);
-                element.draw(roughCanvasRef.current);
+                switch (element.type) {
+                  case "rectangle":
+                    element.Move(dx - lastdx.current, dy - lastdy.current, generator);
+                    element.draw(roughCanvasRef.current);
+                    break;
+                  case "ellipse":
+                    element.Move(dx - lastdx.current, dy - lastdy.current, generator);
+                    element.draw(roughCanvasRef.current);
+                    break;
+                  case "line":
+                    element.Move(dx - lastdx.current, dy - lastdy.current, generator);
+                    element.draw(roughCanvasRef.current);
+                    break;
+                  case "circle":
+                    element.Move(dx - lastdx.current, dy - lastdy.current, generator);
+                    element.draw(roughCanvasRef.current);
+                    break;
+                  case "path":
+                    element.Move(dx - lastdx.current, dy - lastdy.current);
+                    element.draw(contextRef.current);
+                    break;
+                  case "text":
+                    element.move(dx - lastdx.current, dy - lastdy.current);
+                    element.draw(contextRef.current, canvasRef);
+                    break;
+                }
               });
               lastdx.current = dx ;
               lastdy.current = dy ;

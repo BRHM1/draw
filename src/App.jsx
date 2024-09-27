@@ -13,6 +13,7 @@ function App() {
   // BUG: Gizmo coordinates are not correct
   // BUG: Path coordinates are not correct
   // BUG: selection box works only when you drag from top left to bottom right
+  // BUG: Text dissapears when you change the tool from the toolbar
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements
@@ -25,6 +26,7 @@ function App() {
 
   // TODO: Perfromance improvements
   // 1- store functions can be improved
+  // 2- path move method can be improved
 
   // Text flow:
   // 1. onClick intiates an instance of Text class + a textarea

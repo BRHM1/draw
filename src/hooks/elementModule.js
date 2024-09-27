@@ -167,6 +167,14 @@ export class Path extends Shape {
         this.height = this.y2 - this.y1
         this.points.push({ x: x2, y: y2 })
     }
+
+    Move(dx, dy) {
+        this.x1 += dx
+        this.y1 += dy
+        this.x2 += dx
+        this.y2 += dy
+        this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
+    }
 }
 
 export class Text extends Shape {
@@ -190,6 +198,10 @@ export class Text extends Shape {
         allLines.forEach((line, i) => {
             context.fillText(line, this.x1, this.y1 + (i + 1) * 24);
         });
+    }
+    move(dx, dy) {
+        this.x1 += dx
+        this.y1 += dy
     }
     updateText(text) {
         this.text = text

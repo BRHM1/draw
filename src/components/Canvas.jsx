@@ -72,10 +72,10 @@ const Canvas = () => {
             const selectedElement = getElementAtPos(e.pageX, e.pageY, elements);
             // 2- check if the mouse is inside a selectedBox or not
             const isClickInsideSelectionRectangle =
-              e.pageX > selectionBox.current.x1 &&
-              e.pageX < selectionBox.current.x2 &&
-              e.pageY > selectionBox.current.y1 &&
-              e.pageY < selectionBox.current.y2;
+              e.pageX > Math.min(selectionBox.current.x1,selectionBox.current.x2) &&
+              e.pageX < Math.max(selectionBox.current.x1,selectionBox.current.x2) &&
+              e.pageY > Math.min(selectionBox.current.y1,selectionBox.current.y2) &&
+              e.pageY < Math.max(selectionBox.current.y1,selectionBox.current.y2);
 
             // 3- check if the mouse inside a selectedBox then start an action and return 
             if (isClickInsideSelectionRectangle) {
@@ -336,6 +336,7 @@ const Canvas = () => {
           );
           gizmo.draw(contextRef);
         });
+        console.log("Elements inside selection box are" , selectedElements.current);
         // get the elements inside the selection rectangle
       }
       setButtonDown(false);

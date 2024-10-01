@@ -2,7 +2,7 @@ import { useRef, useLayoutEffect } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { useStore } from "../store";
 
-const RenderingCanvas = () => {
+const RenderingCanvas = ({panOffset}) => {
   const renderingCanvasRef = useRef(null);
   const renderingContextRef = useRef(null);
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
@@ -22,6 +22,9 @@ const RenderingCanvas = () => {
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
     
+    renderingCanvasContext.save()
+    renderingCanvasContext.translate(panOffset.x, panOffset.y)
+
     const roughCanvas = rough.canvas(renderingCanvas);
     
     renderingCanvasContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -31,9 +34,10 @@ const RenderingCanvas = () => {
         ? element.draw(roughCanvas)
         : element.draw(renderingContextRef.current, renderingCanvasRef);
     });
+    renderingCanvasContext.restore()
     renderingContextRef.current = renderingCanvasContext;
-    console.log(elements)
-  }, [elements]);
+    console.log(panOffset.x, panOffset.y)
+  }, [elements, panOffset]);
 
   return (
     <canvas

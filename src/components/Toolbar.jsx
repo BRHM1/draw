@@ -5,6 +5,7 @@ import { LuPen } from "react-icons/lu";
 import { FaRegCircle, FaMinus, FaRegSquareFull } from "react-icons/fa6";
 import { TbOvalVertical } from "react-icons/tb";
 import { PiCursorClickBold , PiTextT  } from "react-icons/pi";
+import { FaRegHand } from "react-icons/fa6";
 
 import { twMerge } from "tailwind-merge";
 
@@ -55,11 +56,16 @@ const Toolbar = (props) => {
       icon: <PiTextT />,
       type: "text",
     },
+    {
+      name: "pan",
+      icon: <FaRegHand />,
+      type: "pan",
+    },
   ];
   return (
     <div
       className={twMerge(
-        "min-w-96 h-10 bg-blue-50 z-10 grid place-content-center grid-cols-8 rounded-md mt-3 border border-lime-300 ",
+        "min-w-[30rem] h-10 bg-blue-50 z-10 grid place-content-center grid-cols-9 rounded-md mt-3 border border-lime-300 ",
         props.className
       )}
     >

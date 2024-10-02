@@ -152,7 +152,7 @@ export class Path extends Shape {
     }
     draw(context) {
         context.strokeStyle = this.strokeStyle
-        context.fillStyle = this.fillStyle
+        context.fillStyle = this.color
         const stroke = getStroke(this.points, this.options)
         const path = getSvgPathFromStroke(stroke);
         this.path = new Path2D(path);
@@ -185,10 +185,9 @@ export class Text extends Shape {
         this.height = height
         this.type = "text"
     }
-    draw(context, canvasRef) {
+    draw(context, textAreaRef) {
         context.font = this.options.font;
-        const { width } = canvasRef.current.getBoundingClientRect()
-        const maxLineWidth = width - this.x1;
+        const { width: maxLineWidth } = textAreaRef.current.getBoundingClientRect()
         const lines = this.text.split("\n");
         const allLines = wrappedLines(lines, maxLineWidth, context)
         this.height = allLines.length * 25

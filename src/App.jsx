@@ -11,13 +11,9 @@ function App() {
   // BUG: Undo doesn't save the move action
   // BUG: Text dissapears when you change the tool from the toolbar
   
-  // BUG: selection tool changes the panOffset
-  // BUG: selection tool changes the panOffset
-  // BUG: selection tool changes the panOffset
-  // BUG: selection tool changes the panOffset
-  // BUG: selection tool changes the panOffset
-  // BUG: selection tool changes the panOffset
-  // BUG: selection tool changes the panOffset
+  // BUG: selection tool onMouseDown adds a new element
+  // BUG: typing in the corner of the screen makes it harder to see the text
+  // BUG: text blinking when you type
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements

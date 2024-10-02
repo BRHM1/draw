@@ -70,7 +70,7 @@ const StrokeOptions = ({ handleOptions }) => {
           }`}
         ></button>
         <input
-          onBlur={handleColorChange}
+          onChange={handleColorChange}
           id="5"
           type="color"
           className="ml-2 hover:cursor-pointer"
@@ -129,7 +129,7 @@ const BackgroundOptions = ({ handleOptions }) => {
           }`}
         ></button>
         <input
-          onBlur={handleColorChange}
+          onChange={handleColorChange}
           id="5"
           type="color"
           className="ml-2 hover:cursor-pointer"

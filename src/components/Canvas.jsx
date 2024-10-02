@@ -59,7 +59,6 @@ const Canvas = () => {
     setCordinates({ x: e.clientX, y: e.clientY });
   };
   window.addEventListener("mousemove", fn);
-
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
@@ -130,8 +129,8 @@ const Canvas = () => {
             break;
           case "text":
             shapeRef.current = new Text(
-              e.clientX,
-              e.clientY,
+              e.clientX - panOffset.x,
+              e.clientY - panOffset.y,
               "",
               { font: "24px Arial", fill: "black" },
               0,
@@ -139,13 +138,11 @@ const Canvas = () => {
               0
             );
             // addElement(shapeRef.current);
-            textRef.current.style.display = "block";            
+            textRef.current.style.display = "block";
             textRef.current.style.top = `${e.clientY}px`;
             textRef.current.style.left = `${e.clientX}px`;
             // textRef.current.style.backgroundColor = "lightblue";
-            textRef.current.style.width = `${
-              window.innerWidth - e.clientX 
-            }px`;
+            textRef.current.style.width = `${window.innerWidth - e.clientX}px`;
             textRef.current.style.height = `${
               window.innerHeight - e.clientY
             }px`;
@@ -220,6 +217,7 @@ const Canvas = () => {
             );
             break;
           case "draw":
+            let penColor = useStore.getState().penColor;
             shapeRef.current = new Path(
               e.clientX - panOffset.x,
               e.clientY - panOffset.y,
@@ -227,7 +225,7 @@ const Canvas = () => {
               e.clientY - panOffset.y,
               new Path2D(),
               penOptions,
-              "red",
+              penColor,
               0,
               0,
               [
@@ -394,7 +392,7 @@ const Canvas = () => {
             }
           case "pan":
             // get the moved distance and add that distance to the panOffset
-            shapeRef.current = null
+            shapeRef.current = null;
             const dx = e.clientX - panInitCoords.current.x;
             const dy = e.clientY - panInitCoords.current.y;
             if (type !== "pan") return;
@@ -470,8 +468,8 @@ const Canvas = () => {
     setTimeout(() => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       shapeRef.current.updateText(textRef.current.value);
-
-      shapeRef.current.draw(contextRef.current, canvasRef);
+      setIsDrawing(!isDrawing);
+      // shapeRef.current.draw(contextRef.current, canvasRef);
     }, 0);
   };
 
@@ -513,6 +511,10 @@ const Canvas = () => {
       buttonDown &&
       !shapes.has(shapeRef.current.type) &&
       shapeRef.current.draw(context, canvasRef);
+
+    if(shapeRef.current && type === "text") {
+      shapeRef.current.draw(context, textRef);
+    }
 
     context.restore();
     contextRef.current = context;

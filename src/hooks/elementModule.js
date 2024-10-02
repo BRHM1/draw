@@ -199,7 +199,7 @@ export class Text extends Shape {
             context.fillText(line, this.x1, this.y1 + (i + 1) * 24);
         });
     }
-    move(dx, dy) {
+    Move(dx, dy) {
         this.x1 += dx
         this.y1 += dy
     }

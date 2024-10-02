@@ -10,6 +10,14 @@ function App() {
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
   // BUG: Text dissapears when you change the tool from the toolbar
+  
+  // BUG: selection tool changes the panOffset
+  // BUG: selection tool changes the panOffset
+  // BUG: selection tool changes the panOffset
+  // BUG: selection tool changes the panOffset
+  // BUG: selection tool changes the panOffset
+  // BUG: selection tool changes the panOffset
+  // BUG: selection tool changes the panOffset
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements

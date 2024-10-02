@@ -36,8 +36,9 @@ const RenderingCanvas = ({panOffset}) => {
     });
     renderingCanvasContext.restore()
     renderingContextRef.current = renderingCanvasContext;
-    console.log(panOffset.x, panOffset.y)
-  }, [elements, panOffset]);
+    console.log("panOffsit" , panOffset.x, panOffset.y)
+    console.log(elements)
+  }, [elements, panOffset.x, panOffset.y]);
 
   return (
     <canvas

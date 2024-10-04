@@ -10,18 +10,17 @@ function App() {
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
   // BUG: Text dissapears when you change the tool from the toolbar
-  
   // BUG: selection tool onMouseDown adds a new element
   // BUG: typing in the corner of the screen makes it harder to see the text
   // BUG: text blinking when you type
 
   // TODO: make the canvas persistent
   // TODO: resizing Elements
-  // TODO: layering
+  // TODO: selected elements should be editable from the toolbar
   // TODO: add text tool bar with font size and font family
-  // TODO: add panning tool
   // TODO: add zooming tool
   // TODO: make the DB Model for the application
+  // TODO: Undo Redo functionality
 
   // TODO: Perfromance improvements
   // 1- store functions can be improved

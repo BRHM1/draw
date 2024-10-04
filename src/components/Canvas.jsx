@@ -55,10 +55,20 @@ const Canvas = () => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  const fn = (e) => {
-    setCordinates({ x: e.clientX, y: e.clientY });
-  };
-  window.addEventListener("mousemove", fn);
+  // const fn = (e) => {
+  //   setCordinates({ x: e.clientX, y: e.clientY });
+  // };
+  // window.addEventListener("mousemove", fn);
+
+  const cursorShapes = {
+    draw: "cursor-crosshair",
+    shape: "cursor-crosshair",
+    text: "cursor-text",
+    select: "cursor-grabbing",
+    erase: "cursor-pointer",
+    pan: "cursor-grab",
+  }
+
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
@@ -555,9 +565,7 @@ const Canvas = () => {
       <CanvasElement
         className={twMerge(
           "row-start-1 col-start-1 min-w-full min-h-full overflow-hidden z-10",
-          action === "draw" || action === "shape"
-            ? "cursor-crosshair"
-            : "cursor-default"
+          cursorShapes[action]
         )}
         ref={canvasRef}
         onMouseDown={Down}

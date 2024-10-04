@@ -48,6 +48,7 @@ export const useStore = create((set) => ({
         },
     },
     penColor: "#000000",
+    zoom: 1,
     elements: [],
     RedoStack: [],   // when undo is called, store the last action in undo
     addElement: (element) =>
@@ -134,4 +135,9 @@ export const useStore = create((set) => ({
         set(produce((state) => {
             state.penColor = color;
         })),
+    setZoom: (zoom) =>
+        set(produce((state) => {
+            state.zoom = zoom;
+        })),
+    
 }));

@@ -19,6 +19,7 @@ import PenOptionsToolbar from "./PenOptionsToolbar";
 import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
 import { getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
+import ViewportControl from "./ViewportControl";
 
 const Canvas = () => {
   const canvasRef = useRef(null);
@@ -36,13 +37,16 @@ const Canvas = () => {
   const lastdy = useRef(0);
   const startedActionAfterSelection = useRef(false);
   const isSelectedElementRemoved = useRef(true);
-
+  
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [prevAccumulativeSumX, setPrevAccumulativeSumX] = useState(0);
   const [prevAccumulativeSumY, setPrevAccumulativeSumY] = useState(0);
   const panInitCoords = useRef({ x: 0, y: 0 });
   const lastPanOffset = useRef({ x: 0, y: 0 });
 
+  const zoom = useStore((state) => state.zoom);
+  const setZoom = useStore((state) => state.setZoom);
+  
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
   const options = useStore((state) => state.options);
@@ -67,7 +71,7 @@ const Canvas = () => {
     select: "cursor-grabbing",
     erase: "cursor-pointer",
     pan: "cursor-grab",
-  }
+  };
 
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
@@ -522,7 +526,7 @@ const Canvas = () => {
       !shapes.has(shapeRef.current.type) &&
       shapeRef.current.draw(context, canvasRef);
 
-    if(shapeRef.current && type === "text") {
+    if (shapeRef.current && type === "text") {
       shapeRef.current.draw(context, textRef);
     }
 
@@ -577,10 +581,7 @@ const Canvas = () => {
       <RenderingCanvas panOffset={panOffset} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
-      <div className="w-40 flex justify-center items-center gap-2 mb-2 ml-2">
-        <Button label="Undo" />
-        <Button label="Redo" />
-      </div>
+      <ViewportControl zoom={zoom}/>
     </div>
   );
 };

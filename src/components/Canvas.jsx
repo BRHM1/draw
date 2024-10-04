@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
@@ -13,12 +13,11 @@ import {
 } from "../hooks/elementModule";
 import Gizmo from "../utils/Gizmo";
 
-import Button from "./Button";
+import { getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
 import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
-import { getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
 import ViewportControl from "./ViewportControl";
 
 const Canvas = () => {
@@ -84,6 +83,9 @@ const Canvas = () => {
       (e) => {
         setButtonDown(true);
         // based on the type an object of that type will be created
+        let zoom = useStore.getState().zoom;
+        let x = (e.clientX - panOffset.x) * zoom
+        let y = (e.clientY - panOffset.y) * zoom
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
@@ -143,8 +145,8 @@ const Canvas = () => {
             break;
           case "text":
             shapeRef.current = new Text(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               "",
               { font: "24px Arial", fill: "black" },
               0,
@@ -155,23 +157,24 @@ const Canvas = () => {
             textRef.current.style.display = "block";
             textRef.current.style.top = `${e.clientY}px`;
             textRef.current.style.left = `${e.clientX}px`;
-            // textRef.current.style.backgroundColor = "lightblue";
+            
             textRef.current.style.width = `${window.innerWidth - e.clientX}px`;
             textRef.current.style.height = `${
-              window.innerHeight - e.clientY
+              window.innerHeight - e.clientY 
             }px`;
+            textRef.current.style.fontSize = `${24 / zoom}px`;
             reFocus();
             break;
           case "Rectangle":
             shapeRef.current = new Rectangle(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               0,
               0,
               options,
               generator.rectangle(
-                e.clientX - panOffset.x,
-                e.clientY - panOffset.y,
+                x,
+                y,
                 0,
                 0,
                 options
@@ -181,31 +184,31 @@ const Canvas = () => {
             break;
           case "Circle":
             shapeRef.current = new Circle(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               0,
               options,
               generator.circle(
-                e.clientX - panOffset.x,
-                e.clientY - panOffset.y,
+                x,
+                y,
                 0,
                 options
               ),
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               0
             );
             break;
           case "Ellipse":
             shapeRef.current = new Ellipse(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               0,
               0,
               options,
               generator.ellipse(
-                e.clientX - panOffset.x,
-                e.clientY - panOffset.y,
+                x,
+                y,
                 0,
                 0,
                 options
@@ -215,16 +218,16 @@ const Canvas = () => {
             break;
           case "Line":
             shapeRef.current = new Line(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
+              x,
+              y,
               options,
               generator.line(
-                e.clientX - panOffset.x,
-                e.clientY - panOffset.y,
-                e.clientX - panOffset.x,
-                e.clientY - panOffset.y,
+                x,
+                y,
+                x,
+                y,
                 options
               ),
               0
@@ -233,10 +236,10 @@ const Canvas = () => {
           case "draw":
             let penColor = useStore.getState().penColor;
             shapeRef.current = new Path(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
+              x,
+              y,
               new Path2D(),
               penOptions,
               penColor,
@@ -244,8 +247,8 @@ const Canvas = () => {
               0,
               [
                 {
-                  x: e.clientX - panOffset.x,
-                  y: e.clientY - panOffset.y,
+                  x: x,
+                  y: y,
                   pressure: 1,
                 },
               ],
@@ -263,51 +266,54 @@ const Canvas = () => {
     Move = useCallback(
       (e) => {
         if (e.buttons !== 1) return;
+        let zoom = useStore.getState().zoom;
+        let x = (e.clientX - panOffset.x) * zoom
+        let y = (e.clientY - panOffset.y) * zoom
         switch (type) {
           case "draw":
             shapeRef.current.updateDimensions(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               generator
             );
             setIsDrawing(!isDrawing);
             break;
           case "Rectangle":
             shapeRef.current.updateDimensions(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               generator
             );
             setIsDrawing(!isDrawing);
             break;
           case "Circle":
             shapeRef.current.updateDimensions(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               generator
             );
             setIsDrawing(!isDrawing);
             break;
           case "Ellipse":
             shapeRef.current.updateDimensions(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               generator
             );
             setIsDrawing(!isDrawing);
             break;
           case "Line":
             shapeRef.current.updateDimensions(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
+              x,
+              y,
               generator
             );
             setIsDrawing(!isDrawing);
             break;
           case "erase":
             const selectedElement = getElementAtPos(
-              e.pageX - panOffset.x,
-              e.pageY - panOffset.y,
+              x,
+              y,
               elements
             );
             if (selectedElement === null) return;
@@ -406,6 +412,7 @@ const Canvas = () => {
             }
           case "pan":
             // get the moved distance and add that distance to the panOffset
+            // calculating distance so it doesn't matter to the zoom
             shapeRef.current = null;
             const dx = e.clientX - panInitCoords.current.x;
             const dy = e.clientY - panInitCoords.current.y;
@@ -487,6 +494,14 @@ const Canvas = () => {
     }, 0);
   };
 
+  const onWheel = (e) => {
+    // get the direction and limit the zoom to 0.1 - 2
+    const direction = Math.sign(e.deltaY);
+    const step = 0.1;
+    let newZoom = zoom + direction * step;
+    setZoom(newZoom);
+  };
+
   const onBlur = () => {
     if (elements[elements.length - 1]?.text === "") {
       removeLastElement();
@@ -513,6 +528,7 @@ const Canvas = () => {
 
     context.save();
     context.translate(panOffset.x, panOffset.y);
+    context.scale(1/zoom, 1/zoom);
 
     const roughCanvas = rough.canvas(canvas);
     roughCanvasRef.current = roughCanvas;
@@ -532,7 +548,7 @@ const Canvas = () => {
 
     context.restore();
     contextRef.current = context;
-  }, [isDrawing, panOffset]);
+  }, [isDrawing, panOffset, zoom]);
 
   return (
     <div className="w-full h-screen grid">
@@ -575,6 +591,7 @@ const Canvas = () => {
         onMouseDown={Down}
         onMouseMove={Move}
         onMouseUp={Up}
+        onWheel={onWheel}
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />

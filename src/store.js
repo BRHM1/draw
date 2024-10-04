@@ -137,7 +137,8 @@ export const useStore = create((set) => ({
         })),
     setZoom: (zoom) =>
         set(produce((state) => {
-            state.zoom = zoom;
+             
+            state.zoom = Math.min(2, Math.max(0.1, zoom));
         })),
     
 }));

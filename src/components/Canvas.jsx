@@ -104,8 +104,8 @@ const Canvas = () => {
             // 3- check if the mouse inside a selectedBox then start an action and return
             if (isClickInsideSelectionRectangle) {
               initCoords.current = {
-                x: x,
-                y: y,
+                x: e.clientX,
+                y: e.clientY,
               };
               console.log("inside selection box");
               startedActionAfterSelection.current = true;
@@ -118,8 +118,8 @@ const Canvas = () => {
             if (selectedElement) {
               selectedElements.current.push(selectedElement);
               initCoords.current = {
-                x: x,
-                y: y,
+                x: e.clientX,
+                y: e.clientY,
               };
               const { x1, y1, width, height } = selectedElement;
               startedActionAfterSelection.current = true;
@@ -284,8 +284,8 @@ const Canvas = () => {
             }
             // 2- if we have selected elements then we should move them
             if (selectedElements.current.length > 0) {
-              const dx = e.clientX - initCoords.current.x;
-              const dy = e.clientY - initCoords.current.y;
+              const dx = (e.clientX - initCoords.current.x) * zoom + panOffset.x / zoom;
+              const dy = (e.clientY - initCoords.current.y) * zoom + panOffset.y / zoom;
               contextRef.current.clearRect(
                 0,
                 0,
@@ -393,13 +393,15 @@ const Canvas = () => {
         // 1- after the action is done we should add the selected elements again to the rendering canvas
         if (startedActionAfterSelection.current) {
           selectionBox.current = {
-            x1: panOffset.x,
-            y1: panOffset.y,
-            x2: panOffset.x,
-            y2: panOffset.y,
+            x1: panOffset.x * zoom,
+            y1: panOffset.y * zoom,
+            x2: panOffset.x * zoom,
+            y2: panOffset.y * zoom,
           };
           selectedElements.current.forEach((element) => {
-            element.Move(-(panOffset.x / zoom), -(panOffset.y / zoom), generator);
+            // this line is not correct because the element should be moved based on the zoom and panOffset
+            element.Move(-panOffset.x / zoom, -panOffset.y / zoom, generator);
+            // the correct way is to move the element based on the distance between the initial position and the final position
             addElement(element);
           });
           selectedElements.current.length = 0;
@@ -486,6 +488,7 @@ const Canvas = () => {
     context.save();
     context.translate(panOffset.x, panOffset.y);
     context.scale(1 / zoom, 1 / zoom);
+
 
     const roughCanvas = rough.canvas(canvas);
     roughCanvasRef.current = roughCanvas;

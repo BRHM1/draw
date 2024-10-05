@@ -36,7 +36,7 @@ const Canvas = () => {
   const lastdy = useRef(0);
   const startedActionAfterSelection = useRef(false);
   const isSelectedElementRemoved = useRef(true);
-  
+
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [prevAccumulativeSumX, setPrevAccumulativeSumX] = useState(0);
   const [prevAccumulativeSumY, setPrevAccumulativeSumY] = useState(0);
@@ -45,7 +45,7 @@ const Canvas = () => {
 
   const zoom = useStore((state) => state.zoom);
   const setZoom = useStore((state) => state.setZoom);
-  
+
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
   const options = useStore((state) => state.options);
@@ -84,33 +84,30 @@ const Canvas = () => {
         setButtonDown(true);
         // based on the type an object of that type will be created
         let zoom = useStore.getState().zoom;
-        let x = (e.clientX - panOffset.x) * zoom
-        let y = (e.clientY - panOffset.y) * zoom
+        let x = (e.clientX - panOffset.x) * zoom;
+        let y = (e.clientY - panOffset.y) * zoom;
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
-            const selectedElement = getElementAtPos(
-              e.clientX - panOffset.x,
-              e.clientY - panOffset.y,
-              elements
-            );
+            const selectedElement = getElementAtPos(x, y, elements);
             // 2- check if the mouse is inside a selectedBox or not
             const isClickInsideSelectionRectangle =
-              e.clientX - panOffset.x >
+              e.clientX >
                 Math.min(selectionBox.current.x1, selectionBox.current.x2) &&
-              e.clientX - panOffset.x <
+              e.clientX <
                 Math.max(selectionBox.current.x1, selectionBox.current.x2) &&
-              e.clientY - panOffset.y >
+              e.clientY >
                 Math.min(selectionBox.current.y1, selectionBox.current.y2) &&
-              e.clientY - panOffset.y <
+              e.clientY <
                 Math.max(selectionBox.current.y1, selectionBox.current.y2);
 
             // 3- check if the mouse inside a selectedBox then start an action and return
             if (isClickInsideSelectionRectangle) {
               initCoords.current = {
-                x: e.clientX - panOffset.x,
-                y: e.clientY - panOffset.y,
+                x: x,
+                y: y,
               };
+              console.log("inside selection box");
               startedActionAfterSelection.current = true;
               return;
             }
@@ -121,16 +118,16 @@ const Canvas = () => {
             if (selectedElement) {
               selectedElements.current.push(selectedElement);
               initCoords.current = {
-                x: e.clientX - panOffset.x,
-                y: e.clientY - panOffset.y,
+                x: x,
+                y: y,
               };
               const { x1, y1, width, height } = selectedElement;
               startedActionAfterSelection.current = true;
               const gizmo = new Gizmo(
-                x1 + panOffset.x,
-                y1 + panOffset.y,
-                x1 + width + panOffset.x,
-                y1 + height + panOffset.y,
+                (x1 / zoom) + panOffset.x,
+                (y1 / zoom) + panOffset.y,
+                ((x1 + width) / zoom) + panOffset.x,
+                ((y1 + height) / zoom) + panOffset.y,
                 "transparent"
               );
               gizmo.draw(contextRef);
@@ -138,8 +135,8 @@ const Canvas = () => {
               // 6- in this point the mouse is not inside elements or selectionBox so we start drawing a selectionBox
               selectionBox.current = {
                 ...selectionBox.current,
-                x1: e.clientX - panOffset.x,
-                y1: e.clientY - panOffset.y,
+                x1: e.clientX,
+                y1: e.clientY,
               };
             }
             break;
@@ -157,10 +154,10 @@ const Canvas = () => {
             textRef.current.style.display = "block";
             textRef.current.style.top = `${e.clientY}px`;
             textRef.current.style.left = `${e.clientX}px`;
-            
+
             textRef.current.style.width = `${window.innerWidth - e.clientX}px`;
             textRef.current.style.height = `${
-              window.innerHeight - e.clientY 
+              window.innerHeight - e.clientY
             }px`;
             textRef.current.style.fontSize = `${24 / zoom}px`;
             reFocus();
@@ -172,13 +169,7 @@ const Canvas = () => {
               0,
               0,
               options,
-              generator.rectangle(
-                x,
-                y,
-                0,
-                0,
-                options
-              ),
+              generator.rectangle(x, y, 0, 0, options),
               0
             );
             break;
@@ -188,12 +179,7 @@ const Canvas = () => {
               y,
               0,
               options,
-              generator.circle(
-                x,
-                y,
-                0,
-                options
-              ),
+              generator.circle(x, y, 0, options),
               x,
               y,
               0
@@ -206,13 +192,7 @@ const Canvas = () => {
               0,
               0,
               options,
-              generator.ellipse(
-                x,
-                y,
-                0,
-                0,
-                options
-              ),
+              generator.ellipse(x, y, 0, 0, options),
               0
             );
             break;
@@ -223,13 +203,7 @@ const Canvas = () => {
               x,
               y,
               options,
-              generator.line(
-                x,
-                y,
-                x,
-                y,
-                options
-              ),
+              generator.line(x, y, x, y, options),
               0
             );
             break;
@@ -267,55 +241,31 @@ const Canvas = () => {
       (e) => {
         if (e.buttons !== 1) return;
         let zoom = useStore.getState().zoom;
-        let x = (e.clientX - panOffset.x) * zoom
-        let y = (e.clientY - panOffset.y) * zoom
+        let x = (e.clientX - panOffset.x) * zoom;
+        let y = (e.clientY - panOffset.y) * zoom;
         switch (type) {
           case "draw":
-            shapeRef.current.updateDimensions(
-              x,
-              y,
-              generator
-            );
+            shapeRef.current.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
             break;
           case "Rectangle":
-            shapeRef.current.updateDimensions(
-              x,
-              y,
-              generator
-            );
+            shapeRef.current.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
             break;
           case "Circle":
-            shapeRef.current.updateDimensions(
-              x,
-              y,
-              generator
-            );
+            shapeRef.current.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
             break;
           case "Ellipse":
-            shapeRef.current.updateDimensions(
-              x,
-              y,
-              generator
-            );
+            shapeRef.current.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
             break;
           case "Line":
-            shapeRef.current.updateDimensions(
-              x,
-              y,
-              generator
-            );
+            shapeRef.current.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
             break;
           case "erase":
-            const selectedElement = getElementAtPos(
-              x,
-              y,
-              elements
-            );
+            const selectedElement = getElementAtPos(x, y, elements);
             if (selectedElement === null) return;
             // addToREDO(elements[selectedElement]);
             removeElementById(selectedElement.id);
@@ -392,15 +342,15 @@ const Canvas = () => {
               // 3- if we don't have selected elements then we should draw the selectionBox
               selectionBox.current = {
                 ...selectionBox.current,
-                x2: e.clientX - panOffset.x,
-                y2: e.clientY - panOffset.y,
+                x2: e.clientX,
+                y2: e.clientY,
               };
               // draw the selection rectangle
               const gizmo = new Gizmo(
-                selectionBox.current.x1 + panOffset.x,
-                selectionBox.current.y1 + panOffset.y,
-                selectionBox.current.x2 + panOffset.x,
-                selectionBox.current.y2 + panOffset.y
+                selectionBox.current.x1,
+                selectionBox.current.y1,
+                selectionBox.current.x2,
+                selectionBox.current.y2
               );
               contextRef.current.clearRect(
                 0,
@@ -449,7 +399,7 @@ const Canvas = () => {
             y2: panOffset.y,
           };
           selectedElements.current.forEach((element) => {
-            element.Move(-panOffset.x, -panOffset.y, generator);
+            element.Move(-(panOffset.x / zoom), -(panOffset.y / zoom), generator);
             addElement(element);
           });
           selectedElements.current.length = 0;
@@ -462,17 +412,24 @@ const Canvas = () => {
             window.innerHeight
           );
         }
+
+        let modifiedSelectionBox = {
+          x1: (selectionBox.current.x1 - panOffset.x) * zoom,
+          y1: (selectionBox.current.y1 - panOffset.y) * zoom,
+          x2: (selectionBox.current.x2 - panOffset.x) * zoom,
+          y2: (selectionBox.current.y2 - panOffset.y) * zoom,
+        }
         // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
         selectedElements.current.push(
-          ...getElementsInsideSelectionBox(selectionBox.current, elements)
+          ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
         );
         selectedElements.current.forEach((element) => {
           const { x1, y1, width, height } = element;
           const gizmo = new Gizmo(
-            x1 + panOffset.x,
-            y1 + panOffset.y,
-            x1 + width + panOffset.x,
-            y1 + height + panOffset.y,
+            (x1 / zoom) + panOffset.x,
+            (y1 / zoom) + panOffset.y,
+            ((x1 + width) / zoom) + panOffset.x,
+            ((y1 + height) / zoom) + panOffset.y,
             "transparent"
           );
           gizmo.draw(contextRef);
@@ -528,7 +485,7 @@ const Canvas = () => {
 
     context.save();
     context.translate(panOffset.x, panOffset.y);
-    context.scale(1/zoom, 1/zoom);
+    context.scale(1 / zoom, 1 / zoom);
 
     const roughCanvas = rough.canvas(canvas);
     roughCanvasRef.current = roughCanvas;
@@ -598,7 +555,7 @@ const Canvas = () => {
       <RenderingCanvas panOffset={panOffset} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
-      <ViewportControl zoom={zoom}/>
+      <ViewportControl zoom={zoom} />
     </div>
   );
 };

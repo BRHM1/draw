@@ -43,7 +43,8 @@ const RenderingCanvas = ({ panOffset }) => {
     });
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-    console.log("panOffsit", panOffset.x, panOffset.y);
+    // console.log("panOffsit", panOffset.x, panOffset.y, zoom);
+    console.log("panOffset" , panOffset.x , panOffset.y , zoom);
     console.log(elements);
   }, [elements, panOffset.x, panOffset.y, zoom]);
 

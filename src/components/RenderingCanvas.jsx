@@ -24,8 +24,8 @@ const RenderingCanvas = ({ panOffset }) => {
     renderingCanvas.style.width = `${rect.width}px`;
 
     renderingCanvasContext.save();
-    renderingCanvasContext.translate(panOffset.x, panOffset.y);
     renderingCanvasContext.scale(1 / zoom, 1 / zoom);
+    renderingCanvasContext.translate(panOffset.x, panOffset.y);
 
     const roughCanvas = rough.canvas(renderingCanvas);
 

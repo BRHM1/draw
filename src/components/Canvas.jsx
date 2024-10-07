@@ -84,8 +84,8 @@ const Canvas = () => {
         setButtonDown(true);
         // based on the type an object of that type will be created
         let zoom = useStore.getState().zoom;
-        let x = (e.clientX - panOffset.x) * zoom;
-        let y = (e.clientY - panOffset.y) * zoom;
+        let x = e.clientX * zoom - panOffset.x;
+        let y = e.clientY * zoom - panOffset.y;
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
@@ -104,8 +104,8 @@ const Canvas = () => {
             // 3- check if the mouse inside a selectedBox then start an action and return
             if (isClickInsideSelectionRectangle) {
               initCoords.current = {
-                x: e.clientX,
-                y: e.clientY,
+                x: x,
+                y: y,
               };
               startedActionAfterSelection.current = true;
               return;
@@ -117,8 +117,8 @@ const Canvas = () => {
             if (selectedElement) {
               selectedElements.current.push(selectedElement);
               initCoords.current = {
-                x: e.clientX,
-                y: e.clientY,
+                x: x,
+                y: y,
               };
               const { x1, y1, width, height } = selectedElement;
               startedActionAfterSelection.current = true;
@@ -240,8 +240,8 @@ const Canvas = () => {
       (e) => {
         if (e.buttons !== 1) return;
         let zoom = useStore.getState().zoom;
-        let x = (e.clientX - panOffset.x) * zoom;
-        let y = (e.clientY - panOffset.y) * zoom;
+        let x = e.clientX * zoom - panOffset.x;
+        let y = e.clientY * zoom - panOffset.y;
         switch (type) {
           case "draw":
             shapeRef.current.updateDimensions(x, y, generator);
@@ -283,16 +283,17 @@ const Canvas = () => {
             }
             // 2- if we have selected elements then we should move them
             if (selectedElements.current.length > 0) {
-              const dx =
-                (e.clientX - initCoords.current.x) * zoom + panOffset.x / zoom;
-              const dy =
-                (e.clientY - initCoords.current.y) * zoom + panOffset.y / zoom;
+              const dx = x - initCoords.current.x;
+              const dy = y - initCoords.current.y;
               contextRef.current.clearRect(
                 0,
                 0,
                 window.innerWidth,
                 window.innerHeight
               );
+              contextRef.current.save();
+              contextRef.current.scale(1 / zoom, 1 / zoom);
+              contextRef.current.translate(panOffset.x, panOffset.y);
               selectedElements.current.forEach((element) => {
                 switch (element.type) {
                   case "rectangle":
@@ -304,12 +305,8 @@ const Canvas = () => {
                     // the problem is the element have the dimensions based on the zoom and panOffset
                     // and the canvas drawing them as they are not based on the zoom and panOffset
                     // in other words the drawing of the element is not in save and restore context so it's drawn based on the original context
-                    // solution is to move the drawing functionality to the layoutEffect 
-                    contextRef.current.save()
-                    contextRef.current.scale(1 / zoom, 1 / zoom)
-                    contextRef.current.translate(panOffset.x + panOffset.x / zoom, panOffset.y + panOffset.y / zoom)
+                    // solution is to move the drawing functionality to the layoutEffect
                     element.draw(roughCanvasRef.current);
-                    contextRef.current.restore()
                     break;
                   case "ellipse":
                     element.Move(
@@ -317,11 +314,7 @@ const Canvas = () => {
                       dy - lastdy.current,
                       generator
                     );
-                    contextRef.current.save()
-                    contextRef.current.scale(1 / zoom, 1 / zoom)
-                    contextRef.current.translate(panOffset.x + panOffset.x / zoom, panOffset.y + panOffset.y / zoom)
                     element.draw(roughCanvasRef.current);
-                    contextRef.current.restore()
                     break;
                   case "line":
                     element.Move(
@@ -329,11 +322,7 @@ const Canvas = () => {
                       dy - lastdy.current,
                       generator
                     );
-                    contextRef.current.save()
-                    contextRef.current.scale(1 / zoom, 1 / zoom)
-                    contextRef.current.translate(panOffset.x + panOffset.x / zoom, panOffset.y + panOffset.y / zoom)
                     element.draw(roughCanvasRef.current);
-                    contextRef.current.restore()
                     break;
                   case "circle":
                     element.Move(
@@ -341,30 +330,19 @@ const Canvas = () => {
                       dy - lastdy.current,
                       generator
                     );
-                    contextRef.current.save()
-                    contextRef.current.scale(1 / zoom, 1 / zoom)
-                    contextRef.current.translate(panOffset.x + panOffset.x / zoom, panOffset.y + panOffset.y / zoom)
                     element.draw(roughCanvasRef.current);
-                    contextRef.current.restore()
                     break;
                   case "path":
                     element.Move(dx - lastdx.current, dy - lastdy.current);
-                    contextRef.current.save()
-                    contextRef.current.scale(1 / zoom, 1 / zoom)
-                    contextRef.current.translate(panOffset.x + panOffset.x / zoom, panOffset.y + panOffset.y / zoom)
                     element.draw(contextRef.current);
-                    contextRef.current.restore()
                     break;
                   case "text":
                     element.Move(dx - lastdx.current, dy - lastdy.current);
-                    contextRef.current.save()
-                    contextRef.current.scale(1 / zoom, 1 / zoom)
-                    contextRef.current.translate(panOffset.x + panOffset.x / zoom, panOffset.y + panOffset.y / zoom)
                     element.draw(contextRef.current, canvasRef);
-                    contextRef.current.restore()
                     break;
                 }
               });
+              contextRef.current.restore();
               lastdx.current = dx;
               lastdy.current = dy;
             } else {
@@ -428,9 +406,6 @@ const Canvas = () => {
             y2: panOffset.y * zoom,
           };
           selectedElements.current.forEach((element) => {
-            // this line is not correct because the element should be moved based on the zoom and panOffset
-            element.Move(-panOffset.x / zoom, -panOffset.y / zoom, generator);
-            // the correct way is to move the element based on the distance between the initial position and the final position
             addElement(element);
           });
           selectedElements.current.length = 0;
@@ -445,22 +420,23 @@ const Canvas = () => {
         }
 
         let modifiedSelectionBox = {
-          x1: (selectionBox.current.x1 - panOffset.x) * zoom,
-          y1: (selectionBox.current.y1 - panOffset.y) * zoom,
-          x2: (selectionBox.current.x2 - panOffset.x) * zoom,
-          y2: (selectionBox.current.y2 - panOffset.y) * zoom,
+          x1: selectionBox.current.x1 * zoom - panOffset.x,
+          y1: selectionBox.current.y1 * zoom - panOffset.y,
+          x2: selectionBox.current.x2 * zoom - panOffset.x,
+          y2: selectionBox.current.y2 * zoom - panOffset.y,
         };
         // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
         selectedElements.current.push(
           ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
         );
+        // 3- if there are selected elements then draw a gizmo around them
         selectedElements.current.forEach((element) => {
           const { x1, y1, width, height } = element;
           const gizmo = new Gizmo(
-            x1 / zoom + panOffset.x,
-            y1 / zoom + panOffset.y,
-            (x1 + width) / zoom + panOffset.x,
-            (y1 + height) / zoom + panOffset.y,
+            (x1 + panOffset.x) / zoom,
+            (y1 + panOffset.y) / zoom,
+            (x1 + width + panOffset.x) / zoom,
+            (y1 + height + panOffset.y) / zoom,
             "transparent"
           );
           gizmo.draw(contextRef);
@@ -514,8 +490,8 @@ const Canvas = () => {
     canvas.style.height = `${rect.height}px`;
 
     context.save();
-    context.translate(panOffset.x, panOffset.y);
     context.scale(1 / zoom, 1 / zoom);
+    context.translate(panOffset.x, panOffset.y);
 
     const roughCanvas = rough.canvas(canvas);
     roughCanvasRef.current = roughCanvas;
@@ -535,7 +511,7 @@ const Canvas = () => {
 
     context.restore();
     contextRef.current = context;
-  }, [isDrawing, panOffset.x , panOffset.y, zoom]);
+  }, [isDrawing, panOffset.x, panOffset.y, zoom]);
 
   return (
     <div className="w-full h-screen grid">

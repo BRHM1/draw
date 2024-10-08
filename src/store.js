@@ -49,6 +49,7 @@ export const useStore = create((set) => ({
     },
     penColor: "#000000",
     zoom: 1,
+    centerScalingOffset: { x: 0, y: 0 },
     elements: [],
     RedoStack: [],   // when undo is called, store the last action in undo
     addElement: (element) =>
@@ -140,5 +141,8 @@ export const useStore = create((set) => ({
              
             state.zoom = Math.min(2, Math.max(0.1, zoom));
         })),
-    
+    setCenterScalingOffset: (offset) =>
+        set(produce((state) => {
+            state.centerScalingOffset = offset;
+        })),
 }));

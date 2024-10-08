@@ -19,7 +19,7 @@ const ViewportControl = ({ zoom }) => {
         className="w-20 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white  py-2 px-4 select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
         onClick={() => setZoom(1)}
         >
-          {`${210 - Math.floor(zoom * 100)} %`}
+          {zoom == 1 ? "100%": `${210 - Math.floor(zoom * 100)} %`}
         </button>
         <button className="w-10 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white border-l-2 border-l-white font-bold py-2 px-4 rounded rounded-s-none select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
         onClick={() => setZoom(zoom + 0.1)}

@@ -8,6 +8,7 @@ const RenderingCanvas = ({ panOffset }) => {
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
   const elements = useStore((state) => state.elements);
   const zoom = useStore((state) => state.zoom);
+  const setCenterScalingOffset = useStore((state) => state.setCenterScalingOffset);
 
   useLayoutEffect(() => {
     const renderingCanvas = renderingCanvasRef.current;
@@ -23,9 +24,16 @@ const RenderingCanvas = ({ panOffset }) => {
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
 
+    const scaledWidth = rect.width * zoom;
+    const scaledHeight = rect.height * zoom;
+
+    const scaleOffsetX = (scaledWidth - rect.width) / 2;
+    const scaleOffsetY = (scaledHeight - rect.height) / 2;
+    setCenterScalingOffset({ x: scaleOffsetX, y: scaleOffsetY });
+    
     renderingCanvasContext.save();
     renderingCanvasContext.scale(1 / zoom, 1 / zoom);
-    renderingCanvasContext.translate(panOffset.x, panOffset.y);
+    renderingCanvasContext.translate(panOffset.x + scaleOffsetX, panOffset.y + scaleOffsetY);
 
     const roughCanvas = rough.canvas(renderingCanvas);
 
@@ -43,8 +51,6 @@ const RenderingCanvas = ({ panOffset }) => {
     });
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-    // console.log("panOffsit", panOffset.x, panOffset.y, zoom);
-    console.log("panOffset" , panOffset.x , panOffset.y , zoom);
     console.log(elements);
   }, [elements, panOffset.x, panOffset.y, zoom]);
 

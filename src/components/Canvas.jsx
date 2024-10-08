@@ -84,8 +84,9 @@ const Canvas = () => {
         setButtonDown(true);
         // based on the type an object of that type will be created
         let zoom = useStore.getState().zoom;
-        let x = e.clientX * zoom - panOffset.x;
-        let y = e.clientY * zoom - panOffset.y;
+        let centerScaleOffset = useStore.getState().centerScalingOffset;
+        let x = e.clientX * zoom - panOffset.x - centerScaleOffset.x;
+        let y = e.clientY * zoom - panOffset.y - centerScaleOffset.y;
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
@@ -123,10 +124,10 @@ const Canvas = () => {
               const { x1, y1, width, height } = selectedElement;
               startedActionAfterSelection.current = true;
               const gizmo = new Gizmo(
-                x1 / zoom + panOffset.x,
-                y1 / zoom + panOffset.y,
-                (x1 + width) / zoom + panOffset.x,
-                (y1 + height) / zoom + panOffset.y,
+                (x1 + panOffset.x + centerScaleOffset.x) / zoom,
+                (y1 + panOffset.y + centerScaleOffset.y) / zoom ,
+                (x1 + width + panOffset.x + centerScaleOffset.x) / zoom,
+                (y1 + height + panOffset.y + centerScaleOffset.y) / zoom,
                 "transparent"
               );
               gizmo.draw(contextRef);
@@ -240,8 +241,9 @@ const Canvas = () => {
       (e) => {
         if (e.buttons !== 1) return;
         let zoom = useStore.getState().zoom;
-        let x = e.clientX * zoom - panOffset.x;
-        let y = e.clientY * zoom - panOffset.y;
+        let centerScaleOffset = useStore.getState().centerScalingOffset;
+        let x = e.clientX * zoom - panOffset.x - centerScaleOffset.x;
+        let y = e.clientY * zoom - panOffset.y - centerScaleOffset.y;
         switch (type) {
           case "draw":
             shapeRef.current.updateDimensions(x, y, generator);
@@ -293,7 +295,7 @@ const Canvas = () => {
               );
               contextRef.current.save();
               contextRef.current.scale(1 / zoom, 1 / zoom);
-              contextRef.current.translate(panOffset.x, panOffset.y);
+              contextRef.current.translate(panOffset.x + centerScaleOffset.x, panOffset.y + centerScaleOffset.y);
               selectedElements.current.forEach((element) => {
                 switch (element.type) {
                   case "rectangle":
@@ -387,6 +389,7 @@ const Canvas = () => {
     ),
     Up = () => {
       // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up")
+      const centerScaleOffset = useStore.getState().centerScalingOffset;
       if (type === "pan") {
         lastPanOffset.current = { x: panOffset.x, y: panOffset.y };
         setPrevAccumulativeSumX(0);
@@ -420,10 +423,10 @@ const Canvas = () => {
         }
 
         let modifiedSelectionBox = {
-          x1: selectionBox.current.x1 * zoom - panOffset.x,
-          y1: selectionBox.current.y1 * zoom - panOffset.y,
-          x2: selectionBox.current.x2 * zoom - panOffset.x,
-          y2: selectionBox.current.y2 * zoom - panOffset.y,
+          x1: selectionBox.current.x1 * zoom - panOffset.x - centerScaleOffset.x,
+          y1: selectionBox.current.y1 * zoom - panOffset.y - centerScaleOffset.y,
+          x2: selectionBox.current.x2 * zoom - panOffset.x - centerScaleOffset.x,
+          y2: selectionBox.current.y2 * zoom - panOffset.y - centerScaleOffset.y,
         };
         // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
         selectedElements.current.push(
@@ -433,10 +436,10 @@ const Canvas = () => {
         selectedElements.current.forEach((element) => {
           const { x1, y1, width, height } = element;
           const gizmo = new Gizmo(
-            (x1 + panOffset.x) / zoom,
-            (y1 + panOffset.y) / zoom,
-            (x1 + width + panOffset.x) / zoom,
-            (y1 + height + panOffset.y) / zoom,
+            (x1 + panOffset.x + centerScaleOffset.x) / zoom,
+            (y1 + panOffset.y + centerScaleOffset.y) / zoom,
+            (x1 + width + panOffset.x + centerScaleOffset.x) / zoom,
+            (y1 + height + panOffset.y + centerScaleOffset.y) / zoom,
             "transparent"
           );
           gizmo.draw(contextRef);
@@ -478,6 +481,8 @@ const Canvas = () => {
 
     const dpr = window.devicePixelRatio;
     const rect = canvas.getBoundingClientRect();
+    const centerScaleOffset = useStore.getState().centerScalingOffset;
+
     // Set the "actual" size of the canvas
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
@@ -491,7 +496,7 @@ const Canvas = () => {
 
     context.save();
     context.scale(1 / zoom, 1 / zoom);
-    context.translate(panOffset.x, panOffset.y);
+    context.translate(panOffset.x + centerScaleOffset.x, panOffset.y + centerScaleOffset.y);
 
     const roughCanvas = rough.canvas(canvas);
     roughCanvasRef.current = roughCanvas;

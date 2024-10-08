@@ -30,7 +30,7 @@ const RenderingCanvas = ({ panOffset }) => {
     const scaleOffsetX = (scaledWidth - rect.width) / 2;
     const scaleOffsetY = (scaledHeight - rect.height) / 2;
     setCenterScalingOffset({ x: scaleOffsetX, y: scaleOffsetY });
-    
+    console.log(zoom)
     renderingCanvasContext.save();
     renderingCanvasContext.scale(1 / zoom, 1 / zoom);
     renderingCanvasContext.translate(panOffset.x + scaleOffsetX, panOffset.y + scaleOffsetY);

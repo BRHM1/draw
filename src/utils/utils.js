@@ -99,6 +99,7 @@ export function getElementAtPos(x, y, elements) {
   if (elements?.length === 0) return null
   for (let i = elements?.length - 1; i >= 0; i--) {
     const element = elements[i]
+    if (element.hidden) continue
     if (pointInsideElementFormula[element.type](x, y, element)) return element
   }
   return null
@@ -106,14 +107,14 @@ export function getElementAtPos(x, y, elements) {
 
 export function getElementsInsideSelectionBox(selectionBox, elements) {
   const { x1, y1, x2, y2 } = selectionBox
-  console.log(x1, y1, x2, y2)
   const Bounding_x1 = Math.min(x1, x2)
   const Bounding_x2 = Math.max(x1, x2)
   const Bounding_y1 = Math.min(y1, y2)
   const Bounding_y2 = Math.max(y1, y2)
   const elementsInside = []
   for (let i = 0; i < elements.length; i++) {
-    const { x1, y1, width, height } = elements[i]
+    const { x1, y1, width, height, hidden } = elements[i]
+    if(hidden) continue
     const minX = Math.min(x1, x1 + width)
     const maxX = Math.max(x1, x1 + width)
     const minY = Math.min(y1, y1 + height)

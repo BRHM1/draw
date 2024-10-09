@@ -1,11 +1,11 @@
-import Canvas from "./components/Canvas"
-
+import Canvas from "./components/Canvas";
+import { History } from "./hooks/History";
 
 function App() {
   // document.addEventListener('mousemove', (event) => {
   //   console.log('Mouse position:', event.clientX, event.clientY);
   // });
-  
+
   // BUG: resizing window makes the canvas stretch
   // BUG: while drawing and mouse gets on top of the Toolbar the line stops drawing
   // BUG: Undo doesn't save the move action
@@ -31,11 +31,13 @@ function App() {
   // 2. onKeyDown updates the text
   // 3. onBlur removes the textarea and adds the text to the elements array
   // -------------------- TODAY --------------------
+
+  const history = new History();
   return (
     <div>
-      <Canvas/>
+      <Canvas history={history} />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

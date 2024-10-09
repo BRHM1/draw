@@ -2,13 +2,17 @@ import { useRef, useLayoutEffect } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { useStore } from "../store";
 
-const RenderingCanvas = ({ panOffset }) => {
+const RenderingCanvas = ({ panOffset, history }) => {
   const renderingCanvasRef = useRef(null);
   const renderingContextRef = useRef(null);
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
   const elements = useStore((state) => state.elements);
   const zoom = useStore((state) => state.zoom);
-  const setCenterScalingOffset = useStore((state) => state.setCenterScalingOffset);
+  const setCenterScalingOffset = useStore(
+    (state) => state.setCenterScalingOffset
+  );
+  const rerender = useStore((state) => state.rerender);
+
 
   useLayoutEffect(() => {
     const renderingCanvas = renderingCanvasRef.current;
@@ -30,10 +34,18 @@ const RenderingCanvas = ({ panOffset }) => {
     const scaleOffsetX = (scaledWidth - rect.width) / 2;
     const scaleOffsetY = (scaledHeight - rect.height) / 2;
     setCenterScalingOffset({ x: scaleOffsetX, y: scaleOffsetY });
-    console.log(zoom)
+    renderingCanvasContext.clearRect(
+      0,
+      0,
+      window.innerWidth,
+      window.innerHeight
+    );
     renderingCanvasContext.save();
     renderingCanvasContext.scale(1 / zoom, 1 / zoom);
-    renderingCanvasContext.translate(panOffset.x + scaleOffsetX, panOffset.y + scaleOffsetY);
+    renderingCanvasContext.translate(
+      panOffset.x + scaleOffsetX,
+      panOffset.y + scaleOffsetY
+    );
 
     const roughCanvas = rough.canvas(renderingCanvas);
 
@@ -43,16 +55,27 @@ const RenderingCanvas = ({ panOffset }) => {
       window.innerWidth,
       window.innerHeight
     );
-    elements.forEach((element) => {
-      if (!element?.type) return;
-      shapes.has(element.type)
-        ? element.draw(roughCanvas)
-        : element.draw(renderingContextRef.current, renderingCanvasRef);
+    // elements.forEach((element) => {
+    //   if (!element?.type) return;
+    //   if (element?.type === "event") return;
+    //   shapes.has(element.type)
+    //     ? element.draw(roughCanvas)
+    //     : element.draw(renderingContextRef.current, renderingCanvasRef);
+    // });
+    console.log("triggered rendering");
+    history.forEach((element) => {
+      element.shapes.forEach((shape) => {
+        if (shape.hidden) return
+        shapes.has(shape.type)
+          ? shape.draw(roughCanvas)
+          : shape.draw(renderingContextRef.current, renderingCanvasRef);
+      });
     });
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-    console.log(elements);
-  }, [elements, panOffset.x, panOffset.y, zoom]);
+    console.log("history", history);
+    console.log("elements" ,elements);
+  }, [elements, panOffset.x, panOffset.y, zoom, rerender]);
 
   return (
     <canvas

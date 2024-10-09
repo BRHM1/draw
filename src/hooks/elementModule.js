@@ -9,9 +9,22 @@ export class Shape {
         this.height = height
         this.options = options
         this.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        this.hidden = false
     }
 
     draw() {
+        return null
+    }
+
+    updateDimensions() {
+        return null
+    }
+
+    Move() {
+        return null
+    }
+
+    saveLastState() {
         return null
     }
 }
@@ -49,6 +62,16 @@ export class Circle extends Shape {
     #updateRoughElement(generator) {
         this.roughElement = generator.circle(this.centerX, this.centerY, this.radius * 2, this.options)
     }
+
+    setType(type) {
+        this.type = type
+    }
+
+    saveLastState() {
+        const lastState = new Circle(this.x1, this.y1, this.radius, this.options, this.roughElement, this.centerX, this.centerY, this.rotation)
+        lastState.setType("event")
+        return lastState
+    }
 }
 
 export class Ellipse extends Shape {
@@ -79,6 +102,10 @@ export class Ellipse extends Shape {
     #updateRoughElement(generator) {
         this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
     }
+
+    saveLastState() {
+        return new Ellipse(this.x1, this.y1, this.width, this.height, this.options, this.roughElement, this.rotation, this.centerX, this.centerY)
+    }
 }
 
 export class Line extends Shape {
@@ -107,6 +134,10 @@ export class Line extends Shape {
     #updateRoughElement(generator) {
         this.roughElement = generator.line(this.x1, this.y1, this.x2, this.y2, this.options)
     }
+
+    saveLastState() {
+        return new Line(this.x1, this.y1, this.x2, this.y2, this.options, this.roughElement, this.rotation)
+    }
 }
 
 export class Rectangle extends Shape {
@@ -133,6 +164,10 @@ export class Rectangle extends Shape {
     }
     #updateRoughElement(generator) {
         this.roughElement = generator.rectangle(this.x1, this.y1, this.width, this.height, this.options)
+    }
+
+    saveLastState() {
+        return new Rectangle(this.x1, this.y1, this.width, this.height, this.options, this.roughElement, this.rotation)
     }
 }
 
@@ -175,6 +210,10 @@ export class Path extends Shape {
         this.y2 += dy
         this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
     }
+
+    saveLastState() {
+        return new Path(this.x1, this.y1, this.x2, this.y2, this.path, this.options, this.color, this.fillFlag, this.fillStyle, this.points, this.strokeStyle, this.rotation)
+    }
 }
 
 export class Text extends Shape {
@@ -204,5 +243,9 @@ export class Text extends Shape {
     }
     updateText(text) {
         this.text = text
+    }
+
+    saveLastState() {
+        return new Text(this.x1, this.y1, this.text, this.options, this.rotation, this.width, this.height)
     }
 }

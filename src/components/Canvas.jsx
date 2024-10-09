@@ -3,6 +3,7 @@ import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
 
+import { RemoveAction, DrawAction, MoveAction } from "../hooks/History";
 import {
   Circle,
   Ellipse,
@@ -20,7 +21,7 @@ import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
 import ViewportControl from "./ViewportControl";
 
-const Canvas = () => {
+const Canvas = ({ history }) => {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const roughCanvasRef = useRef(null);
@@ -36,6 +37,8 @@ const Canvas = () => {
   const lastdy = useRef(0);
   const startedActionAfterSelection = useRef(false);
   const isSelectedElementRemoved = useRef(true);
+  const setRerender = useStore((state) => state.setRerender);
+
 
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [prevAccumulativeSumX, setPrevAccumulativeSumX] = useState(0);
@@ -45,6 +48,8 @@ const Canvas = () => {
 
   const zoom = useStore((state) => state.zoom);
   const setZoom = useStore((state) => state.setZoom);
+
+  const distance = useRef({ x: 0, y: 0 });
 
   const removeLastElement = useStore((state) => state.removeLastElement);
   const removeElementById = useStore((state) => state.removeElementById);
@@ -125,7 +130,7 @@ const Canvas = () => {
               startedActionAfterSelection.current = true;
               const gizmo = new Gizmo(
                 (x1 + panOffset.x + centerScaleOffset.x) / zoom,
-                (y1 + panOffset.y + centerScaleOffset.y) / zoom ,
+                (y1 + panOffset.y + centerScaleOffset.y) / zoom,
                 (x1 + width + panOffset.x + centerScaleOffset.x) / zoom,
                 (y1 + height + panOffset.y + centerScaleOffset.y) / zoom,
                 "transparent"
@@ -268,7 +273,11 @@ const Canvas = () => {
           case "erase":
             const selectedElement = getElementAtPos(x, y, elements);
             if (selectedElement === null) return;
-            // addToREDO(elements[selectedElement]);
+            if (selectedElement && selectedElement.hidden === false) {
+              selectedElement.hidden = true;
+              const action = new RemoveAction([selectedElement], generator);
+              history.push(action);
+            }
             removeElementById(selectedElement.id);
             break;
           case "select":
@@ -281,6 +290,8 @@ const Canvas = () => {
               isSelectedElementRemoved.current = false;
               selectedElements.current.forEach((element) => {
                 removeElementById(element.id);
+                setRerender((prev) => !prev);
+                // to save the last position of the element before moving it to be able to make undo for selection cases
               });
             }
             // 2- if we have selected elements then we should move them
@@ -295,8 +306,12 @@ const Canvas = () => {
               );
               contextRef.current.save();
               contextRef.current.scale(1 / zoom, 1 / zoom);
-              contextRef.current.translate(panOffset.x + centerScaleOffset.x, panOffset.y + centerScaleOffset.y);
+              contextRef.current.translate(
+                panOffset.x + centerScaleOffset.x,
+                panOffset.y + centerScaleOffset.y
+              );
               selectedElements.current.forEach((element) => {
+                element.hidden = true;
                 switch (element.type) {
                   case "rectangle":
                     element.Move(
@@ -347,6 +362,7 @@ const Canvas = () => {
               contextRef.current.restore();
               lastdx.current = dx;
               lastdy.current = dy;
+              distance.current = { x: lastdx.current, y: lastdy.current }
             } else {
               // 3- if we don't have selected elements then we should draw the selectionBox
               selectionBox.current = {
@@ -409,8 +425,17 @@ const Canvas = () => {
             y2: panOffset.y * zoom,
           };
           selectedElements.current.forEach((element) => {
+            element.hidden = false
             addElement(element);
           });
+          const action = new MoveAction(
+            [...selectedElements.current],
+            distance.current.x,
+            distance.current.y,
+            generator
+          );
+          history.push(action);
+
           selectedElements.current.length = 0;
           startedActionAfterSelection.current = false;
           isSelectedElementRemoved.current = true;
@@ -423,10 +448,14 @@ const Canvas = () => {
         }
 
         let modifiedSelectionBox = {
-          x1: selectionBox.current.x1 * zoom - panOffset.x - centerScaleOffset.x,
-          y1: selectionBox.current.y1 * zoom - panOffset.y - centerScaleOffset.y,
-          x2: selectionBox.current.x2 * zoom - panOffset.x - centerScaleOffset.x,
-          y2: selectionBox.current.y2 * zoom - panOffset.y - centerScaleOffset.y,
+          x1:
+            selectionBox.current.x1 * zoom - panOffset.x - centerScaleOffset.x,
+          y1:
+            selectionBox.current.y1 * zoom - panOffset.y - centerScaleOffset.y,
+          x2:
+            selectionBox.current.x2 * zoom - panOffset.x - centerScaleOffset.x,
+          y2:
+            selectionBox.current.y2 * zoom - panOffset.y - centerScaleOffset.y,
         };
         // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
         selectedElements.current.push(
@@ -446,10 +475,11 @@ const Canvas = () => {
         });
       }
       setButtonDown(false);
-      type !== "erase" &&
-        type !== "select" &&
-        type !== "pan" &&
+      if (!["erase", "pan", "select"].includes(type)) {
         addElement(shapeRef.current);
+        const action = new DrawAction([shapeRef.current], generator);
+        history.push(action);
+      }
     };
 
   const KeyDown = () => {
@@ -493,10 +523,12 @@ const Canvas = () => {
     // Set the "drawn" size of the canvas
     canvas.style.width = `${rect.width}px`;
     canvas.style.height = `${rect.height}px`;
-
     context.save();
     context.scale(1 / zoom, 1 / zoom);
-    context.translate(panOffset.x + centerScaleOffset.x, panOffset.y + centerScaleOffset.y);
+    context.translate(
+      panOffset.x + centerScaleOffset.x,
+      panOffset.y + centerScaleOffset.y
+    );
 
     const roughCanvas = rough.canvas(canvas);
     roughCanvasRef.current = roughCanvas;
@@ -563,10 +595,10 @@ const Canvas = () => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      <RenderingCanvas panOffset={panOffset} />
+      <RenderingCanvas panOffset={panOffset} history={history.history} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
-      <ViewportControl zoom={zoom} />
+      <ViewportControl zoom={zoom} history={history} />
     </div>
   );
 };

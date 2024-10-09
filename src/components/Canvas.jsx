@@ -426,7 +426,7 @@ const Canvas = ({ history }) => {
           };
           selectedElements.current.forEach((element) => {
             element.hidden = false
-            addElement(element);
+            if (distance.current.x || distance.current.y) addElement(element);
           });
           const action = new MoveAction(
             [...selectedElements.current],
@@ -434,7 +434,7 @@ const Canvas = ({ history }) => {
             distance.current.y,
             generator
           );
-          history.push(action);
+          if(distance.current.x || distance.current.y) history.push(action);
 
           selectedElements.current.length = 0;
           startedActionAfterSelection.current = false;
@@ -501,6 +501,7 @@ const Canvas = ({ history }) => {
 
   const onBlur = () => {
     if (elements[elements.length - 1]?.text === "") {
+      history.pop()
       removeLastElement();
     }
   };

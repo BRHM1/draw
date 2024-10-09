@@ -31,7 +31,7 @@ function App() {
   // 2. onKeyDown updates the text
   // 3. onBlur removes the textarea and adds the text to the elements array
   // -------------------- TODAY --------------------
-
+  // don't push text to history if it's empty
   const history = new History();
   return (
     <div>

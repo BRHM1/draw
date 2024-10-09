@@ -62,8 +62,8 @@ const RenderingCanvas = ({ panOffset, history }) => {
     //     ? element.draw(roughCanvas)
     //     : element.draw(renderingContextRef.current, renderingCanvasRef);
     // });
-    console.log("triggered rendering");
     history.forEach((element) => {
+      if (["event", "remove"].includes(element.type)) return; // skip event actions and only draw shapes
       element.shapes.forEach((shape) => {
         if (shape.hidden) return
         shapes.has(shape.type)

@@ -31,6 +31,11 @@ class History {
         this.redo_idx++
     }
 
+    pop() {
+        this.history.pop()
+        this.undo_idx--
+    }
+
 }
 
 class Action {
@@ -53,6 +58,7 @@ class DrawAction extends Action {
         super()
         this.shapes = shapes
         this.generator = generator
+        this.type = "draw"
     }
 
     undo() {
@@ -72,6 +78,7 @@ class MoveAction extends Action {
         this.dx = dx
         this.dy = dy
         this.generator = generator
+        this.type = "event"
     }
 
     undo() {
@@ -88,6 +95,7 @@ class RemoveAction extends Action {
         super()
         this.shapes = shapes
         this.generator = generator
+        this.type = "remove"
     }
 
     undo() {

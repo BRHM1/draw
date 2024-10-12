@@ -1,3 +1,5 @@
+import { getStroke } from "perfect-freehand";
+
 const average = (a, b) => (a + b) / 2
 
 export function getSvgPathFromStroke(points, closed = true) {
@@ -85,9 +87,11 @@ const pointInsideElementFormula = {
     return isInside ? element : null
   }, // works fine
   path: (x, y, element) => {
-    const { path } = element
+    const { points, options } = element
+    const stroke = getStroke(points, options)
+    const path = getSvgPathFromStroke(stroke);
     const ctx = document.createElement("canvas").getContext("2d")
-    return ctx.isPointInPath(path, x, y) ? element : null
+    return ctx.isPointInPath(new Path2D(path), x, y) ? element : null
   }, // works fine 
   text: (x, y, element) => {
     const { x1, y1, width, height } = element
@@ -114,7 +118,7 @@ export function getElementsInsideSelectionBox(selectionBox, elements) {
   const elementsInside = []
   for (let i = 0; i < elements.length; i++) {
     const { x1, y1, width, height, hidden } = elements[i]
-    if(hidden) continue
+    if (hidden) continue
     const minX = Math.min(x1, x1 + width)
     const maxX = Math.max(x1, x1 + width)
     const minY = Math.min(y1, y1 + height)
@@ -156,4 +160,78 @@ export function drawElement(element, context, roughCanvas, canvasRef) {
       element?.roughElement ? roughCanvas.draw(element.roughElement) : null;
       break;
   }
+};
+
+
+// Browser DB functions(Add, Get, Delete)
+export const addData = (data) => {
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open('myDB', 1);
+
+    request.onsuccess = () => {
+      console.log('request.onsuccess - addData', data);
+      const db = request.result;
+      const tx = db.transaction('elements', 'readwrite');
+      const store = tx.objectStore('elements');
+      store.add(data);
+      resolve(data);
+    };
+
+    request.onerror = () => {
+      const error = request.error?.message
+      if (error) {
+        resolve(error);
+      } else {
+        resolve('Unknown error');
+      }
+    };
+  });
+};
+
+export const getData = () => {
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open('myDB', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction('elements', 'readonly');
+      const store = tx.objectStore('elements');
+      const data = store.getAll();
+      data.onsuccess = () => {
+        resolve(data.result);
+      };
+    };
+
+    request.onerror = () => {
+      const error = request.error?.message
+      if (error) {
+        resolve(error);
+      } else {
+        resolve('Unknown error');
+      }
+    };
+  });
+};
+
+export const deleteData = (id) => {
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open('myDB', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction('elements', 'readwrite');
+      const store = tx.objectStore('elements');
+      store.delete(id);
+      resolve(id);
+    };
+
+    request.onerror = () => {
+      const error = request.error?.message
+      if (error) {
+        resolve(error);
+      } else {
+        resolve('Unknown error');
+      }
+    };
+  });
 };

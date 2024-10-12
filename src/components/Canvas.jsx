@@ -14,7 +14,7 @@ import {
 } from "../hooks/elementModule";
 import Gizmo from "../utils/Gizmo";
 
-import { getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
+import { addData, getElementAtPos, getElementsInsideSelectionBox } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
 import RenderingCanvas from "./RenderingCanvas";
@@ -219,7 +219,7 @@ const Canvas = ({ history }) => {
               y,
               x,
               y,
-              new Path2D(),
+              "",
               penOptions,
               penColor,
               0,
@@ -477,6 +477,14 @@ const Canvas = ({ history }) => {
       setButtonDown(false);
       if (!["erase", "pan", "select"].includes(type)) {
         addElement(shapeRef.current);
+
+        // adding the new element to the DB
+        async function addDataToDB() {
+          await addData(shapeRef.current);
+        }
+        addDataToDB();
+
+        // adding the new element to the history
         const action = new DrawAction([shapeRef.current], generator);
         history.push(action);
       }

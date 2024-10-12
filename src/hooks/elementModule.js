@@ -190,8 +190,7 @@ export class Path extends Shape {
         context.fillStyle = this.color
         const stroke = getStroke(this.points, this.options)
         const path = getSvgPathFromStroke(stroke);
-        this.path = new Path2D(path);
-        context.fill(this.path)
+        context.fill(new Path2D(path))
     }
     updateDimensions(x2, y2) {
         this.x1 = Math.min(this.x1, x2)
@@ -211,9 +210,6 @@ export class Path extends Shape {
         this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
     }
 
-    saveLastState() {
-        return new Path(this.x1, this.y1, this.x2, this.y2, this.path, this.options, this.color, this.fillFlag, this.fillStyle, this.points, this.strokeStyle, this.rotation)
-    }
 }
 
 export class Text extends Shape {

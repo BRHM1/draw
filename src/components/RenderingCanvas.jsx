@@ -1,18 +1,32 @@
-import { useRef, useLayoutEffect } from "react";
+import { useRef, useLayoutEffect, useState } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { useStore } from "../store";
+import { getData } from "../utils/utils";
 
 const RenderingCanvas = ({ panOffset, history }) => {
   const renderingCanvasRef = useRef(null);
   const renderingContextRef = useRef(null);
+  
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
+  
   const elements = useStore((state) => state.elements);
+  
   const zoom = useStore((state) => state.zoom);
   const setCenterScalingOffset = useStore(
     (state) => state.setCenterScalingOffset
   );
+
   const rerender = useStore((state) => state.rerender);
 
+  const localElements = useRef([]);
+  
+  useLayoutEffect(() => {
+    async function fetchData() {
+      const data = await getData();
+      localElements.current = data;
+    }
+    fetchData();
+  }, [elements]);
 
   useLayoutEffect(() => {
     const renderingCanvas = renderingCanvasRef.current;
@@ -22,9 +36,9 @@ const RenderingCanvas = ({ panOffset, history }) => {
 
     renderingCanvas.width = rect.width * dpr;
     renderingCanvas.height = rect.height * dpr;
-
+  
     renderingCanvasContext.scale(dpr, dpr);
-
+    console.log("localElements", localElements.current);
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
 
@@ -55,13 +69,6 @@ const RenderingCanvas = ({ panOffset, history }) => {
       window.innerWidth,
       window.innerHeight
     );
-    // elements.forEach((element) => {
-    //   if (!element?.type) return;
-    //   if (element?.type === "event") return;
-    //   shapes.has(element.type)
-    //     ? element.draw(roughCanvas)
-    //     : element.draw(renderingContextRef.current, renderingCanvasRef);
-    // });
     history.forEach((element) => {
       if (["event", "remove"].includes(element.type)) return; // skip event actions and only draw shapes
       element.shapes.forEach((shape) => {
@@ -73,7 +80,6 @@ const RenderingCanvas = ({ panOffset, history }) => {
     });
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-    console.log("history", history);
     console.log("elements" ,elements);
   }, [elements, panOffset.x, panOffset.y, zoom, rerender]);
 

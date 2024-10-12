@@ -1,5 +1,6 @@
 import Canvas from "./components/Canvas";
 import { History } from "./hooks/History";
+import useInitDB from "./hooks/useInitDB";
 
 function App() {
   // document.addEventListener('mousemove', (event) => {
@@ -33,6 +34,7 @@ function App() {
   // -------------------- TODAY --------------------
   // don't push text to history if it's empty
   const history = new History();
+  useInitDB();
   return (
     <div>
       <Canvas history={history} />

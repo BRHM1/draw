@@ -33,18 +33,15 @@ export const useStore = create((set) => ({
         thinning: 0,
         smoothing: 0.5,
         streamline: 0.5,
-        easing: (t) => t,
         simulatePressure: true,
         last: true,
         start: {
             cap: false,
             taper: 0,
-            easing: (t) => t,
         },
         end: {
             cap: false,
             taper: 0,
-            easing: (t) => t,
         },
     },
     penColor: "#000000",

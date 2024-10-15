@@ -75,40 +75,31 @@ export class Circle extends Shape {
         this.type = type
     }
 
-    Resize(dx, dy, generator, resizingPoint) {
-        let radiusDiff = Math.sqrt(dx ** 2 + dy ** 2)
+    Resize(dx, dy, generator, resizingPoint, mouseDir) {
+        let { left, right, up, down } = mouseDir
+        let radiusDiff = Math.sqrt(dx ** 2 + dy ** 2) / 2
         switch (resizingPoint) {
             case "topLeft":
-                let toRight = dx <= 0 && dy <= 0
-                this.radius =  toRight ? this.radius - radiusDiff / 2 : this.radius - radiusDiff / 2 
-                this.centerY += dy / 2
-                this.centerX += dx / 2
-                this.x1 = this.centerX - this.radius
-                this.y1 = this.centerY - this.radius
-                this.width = this.radius * 2
-                this.height = this.radius * 2
+                this.radius = left || up ? this.radius + radiusDiff : this.radius - radiusDiff
                 break
             case "topRight":
-                this.radius = this.radius - radiusDiff / 2
-                this.centerY += dy / 2
-                this.centerX += dx / 2
-                this.x1 = this.centerX - this.radius
-                this.y1 = this.centerY - this.radius
-                this.width = this.radius * 2
-                this.height = this.radius * 2
+                this.radius = right || up ? this.radius + radiusDiff : this.radius - radiusDiff
                 break
             case "bottomLeft":
-                this.x1 += dx
-                this.width -= dx
-                this.height += dy
+                this.radius = left || down ? this.radius + radiusDiff : this.radius - radiusDiff
                 break
             case "bottomRight":
-                this.width += dx
-                this.height += dy
+                this.radius = right || down ? this.radius + radiusDiff : this.radius - radiusDiff
                 break
             default:
                 break
         }
+        this.centerY += dy / 2
+        this.centerX += dx / 2
+        this.x1 = this.centerX - this.radius
+        this.y1 = this.centerY - this.radius
+        this.width = this.radius * 2
+        this.height = this.radius * 2
         this.#updateRoughElement(generator)
     }
 
@@ -341,7 +332,7 @@ export class Rectangle extends Shape {
 export class Path extends Shape {
     // in this case x1, y1, x2, y2 are the bounding box of the path
     constructor(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation) {
-        super(x1, y1, x2 , y2 , options, rotation)
+        super(x1, y1, x2, y2, options, rotation)
         this.x2 = x2
         this.y2 = y2
         this.path = path

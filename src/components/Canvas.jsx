@@ -24,6 +24,7 @@ import {
   getElementAtPos,
   getElementsInsideSelectionBox,
   getMinMaxCoordinates,
+  getMouseDirection
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -71,6 +72,7 @@ const Canvas = ({ history }) => {
   const isResizing = useRef(false);
   const gizmoRef = useRef(null);
   const resizingPoint = useRef(null);
+  const lastMousePosition = useRef({ x: 0, y: 0 });
 
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
@@ -261,6 +263,16 @@ const Canvas = ({ history }) => {
     ),
     Move = useCallback(
       (e) => {
+        let gitMouseDir = () => {
+          let right = e.clientX - lastMousePosition.current.x > 0;
+          let down = e.clientY - lastMousePosition.current.y > 0;
+          let left = e.clientX - lastMousePosition.current.x < 0;
+          let up = e.clientY - lastMousePosition.current.y < 0;
+          lastMousePosition.current = { x: e.clientX, y: e.clientY };
+          // right up, left down, left up, right down --> those are the directions
+          return { right, down, left, up };
+        }
+
         if (e.buttons !== 1) return;
         let zoom = useStore.getState().zoom;
         let centerScaleOffset = useStore.getState().centerScalingOffset;
@@ -352,9 +364,7 @@ const Canvas = ({ history }) => {
                     dy - lastdy.current,
                     generator,
                     resizingPoint.current,
-                    x,
-                    y,
-                    initCoords.current
+                    gitMouseDir()
                   );
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)

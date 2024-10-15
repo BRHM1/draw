@@ -249,3 +249,14 @@ export const getMinMaxCoordinates = (elements) => {
   })
   return { minX, minY, maxX, maxY }
 }
+
+export const getMouseDirection = (element, x, y) => {
+  const { x1, y1, width, height } = element
+  const centerX = x1 + width / 2
+  const centerY = y1 + height / 2
+  const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI
+  if (angle >= -45 && angle < 45) return 'right'
+  if (angle >= 45 && angle < 135) return 'down'
+  if (angle >= 135 || angle < -135) return 'left'
+  if (angle >= -135 && angle < -45) return 'up'
+}

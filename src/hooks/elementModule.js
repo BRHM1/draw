@@ -75,8 +75,40 @@ export class Circle extends Shape {
         this.type = type
     }
 
-    Resize(dx, dy, generator) {
-        this.radius += dx
+    Resize(dx, dy, generator, resizingPoint) {
+        let radiusDiff = Math.sqrt(dx ** 2 + dy ** 2)
+        switch (resizingPoint) {
+            case "topLeft":
+                let toRight = dx <= 0 && dy <= 0
+                this.radius =  toRight ? this.radius - radiusDiff / 2 : this.radius - radiusDiff / 2 
+                this.centerY += dy / 2
+                this.centerX += dx / 2
+                this.x1 = this.centerX - this.radius
+                this.y1 = this.centerY - this.radius
+                this.width = this.radius * 2
+                this.height = this.radius * 2
+                break
+            case "topRight":
+                this.radius = this.radius - radiusDiff / 2
+                this.centerY += dy / 2
+                this.centerX += dx / 2
+                this.x1 = this.centerX - this.radius
+                this.y1 = this.centerY - this.radius
+                this.width = this.radius * 2
+                this.height = this.radius * 2
+                break
+            case "bottomLeft":
+                this.x1 += dx
+                this.width -= dx
+                this.height += dy
+                break
+            case "bottomRight":
+                this.width += dx
+                this.height += dy
+                break
+            default:
+                break
+        }
         this.#updateRoughElement(generator)
     }
 
@@ -116,9 +148,39 @@ export class Ellipse extends Shape {
         this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
     }
 
-    Resize(dx, dy, generator) {
-        this.width += dx
-        this.height += dy
+    Resize(dx, dy, generator, resizingPoint) {
+        switch (resizingPoint) {
+            case "topLeft":
+                this.x1 += dx
+                this.y1 += dy
+                this.width -= dx
+                this.height -= dy
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                break
+            case "topRight":
+                this.y1 += dy
+                this.width += dx
+                this.height -= dy
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                break
+            case "bottomLeft":
+                this.x1 += dx
+                this.width -= dx
+                this.height += dy
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                break
+            case "bottomRight":
+                this.width += dx
+                this.height += dy
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                break
+            default:
+                break
+        }
         this.#updateRoughElement(generator)
     }
 
@@ -162,9 +224,35 @@ export class Line extends Shape {
         this.roughElement = generator.line(this.x1, this.y1, this.x2, this.y2, this.options)
     }
 
-    Resize(dx, dy, generator) {
-        this.x2 += dx
-        this.y2 += dy
+    Resize(dx, dy, generator, resizingPoint) {
+        switch (resizingPoint) {
+            case "topLeft":
+                this.x1 += dx
+                this.y1 += dy
+                this.width -= dx
+                this.height -= dy
+                break
+            case "topRight":
+                this.y1 += dy
+                this.x2 += dx
+                this.width += dx
+                this.height -= dy
+                break
+            case "bottomLeft":
+                this.x1 += dx
+                this.y2 += dy
+                this.width -= dx
+                this.height += dy
+                break
+            case "bottomRight":
+                this.x2 += dx
+                this.y2 += dy
+                this.width += dx
+                this.height += dy
+                break
+            default:
+                break
+        }
         this.#updateRoughElement(generator)
     }
 
@@ -208,9 +296,31 @@ export class Rectangle extends Shape {
         this.roughElement = generator.rectangle(this.x1, this.y1, this.width, this.height, this.options)
     }
 
-    Resize(dx, dy, generator) {
-        this.width += dx
-        this.height += dy
+    Resize(dx, dy, generator, resizingPoint) {
+        switch (resizingPoint) {
+            case "topLeft":
+                this.x1 += dx
+                this.y1 += dy
+                this.width -= dx
+                this.height -= dy
+                break
+            case "topRight":
+                this.y1 += dy
+                this.width += dx
+                this.height -= dy
+                break
+            case "bottomLeft":
+                this.x1 += dx
+                this.width -= dx
+                this.height += dy
+                break
+            case "bottomRight":
+                this.width += dx
+                this.height += dy
+                break
+            default:
+                break
+        }
         this.#updateRoughElement(generator)
     }
 

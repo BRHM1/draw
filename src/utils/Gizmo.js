@@ -56,20 +56,45 @@ class Gizmo {
     }
 
     Resize(dx, dy) {
-        this.width += dx;
-        this.height += dy;
+        switch (this.resizingPoint) {
+            case "topLeft":
+                this.x1 += dx
+                this.y1 += dy
+                this.width -= dx
+                this.height -= dy
+                break
+            case "topRight":
+                this.y1 += dy
+                this.width += dx
+                this.height -= dy
+                break
+            case "bottomLeft":
+                this.x1 += dx
+                this.width -= dx
+                this.height += dy
+                break
+            case "bottomRight":
+                this.width += dx
+                this.height += dy
+                break
+            default:
+                break
+        }
     }
 
     isMouseResizing(x, y) {
         if (!this.allowResize) return false;
-        const ResizingRegions = [
-            [this.x1, this.y1],
-            [this.x1 + this.width, this.y1],
-            [this.x1, this.y1 + this.height],
-            [this.x1 + this.width, this.y1 + this.height],
-        ];
-
-        return ResizingRegions.some(([gx, gy]) => Math.hypot(gx - x, gy - y) <= 5 + this.offset);
+        const ResizingRegions = {
+            topLeft: [this.x1, this.y1],
+            topRight: [this.x1 + this.width, this.y1],
+            bottomLeft: [this.x1, this.y1 + this.height],
+            bottomRight: [this.x1 + this.width, this.y1 + this.height],
+        };
+        // determine which resizing region the mouse is over
+        let isPointOnRegion = (x, y, region) => Math.hypot(region[0] - x, region[1] - y) <= 5 + this.offset;
+        let region = Object.entries(ResizingRegions).find(([_, region]) => isPointOnRegion(x, y, region));
+        this.resizingPoint = region ? region[0] : false;
+        return region ? region[0] : false;
     }
 }
 

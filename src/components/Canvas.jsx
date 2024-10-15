@@ -3,7 +3,12 @@ import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
 
-import { RemoveAction, DrawAction, MoveAction, ResizingAction } from "../hooks/History";
+import {
+  RemoveAction,
+  DrawAction,
+  MoveAction,
+  ResizingAction,
+} from "../hooks/History";
 import {
   Circle,
   Ellipse,
@@ -65,6 +70,7 @@ const Canvas = ({ history }) => {
   const isDragging = useRef(false);
   const isResizing = useRef(false);
   const gizmoRef = useRef(null);
+  const resizingPoint = useRef(null);
 
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
@@ -82,7 +88,7 @@ const Canvas = ({ history }) => {
     erase: "cursor-pointer",
     pan: "cursor-grab",
   };
-
+  
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
@@ -102,7 +108,9 @@ const Canvas = ({ history }) => {
           case "select":
             // 1- get the element at the position of the mouse
             const selectedElement = getElementAtPos(x, y, elements);
-            if (gizmoRef.current?.isMouseResizing(x, y)) { // SELECTION SYSTEM: check if the mouse inside a resizing point then start an action and return
+            resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
+            if (gizmoRef.current?.isMouseResizing(x, y)) {
+              // SELECTION SYSTEM: check if the mouse inside a resizing point then start an action and return
               initCoords.current = {
                 x: x,
                 y: y,
@@ -110,7 +118,8 @@ const Canvas = ({ history }) => {
               isResizing.current = true;
               isDragging.current = false;
               return;
-            } else if (gizmoRef.current?.isMouseOver(x, y)) { // SELECTION SYSTEM: check if the mouse inside the gizmo then start an action and return
+            } else if (gizmoRef.current?.isMouseOver(x, y)) {
+              // SELECTION SYSTEM: check if the mouse inside the gizmo then start an action and return
               initCoords.current = {
                 x: x,
                 y: y,
@@ -119,7 +128,9 @@ const Canvas = ({ history }) => {
               isResizing.current = false;
               // console.log("mouseDown: inside gizmo");
               return;
-            } else if (selectedElement) { // SELECTION SYSTEM: check if the mouse inside an element then start an action
+            } else if (selectedElement) {
+              // SELECTION SYSTEM: check if the mouse inside an element then start an action
+              selectedElements.current = [];
               selectedElements.current.push(selectedElement);
               initCoords.current = {
                 x: x,
@@ -127,7 +138,7 @@ const Canvas = ({ history }) => {
               };
               isDragging.current = true;
               isResizing.current = false;
-              
+
               const { x1, y1, width, height } = selectedElement;
               gizmoRef.current = new Gizmo(
                 x1,
@@ -145,15 +156,10 @@ const Canvas = ({ history }) => {
               );
               gizmoRef.current.draw(contextRef);
               contextRef.current.restore();
-            } else { // SELECTION SYSTEM: if the mouse is not inside any element then start a new selection action
+            } else {
+              // SELECTION SYSTEM: if the mouse is not inside any element then start a new selection action
               selectedElements.current = [];
-              gizmoRef.current = new Gizmo(
-                x,
-                y,
-                x,
-                y,
-                ""
-              );
+              gizmoRef.current = new Gizmo(x, y, x, y, "");
             }
             break;
           case "text":
@@ -293,7 +299,7 @@ const Canvas = ({ history }) => {
             break;
           case "select":
             if (
-              (isDragging.current || isResizing.current) &&  // SELECTION SYSTEM: if there is an action started then remove the selected elements
+              (isDragging.current || isResizing.current) && // SELECTION SYSTEM: if there is an action started then remove the selected elements
               isSelectedElementRemoved.current
             ) {
               isSelectedElementRemoved.current = false;
@@ -303,7 +309,8 @@ const Canvas = ({ history }) => {
                 // to save the last position of the element before moving it to be able to make undo for selection cases
               });
             }
-            if (selectedElements.current.length > 0) { // SELECTION SYSTEM: if there are selected elements then apply the action
+            if (selectedElements.current.length > 0) {
+              // SELECTION SYSTEM: if there are selected elements then apply the action
               const dx = x - initCoords.current.x;
               const dy = y - initCoords.current.y;
               contextRef.current.clearRect(
@@ -318,40 +325,54 @@ const Canvas = ({ history }) => {
                 panOffset.x + centerScaleOffset.x,
                 panOffset.y + centerScaleOffset.y
               );
-              if (isDragging.current) { // SELECTION SYSTEM: if the action is dragging then move the selected elements
+              if (isDragging.current) {
+                // SELECTION SYSTEM: if the action is dragging then move the selected elements
                 // hide , move and draw the selected elements
                 selectedElements.current.forEach((element) => {
                   element.hidden = true;
-                  element.Move(dx - lastdx.current, dy - lastdy.current, generator);
+                  element.Move(
+                    dx - lastdx.current,
+                    dy - lastdy.current,
+                    generator
+                  );
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
-                    : element.draw(
-                        contextRef.current,
-                        canvasRef
-                      );
+                    : element.draw(contextRef.current, canvasRef);
                 });
                 gizmoRef.current.Move(dx - lastdx.current, dy - lastdy.current);
                 gizmoRef.current.draw(contextRef);
-              } else if (isResizing.current) { // SELECTION SYSTEM: if the action is resizing then resize the selected elements
+              } else if (isResizing.current) {
+                
+                // SELECTION SYSTEM: if the action is resizing then resize the selected elements
                 // hide, resize, and draw the selected elements
                 selectedElements.current.forEach((element) => {
-                  element.hidden = true
-                  element.Resize(dx - lastdx.current, dy - lastdy.current, generator)
+                  element.hidden = true;
+                  element.Resize(
+                    dx - lastdx.current,
+                    dy - lastdy.current,
+                    generator,
+                    resizingPoint.current,
+                    x,
+                    y,
+                    initCoords.current
+                  );
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
-                    : element.draw(
-                        contextRef.current,
-                        canvasRef
-                      );
-                })
-                gizmoRef.current.Resize(dx - lastdx.current, dy - lastdy.current);
+                    : element.draw(contextRef.current, canvasRef);
+                });
+                gizmoRef.current.Resize(
+                  dx - lastdx.current,
+                  dy - lastdy.current,
+                  resizingPoint.current
+                );
                 gizmoRef.current.draw(contextRef);
               }
               contextRef.current.restore();
               lastdx.current = dx;
               lastdy.current = dy;
               distance.current = { x: lastdx.current, y: lastdy.current };
-            } else { // SELECTION SYSTEM: if there are no selected elements then draw the selectionBox
+            } else {
+              // SELECTION SYSTEM: if there are no selected elements then draw the selectionBox
               // 3- if we don't have selected elements then we should draw the selectionBox
               gizmoRef.current.updateCoordinates(x, y);
               // console.log("mouseMove: drawing selectionBox");
@@ -403,7 +424,8 @@ const Canvas = ({ history }) => {
       if (type === "select") {
         // ------------------ selection starts ----------------
         // 1- after the action is done we should add the selected elements again to the rendering canvas
-        if (isDragging.current || isResizing.current) { // SELECTION SYSTEM: if the action is active then it means the action is done so reset the system
+        if (isDragging.current || isResizing.current) {
+          // SELECTION SYSTEM: if the action is active then it means the action is done so reset the system
           // resetting the selection system conditions
           // gizmoRef.current = null;
           isSelectedElementRemoved.current = true;
@@ -413,7 +435,6 @@ const Canvas = ({ history }) => {
             element.hidden = false;
             if (distance.current.x || distance.current.y) addElement(element);
           });
-          
 
           // adding the action to the history to be able to undo it
           const move = new MoveAction(
@@ -428,18 +449,20 @@ const Canvas = ({ history }) => {
             distance.current.x,
             distance.current.y,
             generator
-          )
-          if ((distance.current.x || distance.current.y) && isDragging.current) history.push(move);
-          if ((distance.current.x || distance.current.y) && isResizing.current) history.push(resize);
+          );
+          if ((distance.current.x || distance.current.y) && isDragging.current)
+            history.push(move);
+          if ((distance.current.x || distance.current.y) && isResizing.current)
+            history.push(resize);
           isDragging.current = false;
           isResizing.current = false;
           // selectedElements.current = [];
           contextRef.current.save();
-              contextRef.current.scale(1 / zoom, 1 / zoom);
-              contextRef.current.translate(
-                panOffset.x + centerScaleOffset.x,
-                panOffset.y + centerScaleOffset.y
-              );
+          contextRef.current.scale(1 / zoom, 1 / zoom);
+          contextRef.current.translate(
+            panOffset.x + centerScaleOffset.x,
+            panOffset.y + centerScaleOffset.y
+          );
           gizmoRef.current.draw(contextRef);
           contextRef.current.restore();
           // contextRef.current.clearRect(
@@ -448,7 +471,8 @@ const Canvas = ({ history }) => {
           //   window.innerWidth,
           //   window.innerHeight
           // );
-        } else { // SELECTION SYSTEM: if the actions are not active it means a selectionBox is drawn so we should get the elements inside it
+        } else {
+          // SELECTION SYSTEM: if the actions are not active it means a selectionBox is drawn so we should get the elements inside it
           // getting the elements inside selection region
           let modifiedSelectionBox = {
             x1: gizmoRef.current?.x1,
@@ -464,19 +488,13 @@ const Canvas = ({ history }) => {
           // 3- if there are selected elements then draw a gizmo around them
           selectedElements.current.forEach((element) => {
             const { x1, y1, width, height } = element;
-            const gizmo = new Gizmo(
-              x1,
-              y1,
-              width,
-              height,
-              "transparent"
-            );
+            const gizmo = new Gizmo(x1, y1, width, height, "transparent");
             contextRef.current.save();
-              contextRef.current.scale(1 / zoom, 1 / zoom);
-              contextRef.current.translate(
-                panOffset.x + centerScaleOffset.x,
-                panOffset.y + centerScaleOffset.y
-              );
+            contextRef.current.scale(1 / zoom, 1 / zoom);
+            contextRef.current.translate(
+              panOffset.x + centerScaleOffset.x,
+              panOffset.y + centerScaleOffset.y
+            );
             gizmo.draw(contextRef);
             contextRef.current.restore();
           });
@@ -486,7 +504,7 @@ const Canvas = ({ history }) => {
               selectedElements.current
             );
             gizmoRef.current = new Gizmo(
-              containerGizmoCoords.minX ,
+              containerGizmoCoords.minX,
               containerGizmoCoords.minY,
               containerGizmoCoords.maxX - containerGizmoCoords.minX,
               containerGizmoCoords.maxY - containerGizmoCoords.minY,
@@ -494,11 +512,11 @@ const Canvas = ({ history }) => {
               true
             );
             contextRef.current.save();
-              contextRef.current.scale(1 / zoom, 1 / zoom);
-              contextRef.current.translate(
-                panOffset.x + centerScaleOffset.x,
-                panOffset.y + centerScaleOffset.y
-              );
+            contextRef.current.scale(1 / zoom, 1 / zoom);
+            contextRef.current.translate(
+              panOffset.x + centerScaleOffset.x,
+              panOffset.y + centerScaleOffset.y
+            );
             gizmoRef.current.draw(contextRef);
             contextRef.current.restore();
           }
@@ -582,7 +600,6 @@ const Canvas = ({ history }) => {
     if (shapeRef.current && buttonDown && shapes.has(shapeRef.current.type)) {
       shapeRef.current.draw(roughCanvas);
     }
-
     if (shapeRef.current && buttonDown && !shapes.has(shapeRef.current.type)) {
       shapeRef.current.draw(context, canvasRef);
     }
@@ -643,7 +660,11 @@ const Canvas = ({ history }) => {
       <RenderingCanvas panOffset={panOffset} history={history.history} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
-      <ViewportControl zoom={zoom} history={history} clearGizmoOnOperation={clearGizmoOnOperation} />
+      <ViewportControl
+        zoom={zoom}
+        history={history}
+        clearGizmoOnOperation={clearGizmoOnOperation}
+      />
     </div>
   );
 };

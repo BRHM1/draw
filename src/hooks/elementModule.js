@@ -24,7 +24,15 @@ export class Shape {
         return null
     }
 
+    Resize() {
+        return null
+    }
+
     saveLastState() {
+        return null
+    }
+
+    Refine() {
         return null
     }
 }
@@ -67,6 +75,11 @@ export class Circle extends Shape {
         this.type = type
     }
 
+    Resize(dx, dy, generator) {
+        this.radius += dx
+        this.#updateRoughElement(generator)
+    }
+
     saveLastState() {
         const lastState = new Circle(this.x1, this.y1, this.radius, this.options, this.roughElement, this.centerX, this.centerY, this.rotation)
         lastState.setType("event")
@@ -103,6 +116,20 @@ export class Ellipse extends Shape {
         this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
     }
 
+    Resize(dx, dy, generator) {
+        this.width += dx
+        this.height += dy
+        this.#updateRoughElement(generator)
+    }
+
+    Refine() {
+        const capture = { x1: this.x1, y1: this.y1, width: this.width, height: this.height }
+        this.x1 = Math.min(capture.x1, capture.x1 + capture.width)
+        this.y1 = Math.min(capture.y1, capture.y1 + capture.height)
+        this.width = Math.abs(capture.width)
+        this.height = Math.abs(capture.height)
+    }
+
     saveLastState() {
         return new Ellipse(this.x1, this.y1, this.width, this.height, this.options, this.roughElement, this.rotation, this.centerX, this.centerY)
     }
@@ -135,11 +162,26 @@ export class Line extends Shape {
         this.roughElement = generator.line(this.x1, this.y1, this.x2, this.y2, this.options)
     }
 
+    Resize(dx, dy, generator) {
+        this.x2 += dx
+        this.y2 += dy
+        this.#updateRoughElement(generator)
+    }
+
+    Refine() {
+        const capture = { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2 }
+        this.x1 = Math.min(capture.x1, capture.x2)
+        this.y1 = Math.min(capture.y1, capture.y2)
+        this.x2 = Math.max(capture.x1, capture.x2)
+        this.y2 = Math.max(capture.y1, capture.y2)
+    }
+
     saveLastState() {
         return new Line(this.x1, this.y1, this.x2, this.y2, this.options, this.roughElement, this.rotation)
     }
 }
 
+// width and height always positive
 export class Rectangle extends Shape {
     // in this case x1, y1, width, height are the coordinates of the rectangle
     constructor(x1, y1, width, height, options, roughElement, rotation) {
@@ -166,11 +208,26 @@ export class Rectangle extends Shape {
         this.roughElement = generator.rectangle(this.x1, this.y1, this.width, this.height, this.options)
     }
 
+    Resize(dx, dy, generator) {
+        this.width += dx
+        this.height += dy
+        this.#updateRoughElement(generator)
+    }
+
+    Refine() {
+        const capture = { x1: this.x1, y1: this.y1, width: this.width, height: this.height }
+        this.x1 = Math.min(capture.x1, capture.x1 + capture.width)
+        this.y1 = Math.min(capture.y1, capture.y1 + capture.height)
+        this.width = Math.abs(capture.width)
+        this.height = Math.abs(capture.height)
+    }
+
     saveLastState() {
         return new Rectangle(this.x1, this.y1, this.width, this.height, this.options, this.roughElement, this.rotation)
     }
 }
 
+// width and height always positive
 export class Path extends Shape {
     // in this case x1, y1, x2, y2 are the bounding box of the path
     constructor(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation) {
@@ -202,6 +259,12 @@ export class Path extends Shape {
         this.points.push({ x: x2, y: y2 })
     }
 
+    Resize(dx, dy) {
+        this.x2 += dx
+        this.y2 += dy
+        this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
+    }
+
     Move(dx, dy) {
         this.x1 += dx
         this.y1 += dy
@@ -212,6 +275,7 @@ export class Path extends Shape {
 
 }
 
+// width and height are always positive
 export class Text extends Shape {
     constructor(x1, y1, text, options, rotation, width, height) {
         super(x1, y1, width, height, options, rotation)
@@ -239,6 +303,11 @@ export class Text extends Shape {
     }
     updateText(text) {
         this.text = text
+    }
+
+    Resize(dx, dy) {
+        this.width += dx
+        this.height += dy
     }
 
     saveLastState() {

@@ -65,7 +65,7 @@ const Toolbar = (props) => {
   return (
     <div
       className={twMerge(
-        "min-w-[30rem] h-10 bg-blue-50 z-10 grid place-content-center grid-cols-9 rounded-md mt-3 border border-lime-300 ",
+        "min-w-[30rem] h-10 bg-blue-50 z-10 grid place-content-center grid-cols-9 rounded-md mt-3 ",
         props.className
       )}
     >

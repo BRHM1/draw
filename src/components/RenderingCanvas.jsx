@@ -20,13 +20,13 @@ const RenderingCanvas = ({ panOffset, history }) => {
 
   const localElements = useRef([]);
   
-  useLayoutEffect(() => {
-    async function fetchData() {
-      const data = await getData();
-      localElements.current = data;
-    }
-    fetchData();
-  }, [elements]);
+  // useLayoutEffect(() => {
+  //   async function fetchData() {
+  //     const data = await getData();
+  //     localElements.current = data;
+  //   }
+  //   fetchData();
+  // }, [elements]);
 
   useLayoutEffect(() => {
     const renderingCanvas = renderingCanvasRef.current;
@@ -38,7 +38,6 @@ const RenderingCanvas = ({ panOffset, history }) => {
     renderingCanvas.height = rect.height * dpr;
   
     renderingCanvasContext.scale(dpr, dpr);
-    console.log("localElements", localElements.current);
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
 
@@ -70,7 +69,7 @@ const RenderingCanvas = ({ panOffset, history }) => {
       window.innerHeight
     );
     history.forEach((element) => {
-      if (["event", "remove"].includes(element.type)) return; // skip event actions and only draw shapes
+      if (["event", "remove", "resizing"].includes(element.type)) return; // skip event actions and only draw shapes
       element.shapes.forEach((shape) => {
         if (shape.hidden) return
         shapes.has(shape.type)

@@ -107,4 +107,24 @@ class RemoveAction extends Action {
     }
 }
 
-export { History, DrawAction, MoveAction, RemoveAction }
+class ResizingAction extends Action {
+    constructor(shapes, dx, dy, generator) {
+        super()
+        this.shapes = shapes
+        this.dx = dx
+        this.dy = dy
+        this.generator = generator
+        this.type = "resizing"
+    }
+
+    undo() {
+        this.shapes.forEach(shape => shape.Resize(-this.dx, -this.dy, this.generator))
+    }
+
+    redo() {
+        this.shapes.forEach(shape => shape.Resize(this.dx, this.dy, this.generator))
+    }
+}
+
+
+export { History, DrawAction, MoveAction, RemoveAction, ResizingAction }

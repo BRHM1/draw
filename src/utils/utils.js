@@ -169,7 +169,6 @@ export const addData = (data) => {
     const request = window.indexedDB.open('myDB', 1);
 
     request.onsuccess = () => {
-      console.log('request.onsuccess - addData', data);
       const db = request.result;
       const tx = db.transaction('elements', 'readwrite');
       const store = tx.objectStore('elements');
@@ -235,3 +234,18 @@ export const deleteData = (id) => {
     };
   });
 };
+
+export const getMinMaxCoordinates = (elements) => {
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  elements.forEach(element => {
+    if (element.hidden) return
+    minX = Math.min(minX, element.x1)
+    minY = Math.min(minY, element.y1)
+    maxX = Math.max(maxX, element.x1 + element.width)
+    maxY = Math.max(maxY, element.y1 + element.height)
+  })
+  return { minX, minY, maxX, maxY }
+}

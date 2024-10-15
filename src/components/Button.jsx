@@ -1,15 +1,17 @@
 import { useStore } from "../store";
 
-const Button = ({ label, history }) => {
+const Button = ({ label, history, clearGizmoOnOperation }) => {
   const elements = useStore((state) => state.elements);
   const setRerender = useStore((state) => state.setRerender);
 
   const undo = () => {
     history.undo();
+    clearGizmoOnOperation();
     setRerender(state => !state);
   };
   const redo = () => {
     history.redo();
+    clearGizmoOnOperation();
     setRerender(state => !state);
   };
   return (

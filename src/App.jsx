@@ -32,7 +32,9 @@ function App() {
   // 2. onKeyDown updates the text
   // 3. onBlur removes the textarea and adds the text to the elements array
   // -------------------- TODAY --------------------
-  // don't push text to history if it's empty
+  // change the gizmo impelementation to be more like the elementModule Rect class
+  // this will allow for more robust resizing and moving to not delete the selected elements and 
+  // make multiple selection actions possible
   const history = new History();
   useInitDB();
   return (

@@ -1,6 +1,7 @@
 import { getSvgPathFromStroke } from "../utils/utils"
 import { getStroke } from "perfect-freehand";
 import { wrappedLines, isValidNumber } from "../utils/utils";
+import { useStore } from "../store";
 export class Shape {
     constructor(x1, y1, width, height, options, rotation) {
         this.x1 = x1
@@ -404,11 +405,11 @@ export class Path extends Shape {
             case "bottomRight":
                 origin = { x: this.x1, y: this.y1 }
                 scaleX = 1 + dx / this.width // main problem is width could be 0 and 1 + dx could be 0 also 
-                scaleY = 1 + dy / this.height 
+                scaleY = 1 + dy / this.height
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
-                    return { x: newX , y: newY }
+                    return { x: newX, y: newY }
                 })
                 this.x2 = Math.max(...this.points.map(({ x }) => x))
                 this.y2 = Math.max(...this.points.map(({ y }) => y))
@@ -439,17 +440,24 @@ export class Text extends Shape {
         this.height = height
         this.type = "text"
     }
+
     draw(context, textAreaRef) {
         context.font = this.options.font;
+        const zoom = useStore.getState().zoom
         const { width: maxLineWidth } = textAreaRef.current.getBoundingClientRect()
+        
+        textAreaRef.current.style.fontSize = this.options.font.split('px')[0] / zoom + 'px'
+        textAreaRef.current.style.lineHeight = this.options.font.split('px')[0] / zoom + 'px'
+        textAreaRef.current.style.fontFamily = this.options.font.split(' ')[1]
+
         const lines = this.text.split("\n");
         const allLines = wrappedLines(lines, maxLineWidth, context)
-        this.height = allLines.length * 25
+        this.height = allLines.length * this.options.font.split('px')[0]
         this.width = allLines.reduce((acc, line) => {
             return Math.max(acc, context.measureText(line).width)
         }, 0)
         allLines.forEach((line, i) => {
-            context.fillText(line, this.x1, this.y1 + (i + 1) * 24);
+            context.fillText(line, this.x1, this.y1 + (i + 1) * this.options.font.split('px')[0]);
         });
     }
     Move(dx, dy) {
@@ -460,9 +468,29 @@ export class Text extends Shape {
         this.text = text
     }
 
-    Resize(dx, dy) {
-        this.width += dx
-        this.height += dy
+    Resize(dx, dy, generator, resizingPoint, mouseDir) {
+        let { left, right, up, down } = mouseDir
+        let [fontSize, fontFamily] = this.options.font.split('px')
+        switch (resizingPoint) {
+            case "topLeft":
+                this.options.font = left || up ? `${Number(fontSize) + 1}px ${fontFamily}` : `${Number(fontSize) - 1}px ${fontFamily}`
+                this.x1 += dx
+                this.y1 += dy
+                break
+            case "topRight":
+                this.options.font = right || up ? `${Number(fontSize) + 1}px ${fontFamily}` : `${Number(fontSize) - 1}px ${fontFamily}`
+                this.y1 += dy
+                break
+            case "bottomLeft":
+                this.options.font = left || down ? `${Number(fontSize) + 1}px ${fontFamily}` : `${Number(fontSize) - 1}px ${fontFamily}`
+                this.x1 += dx
+                break
+            case "bottomRight":
+                this.options.font = right || down ? `${Number(fontSize) + 1}px ${fontFamily}` : `${Number(fontSize) - 1}px ${fontFamily}`
+                break
+            default:
+                break
+        }
     }
 
     saveLastState() {

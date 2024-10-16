@@ -77,10 +77,10 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  const fn = (e) => {
-    setCordinates({ x: e.clientX, y: e.clientY });
-  };
-  window.addEventListener("mousemove", fn);
+  // const fn = (e) => {
+  //   setCordinates({ x: e.clientX, y: e.clientY });
+  // };
+  // window.addEventListener("mousemove", fn);
 
   const cursorShapes = {
     draw: "cursor-crosshair",
@@ -236,8 +236,8 @@ const Canvas = ({ history }) => {
             shapeRef.current = new Path(
               x,
               y,
-              x,
-              y,
+              1,
+              1,
               "",
               penOptions,
               penColor,
@@ -270,7 +270,8 @@ const Canvas = ({ history }) => {
           let up = e.clientY - lastMousePosition.current.y < 0;
           lastMousePosition.current = { x: e.clientX, y: e.clientY };
           // right up, left down, left up, right down --> those are the directions
-          return { right, down, left, up };
+          
+          return { right, down, left, up, lastMousePosition };
         }
 
         if (e.buttons !== 1) return;
@@ -494,7 +495,9 @@ const Canvas = ({ history }) => {
           selectedElements.current.push(
             ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
           );
-
+          if(selectedElements.current.length === 0) {
+            gizmoRef.current = null;
+          }
           // 3- if there are selected elements then draw a gizmo around them
           selectedElements.current.forEach((element) => {
             const { x1, y1, width, height } = element;

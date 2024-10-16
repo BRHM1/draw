@@ -1,6 +1,6 @@
 import { getSvgPathFromStroke } from "../utils/utils"
 import { getStroke } from "perfect-freehand";
-import { wrappedLines } from "../utils/utils";
+import { wrappedLines, isValidNumber } from "../utils/utils";
 export class Shape {
     constructor(x1, y1, width, height, options, rotation) {
         this.x1 = x1
@@ -357,13 +357,67 @@ export class Path extends Shape {
         this.y2 = Math.max(this.y2, y2)
         this.width = this.x2 - this.x1
         this.height = this.y2 - this.y1
+        this.centerX = this.x1 + this.width / 2
+        this.centerY = this.y1 + this.height / 2
         this.points.push({ x: x2, y: y2 })
     }
 
-    Resize(dx, dy) {
-        this.x2 += dx
-        this.y2 += dy
-        this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
+    Resize(dx, dy, generator, resizingPoint, mouseDir) {
+        let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
+        switch (resizingPoint) {
+            case "topLeft":
+                origin = { x: this.x2, y: this.y2 }
+                scaleX = 1 - dx / this.width
+                scaleY = 1 - dy / this.height
+                this.points = this.points.map(({ x, y }) => {
+                    let newX = scaleX * (x - origin.x) + origin.x
+                    let newY = scaleY * (y - origin.y) + origin.y
+                    return { x: newX, y: newY }
+                })
+                this.x1 = Math.min(...this.points.map(({ x }) => x))
+                this.y1 = Math.min(...this.points.map(({ y }) => y))
+                break
+            case "topRight":
+                origin = { x: this.x1, y: this.y2 }
+                scaleX = 1 + dx / this.width
+                scaleY = 1 - dy / this.height
+                this.points = this.points.map(({ x, y }) => {
+                    let newX = scaleX * (x - origin.x) + origin.x
+                    let newY = scaleY * (y - origin.y) + origin.y
+                    return { x: newX, y: newY }
+                })
+                this.x2 = Math.max(...this.points.map(({ x }) => x))
+                this.y1 = Math.min(...this.points.map(({ y }) => y))
+                break
+            case "bottomLeft":
+                origin = { x: this.x2, y: this.y1 }
+                scaleX = 1 - dx / this.width;
+                scaleY = 1 + dy / this.height;
+                this.points = this.points.map(({ x, y }) => {
+                    let newX = scaleX * (x - origin.x) + origin.x
+                    let newY = scaleY * (y - origin.y) + origin.y
+                    return { x: newX, y: newY }
+                })
+                this.x1 = Math.min(...this.points.map(({ x }) => x))
+                this.y2 = Math.max(...this.points.map(({ y }) => y))
+                break
+            case "bottomRight":
+                origin = { x: this.x1, y: this.y1 }
+                scaleX = 1 + dx / this.width // main problem is width could be 0 and 1 + dx could be 0 also 
+                scaleY = 1 + dy / this.height 
+                this.points = this.points.map(({ x, y }) => {
+                    let newX = scaleX * (x - origin.x) + origin.x
+                    let newY = scaleY * (y - origin.y) + origin.y
+                    return { x: newX , y: newY }
+                })
+                this.x2 = Math.max(...this.points.map(({ x }) => x))
+                this.y2 = Math.max(...this.points.map(({ y }) => y))
+                break
+            default:
+                break
+        }
+        this.width = this.x2 - this.x1;
+        this.height = this.y2 - this.y1;
     }
 
     Move(dx, dy) {

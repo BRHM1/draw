@@ -260,3 +260,7 @@ export const getMouseDirection = (element, x, y) => {
   if (angle >= 135 || angle < -135) return 'left'
   if (angle >= -135 && angle < -45) return 'up'
 }
+
+export const isValidNumber = (number) => { 
+  return !isNaN(number) && number !== Infinity && number !== -Infinity
+}

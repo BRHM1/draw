@@ -78,10 +78,10 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  const fn = (e) => {
-    setCordinates({ x: e.clientX, y: e.clientY });
-  };
-  window.addEventListener("mousemove", fn);
+  // const fn = (e) => {
+  //   setCordinates({ x: e.clientX, y: e.clientY });
+  // };
+  // window.addEventListener("mousemove", fn);
 
   const cursorShapes = {
     draw: "cursor-crosshair",

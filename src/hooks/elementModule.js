@@ -105,7 +105,7 @@ export class Circle extends Shape {
     }
 
     saveLastState() {
-        return { x1: this.x1, y1: this.y1, width: this.width, height:this.height, radius: this.radius, options: this.options, roughElement: this.roughElement, centerX: this.centerX, centerY: this.centerY, rotation: this.rotation }
+        return { x1: this.x1, y1: this.y1, width: this.width, height: this.height, radius: this.radius, options: this.options, roughElement: this.roughElement, centerX: this.centerX, centerY: this.centerY, rotation: this.rotation }
     }
 }
 
@@ -360,14 +360,14 @@ export class Path extends Shape {
         this.centerY = this.y1 + this.height / 2
         this.points.push({ x: x2, y: y2 })
     }
-
     Resize(dx, dy, generator, resizingPoint, mouseDir) {
         let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
         switch (resizingPoint) {
             case "topLeft":
                 origin = { x: this.x2, y: this.y2 }
-                scaleX = 1 - dx / this.width
-                scaleY = 1 - dy / this.height
+                scaleX = isValidNumber(1 - dx / this.width) ? 1 - dx / this.width : 1
+                scaleY = isValidNumber(1 - dy / this.height) ? 1 - dy / this.height : 1
+                if(scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -375,11 +375,14 @@ export class Path extends Shape {
                 })
                 this.x1 = Math.min(...this.points.map(({ x }) => x))
                 this.y1 = Math.min(...this.points.map(({ y }) => y))
+                this.width -= dx
+                this.height -= dy
                 break
             case "topRight":
                 origin = { x: this.x1, y: this.y2 }
-                scaleX = 1 + dx / this.width
-                scaleY = 1 - dy / this.height
+                scaleX = isValidNumber(1 + dx / this.width) ? 1 + dx / this.width : 1
+                scaleY = isValidNumber(1 - dy / this.height) ? 1 - dy / this.height : 1
+                if(scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -387,11 +390,14 @@ export class Path extends Shape {
                 })
                 this.x2 = Math.max(...this.points.map(({ x }) => x))
                 this.y1 = Math.min(...this.points.map(({ y }) => y))
+                this.width += dx
+                this.height -= dy
                 break
             case "bottomLeft":
                 origin = { x: this.x2, y: this.y1 }
-                scaleX = 1 - dx / this.width;
-                scaleY = 1 + dy / this.height;
+                scaleX = isValidNumber(1 - dx / this.width) ? 1 - dx / this.width : 1
+                scaleY = isValidNumber(1 + dy / this.height) ? 1 + dy / this.height : 1
+                if(scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -399,11 +405,14 @@ export class Path extends Shape {
                 })
                 this.x1 = Math.min(...this.points.map(({ x }) => x))
                 this.y2 = Math.max(...this.points.map(({ y }) => y))
+                this.height += dy
+                this.width -= dx
                 break
             case "bottomRight":
                 origin = { x: this.x1, y: this.y1 }
-                scaleX = 1 + dx / this.width // main problem is width could be 0 and 1 + dx could be 0 also 
-                scaleY = 1 + dy / this.height
+                scaleX = isValidNumber(1 + dx / this.width) ? 1 + dx / this.width : 1 // main problem is width could be 0 and 1 + dx could be 0 also 
+                scaleY = isValidNumber(1 + dy / this.height) ? 1 + dy / this.height : 1
+                if(scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -411,12 +420,12 @@ export class Path extends Shape {
                 })
                 this.x2 = Math.max(...this.points.map(({ x }) => x))
                 this.y2 = Math.max(...this.points.map(({ y }) => y))
+                this.width += dx
+                this.height += dy
                 break
             default:
                 break
         }
-        this.width = this.x2 - this.x1;
-        this.height = this.y2 - this.y1;
     }
 
     Move(dx, dy) {
@@ -447,7 +456,7 @@ export class Text extends Shape {
         context.font = this.options.font;
         const zoom = useStore.getState().zoom
         const { width: maxLineWidth } = textAreaRef.current.getBoundingClientRect()
-        
+
         textAreaRef.current.style.fontSize = this.options.font.split('px')[0] / zoom + 'px'
         textAreaRef.current.style.lineHeight = this.options.font.split('px')[0] / zoom + 'px'
         textAreaRef.current.style.fontFamily = this.options.font.split(' ')[1]
@@ -496,6 +505,6 @@ export class Text extends Shape {
     }
 
     saveLastState() {
-        return { x1: this.x1, y1: this.y1, text: this.text, options: {...this.options}, width: this.width, height: this.height }
+        return { x1: this.x1, y1: this.y1, text: this.text, options: { ...this.options }, width: this.width, height: this.height }
     }
 }

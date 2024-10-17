@@ -262,7 +262,7 @@ export const getMouseDirection = (element, x, y) => {
 }
 
 export const isValidNumber = (number) => {
-  return !isNaN(number) && number !== Infinity && number !== -Infinity
+  return !isNaN(number) && number !== Infinity && number !== -Infinity 
 }
 
 export function swapObjValues(obj1, obj2) {

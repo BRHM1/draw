@@ -1,3 +1,4 @@
+import { swapObjValues } from "../utils/utils"
 class History {
     constructor() {
         this.history = []
@@ -50,7 +51,7 @@ class Action {
     redo() {
         throw new Error("Redo method not implemented")
     }
-} 
+}
 
 
 class DrawAction extends Action {
@@ -108,23 +109,35 @@ class RemoveAction extends Action {
 }
 
 class ResizingAction extends Action {
-    constructor(shapes, dx, dy, generator) {
+    constructor(shapes, lastState, generator) {
         super()
         this.shapes = shapes
-        this.dx = dx
-        this.dy = dy
+        this.lastState = lastState
         this.generator = generator
         this.type = "resizing"
     }
 
     undo() {
-        this.shapes.forEach(shape => shape.Resize(-this.dx, -this.dy, this.generator))
+        for (let i = 0; i < this.shapes.length; i++) {
+            for (let key in this.lastState[i]) {
+                let temp = this.shapes[i][key]
+                this.shapes[i][key] = this.lastState[i][key]
+                this.lastState[i][key] = temp
+            }
+        }
     }
 
     redo() {
-        this.shapes.forEach(shape => shape.Resize(this.dx, this.dy, this.generator))
+        for (let i = 0; i < this.shapes.length; i++) {
+            for (let key in this.lastState[i]) {
+                let temp = this.shapes[i][key]
+                this.shapes[i][key] = this.lastState[i][key]
+                this.lastState[i][key] = temp
+            }
+        }
     }
 }
+
 
 
 export { History, DrawAction, MoveAction, RemoveAction, ResizingAction }

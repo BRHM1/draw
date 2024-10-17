@@ -24,7 +24,7 @@ import {
   getElementAtPos,
   getElementsInsideSelectionBox,
   getMinMaxCoordinates,
-  getMouseDirection
+  getMouseDirection,
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -73,6 +73,7 @@ const Canvas = ({ history }) => {
   const gizmoRef = useRef(null);
   const resizingPoint = useRef(null);
   const lastMousePosition = useRef({ x: 0, y: 0 });
+  const lastResizeState = useRef([]);
 
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
@@ -90,7 +91,7 @@ const Canvas = ({ history }) => {
     erase: "cursor-pointer",
     pan: "cursor-grab",
   };
-  
+
   const reFocus = () => {
     if (textRef.current !== null) textRef.current.value = "";
     setTimeout(() => {
@@ -111,6 +112,7 @@ const Canvas = ({ history }) => {
             // 1- get the element at the position of the mouse
             const selectedElement = getElementAtPos(x, y, elements);
             resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
+            lastResizeState.current = [];
             if (gizmoRef.current?.isMouseResizing(x, y)) {
               // SELECTION SYSTEM: check if the mouse inside a resizing point then start an action and return
               initCoords.current = {
@@ -119,6 +121,9 @@ const Canvas = ({ history }) => {
               };
               isResizing.current = true;
               isDragging.current = false;
+              selectedElements.current.forEach((element) => {
+                lastResizeState.current.push(element.saveLastState());
+              });
               return;
             } else if (gizmoRef.current?.isMouseOver(x, y)) {
               // SELECTION SYSTEM: check if the mouse inside the gizmo then start an action and return
@@ -270,9 +275,9 @@ const Canvas = ({ history }) => {
           let up = e.clientY - lastMousePosition.current.y < 0;
           lastMousePosition.current = { x: e.clientX, y: e.clientY };
           // right up, left down, left up, right down --> those are the directions
-          
+
           return { right, down, left, up, lastMousePosition };
-        }
+        };
 
         if (e.buttons !== 1) return;
         let zoom = useStore.getState().zoom;
@@ -355,7 +360,6 @@ const Canvas = ({ history }) => {
                 gizmoRef.current.Move(dx - lastdx.current, dy - lastdy.current);
                 gizmoRef.current.draw(contextRef);
               } else if (isResizing.current) {
-                
                 // SELECTION SYSTEM: if the action is resizing then resize the selected elements
                 // hide, resize, and draw the selected elements
                 selectedElements.current.forEach((element) => {
@@ -439,6 +443,7 @@ const Canvas = ({ history }) => {
           // SELECTION SYSTEM: if the action is active then it means the action is done so reset the system
           // resetting the selection system conditions
           // gizmoRef.current = null;
+          console.log("a7a");
           isSelectedElementRemoved.current = true;
 
           // pushing the elements back to the rendering canvas
@@ -457,14 +462,23 @@ const Canvas = ({ history }) => {
 
           const resize = new ResizingAction(
             [...selectedElements.current],
-            distance.current.x,
-            distance.current.y,
+            lastResizeState.current,
             generator
           );
-          if ((distance.current.x || distance.current.y) && isDragging.current)
+
+
+          if (
+            (distance.current.x || distance.current.y) &&
+            isDragging.current
+          ) {
             history.push(move);
-          if ((distance.current.x || distance.current.y) && isResizing.current)
+          }
+          if (
+            (distance.current.x || distance.current.y) &&
+            isResizing.current
+          ) {
             history.push(resize);
+          }
           isDragging.current = false;
           isResizing.current = false;
           // selectedElements.current = [];
@@ -482,6 +496,8 @@ const Canvas = ({ history }) => {
           //   window.innerWidth,
           //   window.innerHeight
           // );
+          lastResizeState.current = [];
+          distance.current = { x: 0, y: 0 };
         } else {
           // SELECTION SYSTEM: if the actions are not active it means a selectionBox is drawn so we should get the elements inside it
           // getting the elements inside selection region
@@ -495,7 +511,7 @@ const Canvas = ({ history }) => {
           selectedElements.current.push(
             ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
           );
-          if(selectedElements.current.length === 0) {
+          if (selectedElements.current.length === 0) {
             gizmoRef.current = null;
           }
           // 3- if there are selected elements then draw a gizmo around them

@@ -105,9 +105,7 @@ export class Circle extends Shape {
     }
 
     saveLastState() {
-        const lastState = new Circle(this.x1, this.y1, this.radius, this.options, this.roughElement, this.centerX, this.centerY, this.rotation)
-        lastState.setType("event")
-        return lastState
+        return { x1: this.x1, y1: this.y1, width: this.width, height:this.height, radius: this.radius, options: this.options, roughElement: this.roughElement, centerX: this.centerX, centerY: this.centerY, rotation: this.rotation }
     }
 }
 
@@ -185,7 +183,7 @@ export class Ellipse extends Shape {
     }
 
     saveLastState() {
-        return new Ellipse(this.x1, this.y1, this.width, this.height, this.options, this.roughElement, this.rotation, this.centerX, this.centerY)
+        return { x1: this.x1, y1: this.y1, width: this.width, height: this.height, options: this.options, roughElement: this.roughElement, rotation: this.rotation, centerX: this.centerX, centerY: this.centerY }
     }
 }
 
@@ -257,7 +255,7 @@ export class Line extends Shape {
     }
 
     saveLastState() {
-        return new Line(this.x1, this.y1, this.x2, this.y2, this.options, this.roughElement, this.rotation)
+        return { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2, width: this.width, height: this.height, options: this.options, roughElement: this.roughElement, rotation: this.rotation }
     }
 }
 
@@ -325,7 +323,7 @@ export class Rectangle extends Shape {
     }
 
     saveLastState() {
-        return new Rectangle(this.x1, this.y1, this.width, this.height, this.options, this.roughElement, this.rotation)
+        return { x1: this.x1, y1: this.y1, width: this.width, height: this.height, options: this.options, roughElement: this.roughElement, rotation: this.rotation }
     }
 }
 
@@ -429,6 +427,10 @@ export class Path extends Shape {
         this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
     }
 
+    saveLastState() {
+        return { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2, width: this.width, height: this.height, path: this.path, options: this.options, color: this.color, fillFlag: this.fillFlag, fillStyle: this.fillStyle, points: this.points, strokeStyle: this.strokeStyle }
+    }
+
 }
 
 // width and height are always positive
@@ -494,6 +496,6 @@ export class Text extends Shape {
     }
 
     saveLastState() {
-        return new Text(this.x1, this.y1, this.text, this.options, this.rotation, this.width, this.height)
+        return { x1: this.x1, y1: this.y1, text: this.text, options: {...this.options}, width: this.width, height: this.height }
     }
 }

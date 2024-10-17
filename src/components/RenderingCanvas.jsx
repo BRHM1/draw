@@ -68,6 +68,7 @@ const RenderingCanvas = ({ panOffset, history }) => {
       window.innerWidth,
       window.innerHeight
     );
+
     history.forEach((element) => {
       if (["event", "remove", "resizing"].includes(element.type)) return; // skip event actions and only draw shapes
       element.shapes.forEach((shape) => {
@@ -77,6 +78,8 @@ const RenderingCanvas = ({ panOffset, history }) => {
           : shape.draw(renderingContextRef.current, renderingCanvasRef);
       });
     });
+
+    console.log("history", history)
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
     console.log("elements" ,elements);

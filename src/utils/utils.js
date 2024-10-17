@@ -261,6 +261,15 @@ export const getMouseDirection = (element, x, y) => {
   if (angle >= -135 && angle < -45) return 'up'
 }
 
-export const isValidNumber = (number) => { 
+export const isValidNumber = (number) => {
   return !isNaN(number) && number !== Infinity && number !== -Infinity
 }
+
+export function swapObjValues(obj1, obj2) {
+  const temp = { ...obj1 }
+  console.log(obj1, obj2)
+  Object.keys(obj1).forEach(key => {
+    obj1[key] = obj2[key]
+    obj2[key] = temp[key]
+  })
+}  

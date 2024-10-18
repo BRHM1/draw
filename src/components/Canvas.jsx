@@ -79,10 +79,10 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  // const fn = (e) => {
-  //   setCordinates({ x: e.clientX, y: e.clientY });
-  // };
-  // window.addEventListener("mousemove", fn);
+  const fn = (e) => {
+    setCordinates({ x: e.clientX, y: e.clientY });
+  };
+  window.addEventListener("mousemove", fn);
 
   const cursorShapes = {
     draw: "cursor-crosshair",
@@ -370,7 +370,8 @@ const Canvas = ({ history }) => {
                     dy - lastdy.current,
                     generator,
                     resizingPoint.current,
-                    gitMouseDir()
+                    gitMouseDir(),
+                    gizmoRef.current
                   );
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
@@ -444,7 +445,6 @@ const Canvas = ({ history }) => {
           // SELECTION SYSTEM: if the action is active then it means the action is done so reset the system
           // resetting the selection system conditions
           // gizmoRef.current = null;
-          console.log("a7a");
           isSelectedElementRemoved.current = true;
 
           // pushing the elements back to the rendering canvas
@@ -497,6 +497,9 @@ const Canvas = ({ history }) => {
           //   window.innerWidth,
           //   window.innerHeight
           // );
+          selectedElements.current.forEach((element) => {
+            element.Refine();
+          })
           lastResizeState.current = [];
           distance.current = { x: 0, y: 0 };
         } else {

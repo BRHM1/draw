@@ -104,6 +104,17 @@ export class Circle extends Shape {
         this.#updateRoughElement(generator)
     }
 
+    Refine() {
+        const capture = { x1: this.x1, y1: this.y1, width: this.width, height: this.height }
+        this.x1 = Math.min(capture.x1, capture.x1 + capture.width)
+        this.y1 = Math.min(capture.y1, capture.y1 + capture.height)
+        this.width = Math.abs(capture.width)
+        this.height = Math.abs(capture.height)
+        this.centerX = this.x1 + this.width / 2
+        this.centerY = this.y1 + this.height / 2
+        this.radius = this.width / 2
+    }
+
     saveLastState() {
         return { x1: this.x1, y1: this.y1, width: this.width, height: this.height, radius: this.radius, options: this.options, roughElement: this.roughElement, centerX: this.centerX, centerY: this.centerY, rotation: this.rotation }
     }
@@ -360,14 +371,15 @@ export class Path extends Shape {
         this.centerY = this.y1 + this.height / 2
         this.points.push({ x: x2, y: y2 })
     }
-    Resize(dx, dy, generator, resizingPoint, mouseDir) {
+    Resize(dx, dy, generator, resizingPoint, mouseDir, gizmoRef) {
         let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
+        console.log(gizmoRef.current)
         switch (resizingPoint) {
             case "topLeft":
                 origin = { x: this.x2, y: this.y2 }
                 scaleX = isValidNumber(1 - dx / this.width) ? 1 - dx / this.width : 1
                 scaleY = isValidNumber(1 - dy / this.height) ? 1 - dy / this.height : 1
-                if(scaleX === 0 || scaleY === 0) return
+                if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -382,7 +394,7 @@ export class Path extends Shape {
                 origin = { x: this.x1, y: this.y2 }
                 scaleX = isValidNumber(1 + dx / this.width) ? 1 + dx / this.width : 1
                 scaleY = isValidNumber(1 - dy / this.height) ? 1 - dy / this.height : 1
-                if(scaleX === 0 || scaleY === 0) return
+                if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -397,7 +409,7 @@ export class Path extends Shape {
                 origin = { x: this.x2, y: this.y1 }
                 scaleX = isValidNumber(1 - dx / this.width) ? 1 - dx / this.width : 1
                 scaleY = isValidNumber(1 + dy / this.height) ? 1 + dy / this.height : 1
-                if(scaleX === 0 || scaleY === 0) return
+                if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -412,7 +424,7 @@ export class Path extends Shape {
                 origin = { x: this.x1, y: this.y1 }
                 scaleX = isValidNumber(1 + dx / this.width) ? 1 + dx / this.width : 1 // main problem is width could be 0 and 1 + dx could be 0 also 
                 scaleY = isValidNumber(1 + dy / this.height) ? 1 + dy / this.height : 1
-                if(scaleX === 0 || scaleY === 0) return
+                if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
                     let newY = scaleY * (y - origin.y) + origin.y
@@ -426,6 +438,15 @@ export class Path extends Shape {
             default:
                 break
         }
+    }
+
+    Refine() {
+        this.x1 = Math.min(...this.points.map(({ x }) => x))
+        this.y1 = Math.min(...this.points.map(({ y }) => y))
+        this.x2 = Math.max(...this.points.map(({ x }) => x))
+        this.y2 = Math.max(...this.points.map(({ y }) => y))
+        this.width = this.x2 - this.x1
+        this.height = this.y2 - this.y1
     }
 
     Move(dx, dy) {
@@ -502,6 +523,10 @@ export class Text extends Shape {
             default:
                 break
         }
+    }
+
+    Refine() {
+        // TODO: modifiy the y1 coordinates to be the top left corner of the text
     }
 
     saveLastState() {

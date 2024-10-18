@@ -3,8 +3,8 @@ class Gizmo {
     constructor(x1, y1, width, height, bgColor, allowResize) {
         this.x1 = x1 - 5;
         this.y1 = y1 - 5;
-        this.width = width + 10;
-        this.height = height + 10;
+        this.width = Math.abs(width + 10);
+        this.height = Math.abs(height + 10);
         this.initX = this.x1;
         this.initY = this.y1;
         this.offset = 5;

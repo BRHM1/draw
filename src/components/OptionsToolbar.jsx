@@ -10,7 +10,7 @@ const OptionsToolbar = () => {
   const setFeildInOptions = useStore((state) => state.setFeildInOptions);
 
   return (
-    <div className="bg-blue-200 w-52 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
+    <div className="bg-blue-200 w-44 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
       <StrokeOptions handleOptions={setFeildInOptions} />
       <BackgroundOptions handleOptions={setFeildInOptions} />
       <FillOptions handleOptions={setFeildInOptions} />
@@ -29,8 +29,7 @@ const StrokeOptions = ({ handleOptions }) => {
     1: "#000000",
     2: "#fde047",
     3: "#ef4444",
-    4: "#3b82f6",
-    5: inputRef?.current?.value || "#000000",
+    4: inputRef?.current?.value || "#000000",
   };
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
@@ -62,16 +61,9 @@ const StrokeOptions = ({ handleOptions }) => {
             strokeColor === "#ef4444" ? "scale-110 transition-all" : ""
           }`}
         ></button>
-        <button
-          onClick={handleColorChange}
-          id="4"
-          className={`w-6 h-6 bg-blue-500 rounded-full ${
-            strokeColor === "#3b82f6" ? "scale-110 transition-all" : ""
-          }`}
-        ></button>
         <input
           onChange={handleColorChange}
-          id="5"
+          id="4"
           type="color"
           className="ml-2 hover:cursor-pointer"
           ref={inputRef}
@@ -88,8 +80,7 @@ const BackgroundOptions = ({ handleOptions }) => {
     1: "#000000",
     2: "#fde047",
     3: "#ef4444",
-    4: "#3b82f6",
-    5: inputRef?.current?.value || "#000000",
+    4: inputRef?.current?.value || "#000000",
   };
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
@@ -121,16 +112,9 @@ const BackgroundOptions = ({ handleOptions }) => {
             backgroundColor === "#ef4444" ? "scale-110 transition-all " : ""
           }`}
         ></button>
-        <button
-          onClick={handleColorChange}
-          id="4"
-          className={`w-6 h-6 bg-blue-500 rounded-full ${
-            backgroundColor === "#3b82f6" ? "scale-110 transition-all " : ""
-          }`}
-        ></button>
         <input
           onChange={handleColorChange}
-          id="5"
+          id="4"
           type="color"
           className="ml-2 hover:cursor-pointer"
           ref={inputRef}

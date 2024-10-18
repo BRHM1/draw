@@ -21,7 +21,7 @@ export const useStore = create((set) => ({
         hachureAngle: -41,
         hachureGap: -1,
         maxRandomnessOffset: 2,
-        preserveVertices: false,
+        preserveVertices: true,
         roughness: -1,
         seed: 0,
         stroke: "#892e89",

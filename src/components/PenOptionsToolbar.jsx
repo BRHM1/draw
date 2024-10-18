@@ -40,7 +40,7 @@ const PenOptionsToolbar = () => {
   };
 
   return (
-    <div className="bg-blue-200 w-56 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
+    <div className="bg-blue-200 w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
       <div className="text-lg font-bold">Pen Options</div>
       <div className="flex items-center justify-start">
         <label>Color</label>

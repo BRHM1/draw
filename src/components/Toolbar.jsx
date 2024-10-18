@@ -75,6 +75,7 @@ const Toolbar = (props) => {
           onClick={() => {
             setAction(button.name);
             setType(button.type);
+            props.clearGizmoOnOperation();
           }}
           className={twMerge(
             `w-10 h-8 grid place-content-center justify-self-center rounded-md `,

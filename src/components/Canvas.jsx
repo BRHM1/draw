@@ -31,6 +31,7 @@ import PenOptionsToolbar from "./PenOptionsToolbar";
 import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
 import ViewportControl from "./ViewportControl";
+import SelectionOptionsToolbar from "./SelectionOptionsToolbar";
 
 const Canvas = ({ history }) => {
   const canvasRef = useRef(null);
@@ -646,6 +647,7 @@ const Canvas = ({ history }) => {
       <Toolbar
         className={"row-start-1 col-start-1 justify-self-center left-1/4 z-20"}
         contextRef={contextRef}
+        clearGizmoOnOperation={clearGizmoOnOperation}
       />
       <div className="absolute top-10 left-3">
         {" "}
@@ -689,6 +691,7 @@ const Canvas = ({ history }) => {
       <RenderingCanvas panOffset={panOffset} history={history.history} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
+      {selectedElements.current.length > 0 && <SelectionOptionsToolbar />}
       <ViewportControl
         zoom={zoom}
         history={history}

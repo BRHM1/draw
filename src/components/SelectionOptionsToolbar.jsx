@@ -2,15 +2,15 @@ import {useState, useRef} from 'react';
 import {PiDotsNineBold, PiEmptyLight} from 'react-icons/pi';
 import { IoCopy } from "react-icons/io5";
 
-const SelectionOptionsToolbar = () => {
+const SelectionOptionsToolbar = ({editSelectedElements}) => {
   const handleOptions = (values) => {
-    console.log(values);
+    editSelectedElements(values)
   }
   return (
     <div className="bg-blue-200 w-44 h-[54%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
       {/* sliders for stroke width and path width */}
         <Slider handleOptions={handleOptions} min={0} max={100} property="Border Width" defaultValue={50} ratio={100} />
-        <Slider handleOptions={handleOptions} min={0} max={100} property="Path Width" defaultValue={50} ratio={100} />
+        <Slider handleOptions={handleOptions} min={0} max={100} property="Stroke Width" defaultValue={50} ratio={100} />
         <StrokeOptions handleOptions={handleOptions} />
         <BackgroundOptions handleOptions={handleOptions} />
         <FillOptions handleOptions={handleOptions} />
@@ -257,7 +257,7 @@ const BackgroundOptions = ({ handleOptions }) => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setBackgroundColor(options[optionsId]);
-    handleOptions(e.target.value || options[optionsId]);
+    e.target.value ? handleOptions({ fill: e.target.value }) : handleOptions({ fill: options[optionsId] });
   };
   return (
     <div className="mt-1">
@@ -308,7 +308,7 @@ const StrokeOptions = ({ handleOptions }) => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setStrokeColor(options[optionsId]);
-    handleOptions( e.target.value || options[optionsId]);
+    e.target.value ? handleOptions({ strokeColor: e.target.value }) : handleOptions({ strokeColor: options[optionsId] });
   };
   return (
     <div>

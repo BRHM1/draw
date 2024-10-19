@@ -79,10 +79,10 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  const fn = (e) => {
-    setCordinates({ x: e.clientX, y: e.clientY });
-  };
-  window.addEventListener("mousemove", fn);
+  // const fn = (e) => {
+  //   setCordinates({ x: e.clientX, y: e.clientY });
+  // };
+  // window.addEventListener("mousemove", fn);
 
   const cursorShapes = {
     draw: "cursor-crosshair",
@@ -99,6 +99,64 @@ const Canvas = ({ history }) => {
       textRef?.current?.focus();
     }, 0);
   };
+
+  const editSelectedElements = (modifiedValues) => {
+    let key = Object.entries(modifiedValues)[0][0];
+    let value = Object.entries(modifiedValues)[0][1];
+    selectedElements.current.forEach((element) => {
+      let type = element.type
+      switch (key) {
+        case "Border Width":
+          if(!shapes.has(type)) return
+          element.options = {...element.options , strokeWidth: value * 20}
+          element.roughElement.options = {...element.roughElement.options , strokeWidth: value * 20}
+          break
+        case "Stroke Width":
+          if(shapes.has(type)) return
+          element.options = {...element.options , size: value * 25}
+          break
+        case "strokeColor":
+          if(!shapes.has(type)) return
+          element.options = {...element.options , stroke: value}
+          element.roughElement.options = {...element.roughElement.options , stroke: value}
+          break
+        case "fill":
+          if(!shapes.has(type)) {
+            element.color = value
+          }else {
+            element.options = {...element.options , fill: value}
+            element.roughElement.options = {...element.roughElement.options , fill: value}
+          }
+          break
+        case "fillStyle":
+          if(!shapes.has(type)) return
+          element.options = {...element.options , fillStyle: value}
+          // you have to create a new rough element because the old one has fillPath in sets so you need to change it 
+          let newRoughOptions
+          switch (type) {
+            case "rectangle":
+              newRoughOptions = generator.rectangle(element.x1, element.y1, element.width, element.height, element.options)
+              break
+            case "ellipse":
+              newRoughOptions = generator.ellipse(element.centerX, element.centerY, element.width, element.height, element.options)
+              break
+            case "line":
+              newRoughOptions = generator.line(element.x1, element.y1, element.x2, element.y2, element.options)
+              break
+            case "circle":
+              newRoughOptions = generator.circle(element.centerX, element.centerY, element.width, element.options)
+              break
+            default:
+              break
+          }
+          element.roughElement = newRoughOptions
+          break
+        default:
+          break
+      }
+    });
+    setRerender((prev) => !prev);
+  }
 
   let Down = useCallback(
       (e) => {
@@ -694,7 +752,7 @@ const Canvas = ({ history }) => {
       <RenderingCanvas panOffset={panOffset} history={history.history} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
-      {selectedElements.current.length > 0 && <SelectionOptionsToolbar />}
+      {selectedElements.current.length > 0 && <SelectionOptionsToolbar editSelectedElements={editSelectedElements}/>}
       <ViewportControl
         zoom={zoom}
         history={history}

@@ -382,6 +382,8 @@ export class Path extends Shape {
         this.fillStyle = fillStyle
         this.points = points
         this.strokeStyle = strokeStyle
+        this.width = x2 - x1
+        this.height = y2 - y1
     }
     draw(context) {
         context.strokeStyle = this.strokeStyle
@@ -487,6 +489,12 @@ export class Path extends Shape {
         this.points = this.points.map(({ x, y }) => ({ x: x + dx, y: y + dy }))
     }
 
+    Duplicate(generator) {
+        const options = { ...this.options }
+        const points = this.points.map(({ x, y }) => ({ x: x + 10, y: y + 10 }))
+        return new Path(this.x1 + 10, this.y1 + 10, this.x2 + 10, this.y2 + 10, this.path, options, this.color, this.fillFlag, this.fillStyle, points, this.strokeStyle )
+    }
+
     saveLastState() {
         return { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2, width: this.width, height: this.height, path: this.path, options: this.options, color: this.color, fillFlag: this.fillFlag, fillStyle: this.fillStyle, points: this.points, strokeStyle: this.strokeStyle }
     }
@@ -557,6 +565,11 @@ export class Text extends Shape {
 
     Refine() {
         // TODO: modifiy the y1 coordinates to be the top left corner of the text
+    }
+
+    Duplicate(generator) {
+        const options = { ...this.options }
+        return new Text(this.x1 + 10, this.y1 + 10, this.text, options, this.rotation, this.width, this.height)
     }
 
     saveLastState() {

@@ -1,8 +1,9 @@
 import {useState, useRef} from 'react';
 import {PiDotsNineBold, PiEmptyLight} from 'react-icons/pi';
 import { IoCopy } from "react-icons/io5";
+import rough from "roughjs/bundled/rough.esm";
 
-const SelectionOptionsToolbar = ({editSelectedElements}) => {
+const SelectionOptionsToolbar = ({editSelectedElements, Duplicate}) => {
   const handleOptions = (values) => {
     editSelectedElements(values)
   }
@@ -15,7 +16,7 @@ const SelectionOptionsToolbar = ({editSelectedElements}) => {
         <BackgroundOptions handleOptions={handleOptions} />
         <FillOptions handleOptions={handleOptions} />
         <hr  className="mt-5 mb-2 border border-t-1 border-slate-400" />
-        <Actions handleOptions={handleOptions} />
+        <Actions handleOptions={handleOptions}  Duplicate={Duplicate}/>
     </div>
   );
 };
@@ -347,13 +348,14 @@ const StrokeOptions = ({ handleOptions }) => {
   );
 };
 
-const Actions = ({ handleOptions }) => {
+const Actions = ({ handleOptions, Duplicate }) => {
+  const generator = rough.generator();
   return (
     <div >
       <div className="">Actions</div>
       <div className="flex items-center justify-start gap-1">
         <button
-          onClick={() => handleOptions("copy")}
+          onClick={() => Duplicate(generator)}
          className="w-6 h-6 flex items-center justify-center bg-blue-100 hover:bg-blue-300 transition-all rounded-md shadow-md"
         >
           <IoCopy /> 

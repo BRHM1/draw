@@ -104,59 +104,125 @@ const Canvas = ({ history }) => {
     let key = Object.entries(modifiedValues)[0][0];
     let value = Object.entries(modifiedValues)[0][1];
     selectedElements.current.forEach((element) => {
-      let type = element.type
+      let type = element.type;
       switch (key) {
         case "Border Width":
-          if(!shapes.has(type)) return
-          element.options = {...element.options , strokeWidth: value * 20}
-          element.roughElement.options = {...element.roughElement.options , strokeWidth: value * 20}
-          break
+          if (!shapes.has(type)) return;
+          element.options = { ...element.options, strokeWidth: value * 20 };
+          element.roughElement.options = {
+            ...element.roughElement.options,
+            strokeWidth: value * 20,
+          };
+          break;
         case "Stroke Width":
-          if(shapes.has(type)) return
-          element.options = {...element.options , size: value * 25}
-          break
+          if (shapes.has(type)) return;
+          element.options = { ...element.options, size: value * 25 };
+          break;
         case "strokeColor":
-          if(!shapes.has(type)) return
-          element.options = {...element.options , stroke: value}
-          element.roughElement.options = {...element.roughElement.options , stroke: value}
-          break
+          if (!shapes.has(type)) return;
+          element.options = { ...element.options, stroke: value };
+          element.roughElement.options = {
+            ...element.roughElement.options,
+            stroke: value,
+          };
+          break;
         case "fill":
-          if(!shapes.has(type)) {
-            element.color = value
-          }else {
-            element.options = {...element.options , fill: value}
-            element.roughElement.options = {...element.roughElement.options , fill: value}
+          if (!shapes.has(type)) {
+            element.color = value;
+          } else {
+            element.options = { ...element.options, fill: value };
+            element.roughElement.options = {
+              ...element.roughElement.options,
+              fill: value,
+            };
           }
-          break
+          break;
         case "fillStyle":
-          if(!shapes.has(type)) return
-          element.options = {...element.options , fillStyle: value}
-          // you have to create a new rough element because the old one has fillPath in sets so you need to change it 
-          let newRoughOptions
+          if (!shapes.has(type)) return;
+          element.options = { ...element.options, fillStyle: value };
+          // you have to create a new rough element because the old one has fillPath in sets so you need to change it
+          let newRoughOptions;
           switch (type) {
             case "rectangle":
-              newRoughOptions = generator.rectangle(element.x1, element.y1, element.width, element.height, element.options)
-              break
+              newRoughOptions = generator.rectangle(
+                element.x1,
+                element.y1,
+                element.width,
+                element.height,
+                element.options
+              );
+              break;
             case "ellipse":
-              newRoughOptions = generator.ellipse(element.centerX, element.centerY, element.width, element.height, element.options)
-              break
+              newRoughOptions = generator.ellipse(
+                element.centerX,
+                element.centerY,
+                element.width,
+                element.height,
+                element.options
+              );
+              break;
             case "line":
-              newRoughOptions = generator.line(element.x1, element.y1, element.x2, element.y2, element.options)
-              break
+              newRoughOptions = generator.line(
+                element.x1,
+                element.y1,
+                element.x2,
+                element.y2,
+                element.options
+              );
+              break;
             case "circle":
-              newRoughOptions = generator.circle(element.centerX, element.centerY, element.width, element.options)
-              break
+              newRoughOptions = generator.circle(
+                element.centerX,
+                element.centerY,
+                element.width,
+                element.options
+              );
+              break;
             default:
-              break
+              break;
           }
-          element.roughElement = newRoughOptions
-          break
+          element.roughElement = newRoughOptions;
+          break;
         default:
-          break
+          break;
       }
     });
     setRerender((prev) => !prev);
-  }
+  };
+
+  const Duplicate = (generator) => {
+    let newElements = [];
+    selectedElements.current.forEach((element) => {
+      let newElement = element.Duplicate(generator);
+      newElements.push(newElement);
+      addElement(newElement);
+    });
+    let action = new DrawAction(newElements, generator);
+    history.push(action);
+    
+    // switch the selectedElements and gizmo to the new elements
+    selectedElements.current = newElements;
+    contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    const containerGizmoCoords = getMinMaxCoordinates(selectedElements.current);
+    gizmoRef.current = new Gizmo(
+      containerGizmoCoords.minX,
+      containerGizmoCoords.minY,
+      containerGizmoCoords.maxX - containerGizmoCoords.minX,
+      containerGizmoCoords.maxY - containerGizmoCoords.minY,
+      "transparent",
+      true
+    );
+    const zoom = useStore.getState().zoom;
+    const centerScaleOffset = useStore.getState().centerScalingOffset;
+    contextRef.current.save();
+    contextRef.current.scale(1 / zoom, 1 / zoom);
+    contextRef.current.translate(
+      panOffset.x + centerScaleOffset.x,
+      panOffset.y + centerScaleOffset.y
+    );
+    gizmoRef.current.draw(contextRef);
+    contextRef.current.restore();
+  };
 
   let Down = useCallback(
       (e) => {
@@ -169,6 +235,7 @@ const Canvas = ({ history }) => {
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
+            const elements = useStore.getState().elements;
             const selectedElement = getElementAtPos(x, y, elements);
             resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
             lastResizeState.current = [];
@@ -525,7 +592,6 @@ const Canvas = ({ history }) => {
             generator
           );
 
-
           if (
             (distance.current.x || distance.current.y) &&
             isDragging.current
@@ -557,7 +623,7 @@ const Canvas = ({ history }) => {
           // );
           selectedElements.current.forEach((element) => {
             element.Refine();
-          })
+          });
           lastResizeState.current = [];
           distance.current = { x: 0, y: 0 };
         } else {
@@ -752,7 +818,12 @@ const Canvas = ({ history }) => {
       <RenderingCanvas panOffset={panOffset} history={history.history} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
-      {selectedElements.current.length > 0 && <SelectionOptionsToolbar editSelectedElements={editSelectedElements}/>}
+      {selectedElements.current.length > 0 && (
+        <SelectionOptionsToolbar
+          editSelectedElements={editSelectedElements}
+          Duplicate={Duplicate}
+        />
+      )}
       <ViewportControl
         zoom={zoom}
         history={history}

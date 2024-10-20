@@ -33,6 +33,10 @@ export class Shape {
         return null
     }
 
+    Duplicate() {
+        return null
+    }
+
     Refine() {
         return null
     }
@@ -102,6 +106,12 @@ export class Circle extends Shape {
         this.width = this.radius * 2
         this.height = this.radius * 2
         this.#updateRoughElement(generator)
+    }
+
+    Duplicate(generator) {
+        const options = { ...this.options }
+        const roughElement = generator.circle(this.centerX + 10, this.centerY + 10, this.radius * 2, options)
+        return new Circle(this.x1 + 10, this.y1 + 10, this.radius, options, roughElement, this.centerX + 10, this.centerY + 10, this.rotation)
     }
 
     Refine() {
@@ -185,6 +195,12 @@ export class Ellipse extends Shape {
         this.#updateRoughElement(generator)
     }
 
+    Duplicate(generator) {
+        const options = { ...this.options }
+        const roughElement = generator.ellipse(this.centerX + 10, this.centerY + 10, this.width, this.height, options)
+        return new Ellipse(this.x1 + 10, this.y1 + 10, this.width, this.height, options, roughElement, this.rotation, this.centerX, this.centerY)
+    }
+
     Refine() {
         const capture = { x1: this.x1, y1: this.y1, width: this.width, height: this.height }
         this.x1 = Math.min(capture.x1, capture.x1 + capture.width)
@@ -265,6 +281,14 @@ export class Line extends Shape {
         this.y2 = Math.max(capture.y1, capture.y2)
     }
 
+    Duplicate(generator) {
+        const options = { ...this.options }
+        const roughElement = generator.line(this.x1 + 10, this.y1 + 10, this.x2 + 10, this.y2 + 10, options)
+        let res = new Line(this.x1 + 30, this.y1 + 30, this.x2 + 10, this.y2 + 10, options, roughElement, this.rotation)        
+        res.updateDimensions(this.x2 + 30, this.y2 + 30, generator)
+        return res
+    }
+
     saveLastState() {
         return { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2, width: this.width, height: this.height, options: this.options, roughElement: this.roughElement, rotation: this.rotation }
     }
@@ -331,6 +355,12 @@ export class Rectangle extends Shape {
         this.y1 = Math.min(capture.y1, capture.y1 + capture.height)
         this.width = Math.abs(capture.width)
         this.height = Math.abs(capture.height)
+    }
+
+    Duplicate(generator) {
+        const options = { ...this.options }
+        const roughElement = generator.rectangle(this.x1 + 10, this.y1 + 10, this.width, this.height, options)
+        return new Rectangle(this.x1 + 10, this.y1 + 10, this.width, this.height, options, roughElement, this.rotation)
     }
 
     saveLastState() {

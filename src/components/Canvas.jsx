@@ -128,7 +128,7 @@ const Canvas = ({ history }) => {
           break;
         case "fill":
           if (!shapes.has(type)) {
-            element.color = value;
+            type === "path" ? element.color = value : element.options.fill = value;
           } else {
             element.options = { ...element.options, fill: value };
             element.roughElement.options = {
@@ -488,6 +488,7 @@ const Canvas = ({ history }) => {
               } else if (isResizing.current) {
                 // SELECTION SYSTEM: if the action is resizing then resize the selected elements
                 // hide, resize, and draw the selected elements
+                // console.log("Gizmo" , gizmoRef.current)
                 selectedElements.current.forEach((element) => {
                   element.hidden = true;
                   element.Resize(

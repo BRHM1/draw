@@ -80,21 +80,60 @@ export class Circle extends Shape {
         this.type = type
     }
 
-    Resize(dx, dy, generator, resizingPoint, mouseDir) {
-        let { left, right, up, down } = mouseDir
-        let radiusDiff = Math.sqrt(dx ** 2 + dy ** 2) / 2
+    Resize(dx, dy, generator, resizingPoint, mouseDir, gizmoRef) {
+        let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
         switch (resizingPoint) {
             case "topLeft":
-                this.radius = left || up ? this.radius + radiusDiff : this.radius - radiusDiff
+                origin = { x: gizmoRef.x1 + gizmoRef.width / 2, y: gizmoRef.y1 + gizmoRef.height / 2 }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                this.radius = this.width / 2
                 break
             case "topRight":
-                this.radius = right || up ? this.radius + radiusDiff : this.radius - radiusDiff
+                origin = { x: gizmoRef.x1 + gizmoRef.width / 2, y: gizmoRef.y1 + gizmoRef.height / 2 }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                this.radius = this.width / 2
                 break
             case "bottomLeft":
-                this.radius = left || down ? this.radius + radiusDiff : this.radius - radiusDiff
+                origin = { x: gizmoRef.x1 + gizmoRef.width / 2, y: gizmoRef.y1 + gizmoRef.height / 2 }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                this.radius = this.width / 2
                 break
             case "bottomRight":
-                this.radius = right || down ? this.radius + radiusDiff : this.radius - radiusDiff
+                origin = { x: gizmoRef.x1 + gizmoRef.width / 2, y: gizmoRef.y1 + gizmoRef.height / 2 }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.centerX = this.x1 + this.width / 2
+                this.centerY = this.y1 + this.height / 2
+                this.radius = this.width / 2
                 break
             default:
                 break
@@ -159,33 +198,54 @@ export class Ellipse extends Shape {
         this.roughElement = generator.ellipse(this.centerX, this.centerY, this.width, this.height, this.options)
     }
 
-    Resize(dx, dy, generator, resizingPoint) {
+    Resize(dx, dy, generator, resizingPoint, _, gizmoRef) {
+        let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
         switch (resizingPoint) {
             case "topLeft":
-                this.x1 += dx
-                this.y1 += dy
-                this.width -= dx
-                this.height -= dy
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 this.centerX = this.x1 + this.width / 2
                 this.centerY = this.y1 + this.height / 2
                 break
             case "topRight":
-                this.y1 += dy
-                this.width += dx
-                this.height -= dy
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 this.centerX = this.x1 + this.width / 2
                 this.centerY = this.y1 + this.height / 2
                 break
             case "bottomLeft":
-                this.x1 += dx
-                this.width -= dx
-                this.height += dy
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 this.centerX = this.x1 + this.width / 2
                 this.centerY = this.y1 + this.height / 2
                 break
             case "bottomRight":
-                this.width += dx
-                this.height += dy
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 this.centerX = this.x1 + this.width / 2
                 this.centerY = this.y1 + this.height / 2
                 break
@@ -219,6 +279,8 @@ export class Line extends Shape {
         super(x1, y1, x2, y2, options, rotation)
         this.roughElement = roughElement
         this.type = "line"
+        this.firstPoint = { x: x1, y: y1 }
+        this.secondPoint = { x: x2, y: y2 }
     }
     draw(roughCanvas) {
         roughCanvas.draw(this.roughElement)
@@ -228,6 +290,7 @@ export class Line extends Shape {
         this.y2 = y2
         this.width = x2 - this.x1
         this.height = y2 - this.y1
+        this.secondPoint = { x: x2, y: y2 }
         this.#updateRoughElement(generator)
     }
     Move(dx, dy, generator) {
@@ -235,50 +298,87 @@ export class Line extends Shape {
         this.y1 += dy
         this.x2 += dx
         this.y2 += dy
+        this.firstPoint = { x: this.firstPoint.x + dx, y: this.firstPoint.y + dy }
+        this.secondPoint = { x: this.secondPoint.x + dx, y: this.secondPoint.y + dy }
         this.#updateRoughElement(generator)
     }
     #updateRoughElement(generator) {
-        this.roughElement = generator.line(this.x1, this.y1, this.x2, this.y2, this.options)
+        this.roughElement = generator.line(this.firstPoint.x, this.firstPoint.y, this.secondPoint.x, this.secondPoint.y, this.options)
     }
 
-    Resize(dx, dy, generator, resizingPoint) {
+    Resize(dx, dy, generator, resizingPoint, _, gizmoRef) {
+        let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
         switch (resizingPoint) {
             case "topLeft":
-                this.x1 += dx
-                this.y1 += dy
-                this.width -= dx
-                this.height -= dy
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.x2 = scaleX * (this.x2 - origin.x) + origin.x
+                this.y2 = scaleY * (this.y2 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.firstPoint = { x: scaleX * (this.firstPoint.x - origin.x) + origin.x , y: scaleY * (this.firstPoint.y - origin.y) + origin.y }
+                this.secondPoint = { x: scaleX * (this.secondPoint.x - origin.x) + origin.x , y: scaleY * (this.secondPoint.y - origin.y) + origin.y }
                 break
             case "topRight":
-                this.y1 += dy
-                this.x2 += dx
-                this.width += dx
-                this.height -= dy
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.x2 = scaleX * (this.x2 - origin.x) + origin.x
+                this.y2 = scaleY * (this.y2 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.firstPoint = { x: scaleX * (this.firstPoint.x - origin.x) + origin.x , y: scaleY * (this.firstPoint.y - origin.y) + origin.y }
+                this.secondPoint = { x: scaleX * (this.secondPoint.x - origin.x) + origin.x , y: scaleY * (this.secondPoint.y - origin.y) + origin.y }
                 break
             case "bottomLeft":
-                this.x1 += dx
-                this.y2 += dy
-                this.width -= dx
-                this.height += dy
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.x2 = scaleX * (this.x2 - origin.x) + origin.x
+                this.y2 = scaleY * (this.y2 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.firstPoint = { x: scaleX * (this.firstPoint.x - origin.x) + origin.x , y: scaleY * (this.firstPoint.y - origin.y) + origin.y }
+                this.secondPoint = { x: scaleX * (this.secondPoint.x - origin.x) + origin.x , y: scaleY * (this.secondPoint.y - origin.y) + origin.y }
                 break
             case "bottomRight":
-                this.x2 += dx
-                this.y2 += dy
-                this.width += dx
-                this.height += dy
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.x2 = scaleX * (this.x2 - origin.x) + origin.x
+                this.y2 = scaleY * (this.y2 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
+                this.firstPoint = { x: scaleX * (this.firstPoint.x - origin.x) + origin.x , y: scaleY * (this.firstPoint.y - origin.y) + origin.y }
+                this.secondPoint = { x: scaleX * (this.secondPoint.x - origin.x) + origin.x , y: scaleY * (this.secondPoint.y - origin.y) + origin.y }
                 break
             default:
                 break
         }
         this.#updateRoughElement(generator)
     }
-
+    // what defines the gizmo shouldn't be the same which defines the points
     Refine() {
         const capture = { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2 }
         this.x1 = Math.min(capture.x1, capture.x2)
         this.y1 = Math.min(capture.y1, capture.y2)
         this.x2 = Math.max(capture.x1, capture.x2)
         this.y2 = Math.max(capture.y1, capture.y2)
+        this.width = this.x2 - this.x1
+        this.height = this.y2 - this.y1
     }
 
     Duplicate(generator) {
@@ -321,27 +421,48 @@ export class Rectangle extends Shape {
         this.roughElement = generator.rectangle(this.x1, this.y1, this.width, this.height, this.options)
     }
 
-    Resize(dx, dy, generator, resizingPoint) {
+    Resize(dx, dy, generator, resizingPoint, _, gizmoRef) {
+        let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
         switch (resizingPoint) {
             case "topLeft":
-                this.x1 += dx
-                this.y1 += dy
-                this.width -= dx
-                this.height -= dy
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 break
             case "topRight":
-                this.y1 += dy
-                this.width += dx
-                this.height -= dy
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 break
             case "bottomLeft":
-                this.x1 += dx
-                this.width -= dx
-                this.height += dy
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 break
             case "bottomRight":
-                this.width += dx
-                this.height += dy
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
+                if (scaleX === 0 || scaleY === 0) return
+                this.x1 = scaleX * (this.x1 - origin.x) + origin.x
+                this.y1 = scaleY * (this.y1 - origin.y) + origin.y
+                this.width = scaleX * this.width
+                this.height = scaleY * this.height
                 break
             default:
                 break
@@ -405,12 +526,11 @@ export class Path extends Shape {
     }
     Resize(dx, dy, generator, resizingPoint, mouseDir, gizmoRef) {
         let scaleX = 1, scaleY = 1, origin = { x: 0, y: 0 }
-        console.log(gizmoRef.current)
         switch (resizingPoint) {
             case "topLeft":
-                origin = { x: this.x2, y: this.y2 }
-                scaleX = isValidNumber(1 - dx / this.width) ? 1 - dx / this.width : 1
-                scaleY = isValidNumber(1 - dy / this.height) ? 1 - dy / this.height : 1
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
                 if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
@@ -423,9 +543,9 @@ export class Path extends Shape {
                 this.height -= dy
                 break
             case "topRight":
-                origin = { x: this.x1, y: this.y2 }
-                scaleX = isValidNumber(1 + dx / this.width) ? 1 + dx / this.width : 1
-                scaleY = isValidNumber(1 - dy / this.height) ? 1 - dy / this.height : 1
+                origin = { x: gizmoRef.x1, y: gizmoRef.y1 + gizmoRef.height }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 - dy / gizmoRef.height) ? 1 - dy / gizmoRef.height : 1
                 if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
@@ -438,9 +558,9 @@ export class Path extends Shape {
                 this.height -= dy
                 break
             case "bottomLeft":
-                origin = { x: this.x2, y: this.y1 }
-                scaleX = isValidNumber(1 - dx / this.width) ? 1 - dx / this.width : 1
-                scaleY = isValidNumber(1 + dy / this.height) ? 1 + dy / this.height : 1
+                origin = { x: gizmoRef.x1 + gizmoRef.width, y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 - dx / gizmoRef.width) ? 1 - dx / gizmoRef.width : 1
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
                 if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
                     let newX = scaleX * (x - origin.x) + origin.x
@@ -453,13 +573,13 @@ export class Path extends Shape {
                 this.width -= dx
                 break
             case "bottomRight":
-                origin = { x: this.x1, y: this.y1 }
-                scaleX = isValidNumber(1 + dx / this.width) ? 1 + dx / this.width : 1 // main problem is width could be 0 and 1 + dx could be 0 also 
-                scaleY = isValidNumber(1 + dy / this.height) ? 1 + dy / this.height : 1
+                origin = { x: gizmoRef.x1 , y: gizmoRef.y1 }
+                scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1 // main problem is width could be 0 and 1 + dx could be 0 also 
+                scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
                 if (scaleX === 0 || scaleY === 0) return
                 this.points = this.points.map(({ x, y }) => {
-                    let newX = scaleX * (x - origin.x) + origin.x
-                    let newY = scaleY * (y - origin.y) + origin.y
+                    let newX = scaleX * (x - origin.x) + origin.x 
+                    let newY = scaleY * (y - origin.y) + origin.y 
                     return { x: newX, y: newY }
                 })
                 this.x2 = Math.max(...this.points.map(({ x }) => x))
@@ -513,6 +633,7 @@ export class Text extends Shape {
 
     draw(context, textAreaRef) {
         context.font = this.options.font;
+        context.fillStyle = this.options.fill || "black";
         const zoom = useStore.getState().zoom
         const { width: maxLineWidth } = textAreaRef.current.getBoundingClientRect()
 
@@ -538,7 +659,7 @@ export class Text extends Shape {
         this.text = text
     }
 
-    Resize(dx, dy, generator, resizingPoint, mouseDir) {
+    Resize(dx, dy, generator, resizingPoint, mouseDir, gizmoRef) {
         let { left, right, up, down } = mouseDir
         let [fontSize, fontFamily] = this.options.font.split('px')
         switch (resizingPoint) {

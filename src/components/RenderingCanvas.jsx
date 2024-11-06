@@ -6,11 +6,11 @@ import { getData } from "../utils/utils";
 const RenderingCanvas = ({ panOffset, history }) => {
   const renderingCanvasRef = useRef(null);
   const renderingContextRef = useRef(null);
-  
+
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
-  
+
   const elements = useStore((state) => state.elements);
-  
+
   const zoom = useStore((state) => state.zoom);
   const setCenterScalingOffset = useStore(
     (state) => state.setCenterScalingOffset
@@ -19,7 +19,7 @@ const RenderingCanvas = ({ panOffset, history }) => {
   const rerender = useStore((state) => state.rerender);
 
   const localElements = useRef([]);
-  
+
   // useLayoutEffect(() => {
   //   async function fetchData() {
   //     const data = await getData();
@@ -27,7 +27,6 @@ const RenderingCanvas = ({ panOffset, history }) => {
   //   }
   //   fetchData();
   // }, [elements]);
-
   useLayoutEffect(() => {
     const renderingCanvas = renderingCanvasRef.current;
     const renderingCanvasContext = renderingCanvas.getContext("2d");
@@ -36,7 +35,7 @@ const RenderingCanvas = ({ panOffset, history }) => {
 
     renderingCanvas.width = rect.width * dpr;
     renderingCanvas.height = rect.height * dpr;
-  
+
     renderingCanvasContext.scale(dpr, dpr);
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
@@ -72,17 +71,17 @@ const RenderingCanvas = ({ panOffset, history }) => {
     history.forEach((element) => {
       if (["event", "remove", "resizing"].includes(element.type)) return; // skip event actions and only draw shapes
       element.shapes.forEach((shape) => {
-        if (shape.hidden) return
+        if (shape.hidden) return;
         shapes.has(shape.type)
           ? shape.draw(roughCanvas)
           : shape.draw(renderingContextRef.current, renderingCanvasRef);
       });
     });
 
-    console.log("history", history)
+    console.log("history", history);
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-    console.log("elements" ,elements);
+    console.log("elements", elements);
   }, [elements, panOffset.x, panOffset.y, zoom, rerender]);
 
   return (

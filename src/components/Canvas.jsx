@@ -1,8 +1,14 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
-
+import { io } from "socket.io-client";
 import {
   RemoveAction,
   DrawAction,
@@ -24,7 +30,7 @@ import {
   getElementAtPos,
   getElementsInsideSelectionBox,
   getMinMaxCoordinates,
-  getMouseDirection,
+  generateID,
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -32,8 +38,15 @@ import RenderingCanvas from "./RenderingCanvas";
 import Toolbar from "./Toolbar";
 import ViewportControl from "./ViewportControl";
 import SelectionOptionsToolbar from "./SelectionOptionsToolbar";
+import Modal from "./Modal";
+
+const socket = io("http://localhost:3000");
 
 const Canvas = ({ history }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const urlParams = new URLSearchParams(window.location.search);
+  const [roomID, setRoomID] = useState(urlParams.get("roomID"));
+
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const roughCanvasRef = useRef(null);
@@ -84,6 +97,15 @@ const Canvas = ({ history }) => {
   // };
   // window.addEventListener("mousemove", fn);
 
+  useEffect(() => {
+    if (!roomID) return;
+    socket.emit('join-room', roomID);
+    const onReceiveDraw = data => console.log(data);
+
+    socket.on('receive-draw', onReceiveDraw);
+    return () => socket.off('receive-draw', onReceiveDraw);
+  }, [roomID, socket]);
+
   const cursorShapes = {
     draw: "cursor-crosshair",
     shape: "cursor-crosshair",
@@ -91,6 +113,20 @@ const Canvas = ({ history }) => {
     select: "cursor-grabbing",
     erase: "cursor-pointer",
     pan: "cursor-grab",
+  };
+
+  const handleShare = () => {
+    setIsOpen(true);
+
+    // set up the socket connection to the server --- should be on the share button click
+    // listen for the connection to the server --- should be on the share button click
+    const id = generateID();
+    if (!roomID) setRoomID(id);
+  };
+
+  const handleEndSession = () => {
+    setRoomID("");
+    urlParams.delete("roomID");
   };
 
   const reFocus = () => {
@@ -128,7 +164,9 @@ const Canvas = ({ history }) => {
           break;
         case "fill":
           if (!shapes.has(type)) {
-            type === "path" ? element.color = value : element.options.fill = value;
+            type === "path"
+              ? (element.color = value)
+              : (element.options.fill = value);
           } else {
             element.options = { ...element.options, fill: value };
             element.roughElement.options = {
@@ -199,7 +237,7 @@ const Canvas = ({ history }) => {
     });
     let action = new DrawAction(newElements, generator);
     history.push(action);
-    
+
     // switch the selectedElements and gizmo to the new elements
     selectedElements.current = newElements;
     contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -689,7 +727,11 @@ const Canvas = ({ history }) => {
           await addData(shapeRef.current);
         }
         addDataToDB();
-
+        // sending the draw data to the server
+        if(roomID) {
+          console.log(socket)
+          socket.emit('send-draw', roomID, shapeRef.current)
+        };
         // adding the new element to the history
         const action = new DrawAction([shapeRef.current], generator);
         history.push(action);
@@ -772,6 +814,20 @@ const Canvas = ({ history }) => {
 
   return (
     <div className="w-full h-screen grid">
+      <button
+        className="absolute top-4 right-10 w-20 h-10 text-[18px] font-nova bg-blue-500 text-white rounded-md z-20"
+        onClick={handleShare}
+      >
+        share
+      </button>
+      {isOpen && (
+        <Modal
+          open={isOpen}
+          roomID={roomID}
+          handleEndSession={handleEndSession}
+          onClose={() => setIsOpen(false)}
+        />
+      )}
       <Toolbar
         className={"row-start-1 col-start-1 justify-self-center left-1/4 z-20"}
         contextRef={contextRef}

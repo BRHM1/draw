@@ -281,6 +281,10 @@ export class Line extends Shape {
         this.type = "line"
         this.firstPoint = { x: x1, y: y1 }
         this.secondPoint = { x: x2, y: y2 }
+        this.width = x2 - x1
+        this.height = y2 - y1
+        this.x2 = x2
+        this.y2 = y2
     }
     draw(roughCanvas) {
         roughCanvas.draw(this.roughElement)

@@ -31,6 +31,7 @@ import {
   getElementsInsideSelectionBox,
   getMinMaxCoordinates,
   generateID,
+  hydrate
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -61,6 +62,7 @@ const Canvas = ({ history }) => {
   const lastdy = useRef(0);
   const isSelectedElementRemoved = useRef(true);
   const setRerender = useStore((state) => state.setRerender);
+  const capturedText = useRef(null)
 
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [prevAccumulativeSumX, setPrevAccumulativeSumX] = useState(0);
@@ -100,8 +102,16 @@ const Canvas = ({ history }) => {
   useEffect(() => {
     if (!roomID) return;
     socket.emit('join-room', roomID);
-    const onReceiveDraw = data => console.log(data);
-
+    const onReceiveDraw = data => {
+      if(data === null) return;
+      const element = hydrate(data)
+      addElement(element);
+      const action = new DrawAction([element], generator);
+      history.push(action);
+      console.log("Hydrated Element is" ,element)
+    };
+    // get the drawing data then hydrate it then draw it on the canvas
+    // if the data is a modification then modify the element
     socket.on('receive-draw', onReceiveDraw);
     return () => socket.off('receive-draw', onReceiveDraw);
   }, [roomID, socket]);
@@ -729,7 +739,6 @@ const Canvas = ({ history }) => {
         addDataToDB();
         // sending the draw data to the server
         if(roomID) {
-          console.log(socket)
           socket.emit('send-draw', roomID, shapeRef.current)
         };
         // adding the new element to the history
@@ -742,6 +751,7 @@ const Canvas = ({ history }) => {
     setTimeout(() => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       shapeRef.current.updateText(textRef.current.value);
+      capturedText.current = shapeRef.current
       setIsDrawing(!isDrawing);
       // shapeRef.current.draw(contextRef.current, canvasRef);
     }, 0);
@@ -760,6 +770,10 @@ const Canvas = ({ history }) => {
       history.pop();
       removeLastElement();
     }
+    console.log("OnBlur Edition" ,capturedText.current)
+    if(roomID) {
+      socket.emit('send-draw', roomID, capturedText.current)
+    };
   };
 
   const clearGizmoOnOperation = () => {

@@ -1,4 +1,6 @@
 import { getStroke } from "perfect-freehand";
+import { Path, Rectangle, Ellipse, Circle, Line, Text } from "../hooks/elementModule";
+
 
 const average = (a, b) => (a + b) / 2
 
@@ -262,7 +264,7 @@ export const getMouseDirection = (element, x, y) => {
 }
 
 export const isValidNumber = (number) => {
-  return !isNaN(number) && number !== Infinity && number !== -Infinity 
+  return !isNaN(number) && number !== Infinity && number !== -Infinity
 }
 
 export function swapObjValues(obj1, obj2) {
@@ -272,7 +274,7 @@ export function swapObjValues(obj1, obj2) {
     obj1[key] = obj2[key]
     obj2[key] = temp[key]
   })
-}  
+}
 
 export const generateID = () => {
   let result = "";
@@ -286,3 +288,33 @@ export const generateID = () => {
   }
   return result;
 };
+
+export const hydrate = element => {
+  let result = null
+  const { points, options, roughElement, x1, y1, x2, y2, path, fillFlag, fillStyle, strokeStyle,text, rotation , width, height, radius, centerX, centerY} = element
+  switch (element.type) {
+    case "path":
+      result = new Path(x1, y1, x2, y2, path, options, "black", fillFlag, fillStyle, points, strokeStyle, rotation)
+      break
+    case "rectangle":
+      // const { x1, y1, width, height, options, roughElement, rotation } = element
+      result = new Rectangle(x1, y1, width, height, options, roughElement, rotation)
+      break
+    case "ellipse":
+      result = new Ellipse(x1, y1, width, height, options, roughElement, rotation)
+      break
+    case "circle":
+      result = new Circle(x1, y1, radius, options, roughElement,centerX, centerY, rotation)
+      break
+    case "line":
+      // const {x1, y1, x2, y2, options, roughElement, rotation} = element
+      result = new Line(x1, y1, x2, y2, options, roughElement, rotation)
+      break
+    case "text":
+      result = new Text(x1, y1, text, options, rotation, width, height)
+      break
+    default:
+      break
+  }
+  return result
+}

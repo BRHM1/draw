@@ -23,6 +23,14 @@ function App() {
   // 1- store functions can be improved
   // 2- path move method can be improved
 
+  // TODO: 
+  // events should be sent through the socket also like move ,copy, delete, resize and undo redo
+  // show cursor of the other users in the same room
+  // each drawn shape should have a unique id even after hydration   
+
+
+
+
   // Text flow:
   // 1. onClick intiates an instance of Text class + a textarea
   // 2. onKeyDown updates the text

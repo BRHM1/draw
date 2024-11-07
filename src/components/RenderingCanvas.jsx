@@ -1,12 +1,12 @@
-import { useRef, useLayoutEffect, useState } from "react";
+import { useRef, useLayoutEffect, useState, useEffect } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import { useStore } from "../store";
-import { getData } from "../utils/utils";
+import { getData, hydrate } from "../utils/utils";
 
 const RenderingCanvas = ({ panOffset, history }) => {
   const renderingCanvasRef = useRef(null);
   const renderingContextRef = useRef(null);
-
+  const [hasMounted, setHasMounted] = useState(false);
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
   const elements = useStore((state) => state.elements);
@@ -18,16 +18,20 @@ const RenderingCanvas = ({ panOffset, history }) => {
 
   const rerender = useStore((state) => state.rerender);
 
-  const localElements = useRef([]);
+  const [localElements, setLocalElements] = useState([]);
 
-  // useLayoutEffect(() => {
-  //   async function fetchData() {
-  //     const data = await getData();
-  //     localElements.current = data;
-  //   }
-  //   fetchData();
-  // }, [elements]);
   useLayoutEffect(() => {
+    async function fetchData() {
+      const data = await getData();
+      let hydrated = data.map((element) => hydrate(element));
+      setLocalElements(hydrated);
+      setHasMounted(true);
+    }
+    fetchData();
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!hasMounted) return;
     const renderingCanvas = renderingCanvasRef.current;
     const renderingCanvasContext = renderingCanvas.getContext("2d");
     const dpr = window.devicePixelRatio;
@@ -39,7 +43,7 @@ const RenderingCanvas = ({ panOffset, history }) => {
     renderingCanvasContext.scale(dpr, dpr);
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
-
+    
     const scaledWidth = rect.width * zoom;
     const scaledHeight = rect.height * zoom;
 
@@ -78,11 +82,12 @@ const RenderingCanvas = ({ panOffset, history }) => {
       });
     });
 
+
     console.log("history", history);
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
     console.log("elements", elements);
-  }, [elements, panOffset.x, panOffset.y, zoom, rerender]);
+  }, [elements, panOffset.x, panOffset.y, zoom, rerender, hasMounted]);
 
   return (
     <canvas

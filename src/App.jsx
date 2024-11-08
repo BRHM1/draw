@@ -1,6 +1,7 @@
 import Canvas from "./components/Canvas";
 import { History } from "./hooks/History";
 import useInitDB from "./hooks/useInitDB";
+import { io } from "socket.io-client";
 
 function App() {
   // document.addEventListener('mousemove', (event) => {
@@ -26,10 +27,11 @@ function App() {
   // TODO: 
   // events should be sent through the socket also like move ,copy, delete, resize and undo redo
   // show cursor of the other users in the same room
-  // each drawn shape should have a unique id even after hydration   
-
-
-
+  // each drawn shape should have a unique id even after hydration 
+  
+  // reload works and shapes are hydrated but you should make the id's unique while hydrating the shapes 
+  // and also you should seperate the history from the rendered elements to be able to merge the localElements with the recently 
+  // drawn elements from the user  
 
   // Text flow:
   // 1. onClick intiates an instance of Text class + a textarea

@@ -31,7 +31,7 @@ import {
   getElementsInsideSelectionBox,
   getMinMaxCoordinates,
   generateID,
-  hydrate
+  hydrate,
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -40,6 +40,7 @@ import Toolbar from "./Toolbar";
 import ViewportControl from "./ViewportControl";
 import SelectionOptionsToolbar from "./SelectionOptionsToolbar";
 import Modal from "./Modal";
+import Cursor from "./Cursor";
 
 const socket = io("http://localhost:3000");
 
@@ -47,7 +48,8 @@ const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const [roomID, setRoomID] = useState(urlParams.get("roomID"));
-
+  const [users, setUsers] = useState([]); // {id: , name: , cursor: {x: , y: }}
+  const [username, setUsername] = useState("");
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const roughCanvasRef = useRef(null);
@@ -62,7 +64,7 @@ const Canvas = ({ history }) => {
   const lastdy = useRef(0);
   const isSelectedElementRemoved = useRef(true);
   const setRerender = useStore((state) => state.setRerender);
-  const capturedText = useRef(null)
+  const capturedText = useRef(null);
 
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [prevAccumulativeSumX, setPrevAccumulativeSumX] = useState(0);
@@ -94,27 +96,45 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  // const fn = (e) => {
-  //   setCordinates({ x: e.clientX, y: e.clientY });
-  // };
-  // window.addEventListener("mousemove", fn);
-
   useEffect(() => {
     if (!roomID) return;
-    socket.emit('join-room', roomID);
-    const onReceiveDraw = data => {
-      if(data === null) return;
-      const element = hydrate(data)
+    socket.emit("join-room", roomID, username);
+
+    const sendCursorPosition = (e) => {
+      if (!roomID || !socket) return;
+      let zoom = useStore.getState().zoom;
+      let centerScaleOffset = useStore.getState().centerScalingOffset;
+
+      socket.emit(
+        "send-cursor",
+        roomID,
+        {
+          x: e.clientX * zoom - panOffset.x - centerScaleOffset.x,
+          y: e.clientY * zoom - panOffset.y - centerScaleOffset.y,
+        },
+        socket.id
+      );
+    };
+    window.addEventListener("mousemove", sendCursorPosition);
+
+    const onReceiveDraw = (data) => {
+      if (data === null) return;
+      const element = hydrate(data);
       addElement(element);
       const action = new DrawAction([element], generator);
       history.push(action);
-      console.log("Hydrated Element is" ,element)
     };
-    // get the drawing data then hydrate it then draw it on the canvas
-    // if the data is a modification then modify the element
-    socket.on('receive-draw', onReceiveDraw);
-    return () => socket.off('receive-draw', onReceiveDraw);
-  }, [roomID, socket]);
+    const setUsersInRoom = (users) => {
+      setUsers(users);
+    };
+    socket.on('all-users', setUsersInRoom);
+    socket.on("receive-draw", onReceiveDraw);
+    return () => {
+      socket.off("receive-draw", onReceiveDraw);
+      socket.off('all-users', setUsersInRoom);
+      window.removeEventListener("mousemove", sendCursorPosition);
+    };
+  }, [roomID, socket, username]);
 
   const cursorShapes = {
     draw: "cursor-crosshair",
@@ -738,9 +758,9 @@ const Canvas = ({ history }) => {
         }
         addDataToDB();
         // sending the draw data to the server
-        if(roomID) {
-          socket.emit('send-draw', roomID, shapeRef.current)
-        };
+        if (roomID) {
+          socket.emit("send-draw", roomID, shapeRef.current);
+        }
         // adding the new element to the history
         const action = new DrawAction([shapeRef.current], generator);
         history.push(action);
@@ -751,7 +771,7 @@ const Canvas = ({ history }) => {
     setTimeout(() => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
       shapeRef.current.updateText(textRef.current.value);
-      capturedText.current = shapeRef.current
+      capturedText.current = shapeRef.current;
       setIsDrawing(!isDrawing);
       // shapeRef.current.draw(contextRef.current, canvasRef);
     }, 0);
@@ -770,16 +790,21 @@ const Canvas = ({ history }) => {
       history.pop();
       removeLastElement();
     }
-    console.log("OnBlur Edition" ,capturedText.current)
-    if(roomID) {
-      socket.emit('send-draw', roomID, capturedText.current)
-    };
+    console.log("OnBlur Edition", capturedText.current);
+    if (roomID) {
+      socket.emit("send-draw", roomID, capturedText.current);
+    }
   };
 
   const clearGizmoOnOperation = () => {
     contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
     gizmoRef.current = null;
     selectedElements.current = [];
+  };
+
+  const onCloseModal = (name) => {
+    setIsOpen(false);
+    setUsername(name);
   };
 
   useLayoutEffect(() => {
@@ -839,7 +864,7 @@ const Canvas = ({ history }) => {
           open={isOpen}
           roomID={roomID}
           handleEndSession={handleEndSession}
-          onClose={() => setIsOpen(false)}
+          onClose={onCloseModal}
         />
       )}
       <Toolbar
@@ -900,6 +925,19 @@ const Canvas = ({ history }) => {
         history={history}
         clearGizmoOnOperation={clearGizmoOnOperation}
       />
+      {roomID &&
+        Object.entries(users).map(
+          (user) =>
+            user[0] !== socket.id && (
+              <Cursor
+                key={user[0]}
+                id={user[0]}
+                socket={socket}
+                roomID={roomID}
+                name={user[1]}
+              />
+            )
+        )}
     </div>
   );
 };

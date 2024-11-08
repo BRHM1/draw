@@ -1,6 +1,8 @@
-import React from "react";
+import { useRef, useState } from "react";
 
-const Modal = ({ open, onClose,handleEndSession, roomID }) => {
+const Modal = ({ open, onClose, handleEndSession, roomID }) => {
+  const usernameRef = useRef(null);
+  const [username , setUsername] = useState("");
   const copyToClipboard = () => {
     const text = document.getElementById("link").value;
     navigator.clipboard.writeText(text).then(
@@ -15,7 +17,7 @@ const Modal = ({ open, onClose,handleEndSession, roomID }) => {
   return (
     <div>
       {open && (
-        <BackDrop open={open} onClose={onClose}>
+        <BackDrop open={open} onClose={onClose} username={username}>
           <div
             className="bg-white p-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] rounded-md font-nova"
             onClick={(e) => e.stopPropagation()}
@@ -35,6 +37,8 @@ const Modal = ({ open, onClose,handleEndSession, roomID }) => {
                   type="text"
                   name="room"
                   id="room"
+                  ref={usernameRef}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="border border-gray-300 rounded-md p-1 w-[70%]"
                 />
               </div>
@@ -49,17 +53,18 @@ const Modal = ({ open, onClose,handleEndSession, roomID }) => {
                     value={`http://localhost:5173/?roomID=${roomID}`}
                     className="border border-gray-300 rounded-md p-1 focus:border-none w-[70%]"
                   />
-                  <button 
-                  onClick={copyToClipboard}
-                  className="bg-blue-500  text-white rounded-md p-1 w-[25%]">
+                  <button
+                    onClick={copyToClipboard}
+                    className="bg-blue-500  text-white rounded-md p-1 w-[25%]"
+                  >
                     Copy
                   </button>
                 </div>
               </div>
               <button
                 onClick={() => {
-                    handleEndSession();
-                    onClose();
+                  handleEndSession();
+                  onClose(username);
                 }}
                 className="bg-blue-500 text-white rounded-md p-1 mt-4 w-full"
               >
@@ -73,11 +78,11 @@ const Modal = ({ open, onClose,handleEndSession, roomID }) => {
   );
 };
 
-const BackDrop = ({ children, open, onClose }) => {
+const BackDrop = ({ children, open, onClose, username }) => {
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 z-[999]"
-      onClick={onClose}
+      onClick={onClose.bind(null, username)}
     >
       {children}
     </div>

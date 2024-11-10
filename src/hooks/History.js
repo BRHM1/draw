@@ -49,6 +49,10 @@ class History {
     setElements(elements) {
         this.elements = elements
     }
+
+    addElement(element) {
+        this.elements.set(element.id, element)
+    }
 }
 
 class Action {

@@ -51,6 +51,10 @@ const Canvas = ({ history }) => {
   const [roomID, setRoomID] = useState(urlParams.get("roomID"));
   const [users, setUsers] = useState([]); // {id: , name: , cursor: {x: , y: }}
   const [username, setUsername] = useState("");
+
+  // this contains the id's of the shapes that are currently being modified by OTHERS
+  const [lockedShapes, setLockedShapes] = useState(new Set()) 
+
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const roughCanvasRef = useRef(null);
@@ -116,27 +120,42 @@ const Canvas = ({ history }) => {
         socket.id
       );
     };
-    window.addEventListener("mousemove", sendCursorPosition);
-
+    
     const onReceiveDraw = (data) => {
       if (data === null) return;
       const element = hydrate(data);
       addElement(element);
-      const action = new DrawAction([element], generator);
-      history.push(action);
+      history.addElement(element)
     };
     const setUsersInRoom = (users) => {
       setUsers(users);
     };
+
+    const updateLockedShapes = (id , lock) => {
+      if(lock) {
+        setLockedShapes(prev => new Set([...prev, id])) 
+      } else {
+        let newLockedShapes = new Set(lockedShapes)
+        newLockedShapes.delete(id)
+        setLockedShapes(newLockedShapes)
+      }
+    }
+
+    // LISTENERs
+    socket.on('update-locked-elements' , updateLockedShapes)
     socket.on("all-users", setUsersInRoom);
     socket.on("receive-draw", onReceiveDraw);
+    window.addEventListener("mousemove", sendCursorPosition);
+
+    // REMOVE OLD LISTENERs
     return () => {
       socket.off("receive-draw", onReceiveDraw);
       socket.off("all-users", setUsersInRoom);
+      socket.off('update-locked-elements' , updateLockedShapes)
       window.removeEventListener("mousemove", sendCursorPosition);
     };
   }, [roomID, socket, username]);
-
+  console.log("Locked Elements" , lockedShapes)
   const cursorShapes = {
     draw: "cursor-crosshair",
     shape: "cursor-crosshair",
@@ -284,6 +303,7 @@ const Canvas = ({ history }) => {
 
     // switch the selectedElements and gizmo to the new elements
     selectedElements.current = newElements;
+    selectedElements.current.forEach(element => element.Lock(socket, roomID))
     contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const containerGizmoCoords = getMinMaxCoordinates(selectedElements.current);
     gizmoRef.current = new Gizmo(
@@ -318,10 +338,12 @@ const Canvas = ({ history }) => {
           case "select":
             // 1- get the element at the position of the mouse
             const elements = [...history.elements.values()];
-            console.log("Elements", elements);
             const selectedElement = getElementAtPos(x, y, elements);
             resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
             lastResizeState.current = [];
+            
+            if(selectedElement && lockedShapes.has(selectedElement.id)) return
+
             if (gizmoRef.current?.isMouseResizing(x, y)) {
               // SELECTION SYSTEM: check if the mouse inside a resizing point then start an action and return
               initCoords.current = {
@@ -346,12 +368,15 @@ const Canvas = ({ history }) => {
               return;
             } else if (selectedElement) {
               // SELECTION SYSTEM: check if the mouse inside an element then start an action
+              selectedElements.current.forEach((element) => element.Unlock(socket, roomID))
               selectedElements.current = [];
               selectedElements.current.push(selectedElement);
+              selectedElement.Lock(socket, roomID)
               initCoords.current = {
                 x: x,
                 y: y,
               };
+              console.log("it doesn't return")
               isDragging.current = true;
               isResizing.current = false;
 
@@ -374,6 +399,7 @@ const Canvas = ({ history }) => {
               contextRef.current.restore();
             } else {
               // SELECTION SYSTEM: if the mouse is not inside any element then start a new selection action
+              selectedElements.current.forEach(element => element.Unlock(socket, roomID))
               selectedElements.current = [];
               gizmoRef.current = new Gizmo(x, y, x, y, "");
             }
@@ -520,8 +546,6 @@ const Canvas = ({ history }) => {
             if (selectedElement === null) return;
             if (selectedElement && selectedElement.hidden === false) {
               selectedElement.hidden = true;
-              //TODO: shapes saved in browser db are saved with hidden = false so we need to hide them and add the element to the db
-              // if undo operation had been done then the element will be hidden so we need to show it and remove it from the db
               async function removeDataFromDB() {
                 await deleteData(selectedElement.id);
               }
@@ -607,6 +631,7 @@ const Canvas = ({ history }) => {
             } else {
               // SELECTION SYSTEM: if there are no selected elements then draw the selectionBox
               // 3- if we don't have selected elements then we should draw the selectionBox
+              if(!gizmoRef.current) return
               gizmoRef.current.updateCoordinates(x, y);
               // console.log("mouseMove: drawing selectionBox");
               contextRef.current.clearRect(
@@ -736,9 +761,17 @@ const Canvas = ({ history }) => {
           };
           const elements = [...history.elements.values()];
           // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
-          selectedElements.current.push(
-            ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
-          );
+          // selectedElements.current.push(
+          //   ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
+          // );
+
+          for(let element of getElementsInsideSelectionBox(modifiedSelectionBox, elements)){
+            if(!lockedShapes.has(element.id)) {
+              selectedElements.current.push(element)
+              element.Lock(socket, roomID)
+            }
+          }
+          // selectedElements.current.forEach
           if (selectedElements.current.length === 0) {
             gizmoRef.current = null;
           }
@@ -834,6 +867,7 @@ const Canvas = ({ history }) => {
   const clearGizmoOnOperation = () => {
     contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
     gizmoRef.current = null;
+    selectedElements.current.forEach((element) => element.Unlock(socket, roomID))
     selectedElements.current = [];
   };
 

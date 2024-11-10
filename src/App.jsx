@@ -26,12 +26,17 @@ function App() {
 
   // TODO: 
   // events should be sent through the socket also like move ,copy, delete, resize and undo redo
-  // show cursor of the other users in the same room
-  // each drawn shape should have a unique id even after hydration 
-  
-  // reload works and shapes are hydrated but you should make the id's unique while hydrating the shapes 
-  // and also you should seperate the history from the rendered elements to be able to merge the localElements with the recently 
-  // drawn elements from the user  
+  // each shape should have a locked attribute so when the shape is bieng modified like moved, copied, etc..
+  // other users couldn't modifiy the shape and when the modification is released lock is released   
+
+  // SOLVING CONFLICT PROBLEM:::
+  // flow: suppose you have three users A,B and C user A selects an element it should call the method LOCK on that element 
+  // LOCK = (socket) => socket.emit('lock-element', element.id) and the server should emit to all users except user A that element is locked
+  // all other users listens on socket.on('update-locked-elements' , (id) => lockedElements.add(id)) 
+  // now user B and C have the locked elements so they won't be able to add them to the selectedElements if(lockedElements.has(element.id)) return
+  // finally when user A release's the element it should call method UNLOCK
+  // UNLOCK = (socket) => socket.emit('unlock-element', element.id) and the server should emit to all users except user A that element is unlocked
+  // all other users listens on socket.on('update-locked-elements' , (id) => lockedElements.delete(id))
 
   // Text flow:
   // 1. onClick intiates an instance of Text class + a textarea

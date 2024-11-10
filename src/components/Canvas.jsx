@@ -32,6 +32,7 @@ import {
   getMinMaxCoordinates,
   generateID,
   hydrate,
+  deleteData,
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -127,11 +128,11 @@ const Canvas = ({ history }) => {
     const setUsersInRoom = (users) => {
       setUsers(users);
     };
-    socket.on('all-users', setUsersInRoom);
+    socket.on("all-users", setUsersInRoom);
     socket.on("receive-draw", onReceiveDraw);
     return () => {
       socket.off("receive-draw", onReceiveDraw);
-      socket.off('all-users', setUsersInRoom);
+      socket.off("all-users", setUsersInRoom);
       window.removeEventListener("mousemove", sendCursorPosition);
     };
   }, [roomID, socket, username]);
@@ -255,6 +256,13 @@ const Canvas = ({ history }) => {
           break;
       }
     });
+    async function addDataToDB() {
+      selectedElements.current.forEach(async (element) => {
+        await deleteData(element.id);
+        await addData(element);
+      });
+    }
+    addDataToDB();
     setRerender((prev) => !prev);
   };
 
@@ -267,6 +275,12 @@ const Canvas = ({ history }) => {
     });
     let action = new DrawAction(newElements, generator);
     history.push(action);
+    async function addDataToDB() {
+      newElements.forEach(async (element) => {
+        await addData(element);
+      });
+    }
+    addDataToDB();
 
     // switch the selectedElements and gizmo to the new elements
     selectedElements.current = newElements;
@@ -303,7 +317,8 @@ const Canvas = ({ history }) => {
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
-            const elements = useStore.getState().elements;
+            const elements = [...history.elements.values()];
+            console.log("Elements", elements);
             const selectedElement = getElementAtPos(x, y, elements);
             resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
             lastResizeState.current = [];
@@ -500,10 +515,17 @@ const Canvas = ({ history }) => {
             setIsDrawing(!isDrawing);
             break;
           case "erase":
+            const elements = [...history.elements.values()];
             const selectedElement = getElementAtPos(x, y, elements);
             if (selectedElement === null) return;
             if (selectedElement && selectedElement.hidden === false) {
               selectedElement.hidden = true;
+              //TODO: shapes saved in browser db are saved with hidden = false so we need to hide them and add the element to the db
+              // if undo operation had been done then the element will be hidden so we need to show it and remove it from the db
+              async function removeDataFromDB() {
+                await deleteData(selectedElement.id);
+              }
+              removeDataFromDB();
               const action = new RemoveAction([selectedElement], generator);
               history.push(action);
             }
@@ -666,12 +688,20 @@ const Canvas = ({ history }) => {
             isDragging.current
           ) {
             history.push(move);
+            selectedElements.current.forEach(async (element) => {
+              await deleteData(element.id);
+              await addData(element);
+            });
           }
           if (
             (distance.current.x || distance.current.y) &&
             isResizing.current
           ) {
             history.push(resize);
+            selectedElements.current.forEach(async (element) => {
+              await deleteData(element.id);
+              await addData(element);
+            });
           }
           isDragging.current = false;
           isResizing.current = false;
@@ -704,6 +734,7 @@ const Canvas = ({ history }) => {
             x2: gizmoRef.current?.x1 + gizmoRef.current?.width,
             y2: gizmoRef.current?.y1 + gizmoRef.current?.height,
           };
+          const elements = [...history.elements.values()];
           // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
           selectedElements.current.push(
             ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
@@ -790,7 +821,11 @@ const Canvas = ({ history }) => {
       history.pop();
       removeLastElement();
     }
-    console.log("OnBlur Edition", capturedText.current);
+    async function addDataToDB() {
+      await deleteData(capturedText.current.id);
+      await addData(capturedText.current);
+    }
+    addDataToDB();
     if (roomID) {
       socket.emit("send-draw", roomID, capturedText.current);
     }
@@ -810,7 +845,6 @@ const Canvas = ({ history }) => {
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-
     const dpr = window.devicePixelRatio;
     const rect = canvas.getBoundingClientRect();
     const centerScaleOffset = useStore.getState().centerScalingOffset;
@@ -896,7 +930,7 @@ const Canvas = ({ history }) => {
           zIndex: 11,
         }}
         onKeyDown={KeyDown}
-        onBlur={onBlur}
+        onBlurCapture={onBlur}
       />
       <CanvasElement
         className={twMerge(
@@ -911,7 +945,7 @@ const Canvas = ({ history }) => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      <RenderingCanvas panOffset={panOffset} history={history.history} />
+      <RenderingCanvas panOffset={panOffset} history={history} textAreaRef={textRef} />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
       {selectedElements.current.length > 0 && (

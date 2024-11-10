@@ -3,13 +3,13 @@ import { getStroke } from "perfect-freehand";
 import { wrappedLines, isValidNumber } from "../utils/utils";
 import { useStore } from "../store";
 export class Shape {
-    constructor(x1, y1, width, height, options, rotation) {
+    constructor(x1, y1, width, height, options, rotation, id) {
         this.x1 = x1
         this.y1 = y1
         this.width = width
         this.height = height
         this.options = options
-        this.id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        this.id = id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
         this.hidden = false
     }
 
@@ -44,8 +44,8 @@ export class Shape {
 
 
 export class Circle extends Shape {
-    constructor(x1, y1, radius, options, roughElement, centerX, centerY, rotation) {
-        super(x1, y1, radius * 2, radius * 2, options, rotation)
+    constructor(x1, y1, radius, options, roughElement, centerX, centerY, rotation, id) {
+        super(x1, y1, radius * 2, radius * 2, options, rotation, id)
         this.roughElement = roughElement
         this.centerX = centerX
         this.centerY = centerY
@@ -170,8 +170,8 @@ export class Circle extends Shape {
 }
 
 export class Ellipse extends Shape {
-    constructor(x1, y1, width, height, options, roughElement, rotation, centerX, centerY) {
-        super(x1, y1, width, height, options, rotation)
+    constructor(x1, y1, width, height, options, roughElement, rotation, centerX, centerY, id) {
+        super(x1, y1, width, height, options, rotation, id)
         this.roughElement = roughElement
         this.centerX = this.x1 + this.width / 2
         this.centerY = this.y1 + this.height / 2
@@ -275,8 +275,8 @@ export class Ellipse extends Shape {
 }
 
 export class Line extends Shape {
-    constructor(x1, y1, x2, y2, options, roughElement, rotation) {
-        super(x1, y1, x2, y2, options, rotation)
+    constructor(x1, y1, x2, y2, options, roughElement, rotation, id) {
+        super(x1, y1, x2, y2, options, rotation, id)
         this.roughElement = roughElement
         this.type = "line"
         this.firstPoint = { x: x1, y: y1 }
@@ -401,8 +401,8 @@ export class Line extends Shape {
 // width and height always positive
 export class Rectangle extends Shape {
     // in this case x1, y1, width, height are the coordinates of the rectangle
-    constructor(x1, y1, width, height, options, roughElement, rotation) {
-        super(x1, y1, width, height, options, rotation)
+    constructor(x1, y1, width, height, options, roughElement, rotation, id) {
+        super(x1, y1, width, height, options, rotation, id)
         this.roughElement = roughElement
         this.type = "rectangle"
     }
@@ -496,8 +496,8 @@ export class Rectangle extends Shape {
 // width and height always positive
 export class Path extends Shape {
     // in this case x1, y1, x2, y2 are the bounding box of the path
-    constructor(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation) {
-        super(x1, y1, x2, y2, options, rotation)
+    constructor(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation, id) {
+        super(x1, y1, x2, y2, options, rotation, id)
         this.x2 = x2
         this.y2 = y2
         this.path = path
@@ -511,7 +511,8 @@ export class Path extends Shape {
         this.height = y2 - y1
     }
     draw(context) {
-        context.strokeStyle = this.strokeStyle
+        if(!context) return
+        context.strokeStyle = this.strokeStyle ?? this.color
         context.fillStyle = this.color
         const stroke = getStroke(this.points, this.options)
         const path = getSvgPathFromStroke(stroke);
@@ -627,8 +628,8 @@ export class Path extends Shape {
 
 // width and height are always positive
 export class Text extends Shape {
-    constructor(x1, y1, text, options, rotation, width, height) {
-        super(x1, y1, width, height, options, rotation)
+    constructor(x1, y1, text, options, rotation, width, height, id) {
+        super(x1, y1, width, height, options, rotation, id)
         this.text = text
         this.width = width
         this.height = height
@@ -636,6 +637,7 @@ export class Text extends Shape {
     }
 
     draw(context, textAreaRef) {
+        if (!context) return
         context.font = this.options.font;
         context.fillStyle = this.options.fill || "black";
         const zoom = useStore.getState().zoom

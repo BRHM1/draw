@@ -3,7 +3,7 @@ import rough from "roughjs/bundled/rough.esm";
 import { useStore } from "../store";
 import { getData, hydrate } from "../utils/utils";
 
-const RenderingCanvas = ({ panOffset, history }) => {
+const RenderingCanvas = ({ panOffset, history, textAreaRef }) => {
   const renderingCanvasRef = useRef(null);
   const renderingContextRef = useRef(null);
   const [hasMounted, setHasMounted] = useState(false);
@@ -24,13 +24,20 @@ const RenderingCanvas = ({ panOffset, history }) => {
     async function fetchData() {
       const data = await getData();
       let hydrated = data.map((element) => hydrate(element));
+      // convert the hydrated elements to a map and set it in the history.elements
+      let elementMap = new Map();
+      hydrated.forEach((element) => {
+        elementMap.set(element.id, element);
+      });
+      history.setElements(elementMap);
       setLocalElements(hydrated);
       setHasMounted(true);
     }
     fetchData();
   }, []);
-
+  
   useLayoutEffect(() => {
+    console.log("Local Elements" ,localElements)
     if (!hasMounted) return;
     const renderingCanvas = renderingCanvasRef.current;
     const renderingCanvasContext = renderingCanvas.getContext("2d");
@@ -43,7 +50,7 @@ const RenderingCanvas = ({ panOffset, history }) => {
     renderingCanvasContext.scale(dpr, dpr);
     renderingCanvas.style.height = `${rect.height}px`;
     renderingCanvas.style.width = `${rect.width}px`;
-    
+
     const scaledWidth = rect.width * zoom;
     const scaledHeight = rect.height * zoom;
 
@@ -72,18 +79,14 @@ const RenderingCanvas = ({ panOffset, history }) => {
       window.innerHeight
     );
 
-    history.forEach((element) => {
-      if (["event", "remove", "resizing"].includes(element.type)) return; // skip event actions and only draw shapes
-      element.shapes.forEach((shape) => {
-        if (shape.hidden) return;
-        shapes.has(shape.type)
-          ? shape.draw(roughCanvas)
-          : shape.draw(renderingContextRef.current, renderingCanvasRef);
-      });
+    history.elements.values().forEach((element) => {
+      if (element.hidden) return;
+      shapes.has(element.type)
+        ? element.draw(roughCanvas)
+        : element.draw(renderingCanvasContext, textAreaRef);
     });
 
-
-    console.log("history", history);
+    console.log("history", history.history);
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
     console.log("elements", elements);

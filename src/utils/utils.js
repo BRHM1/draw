@@ -291,27 +291,27 @@ export const generateID = () => {
 
 export const hydrate = element => {
   let result = null
-  const { points, options, roughElement, x1, y1, x2, y2, path, fillFlag, fillStyle, strokeStyle,text, rotation , width, height, radius, centerX, centerY} = element
+  const { points, options, roughElement, x1, y1, x2, y2, path, fillFlag, fillStyle, strokeStyle,text, rotation , width, height, radius, centerX, centerY, id} = element
   switch (element.type) {
     case "path":
-      result = new Path(x1, y1, x2, y2, path, options, "black", fillFlag, fillStyle, points, strokeStyle, rotation)
+      result = new Path(x1, y1, x2, y2, path, options, "black", fillFlag, fillStyle, points, strokeStyle, rotation, id)
       break
     case "rectangle":
       // const { x1, y1, width, height, options, roughElement, rotation } = element
-      result = new Rectangle(x1, y1, width, height, options, roughElement, rotation)
+      result = new Rectangle(x1, y1, width, height, options, roughElement, rotation, id)
       break
     case "ellipse":
-      result = new Ellipse(x1, y1, width, height, options, roughElement, rotation)
+      result = new Ellipse(x1, y1, width, height, options, roughElement, rotation, id)
       break
     case "circle":
-      result = new Circle(x1, y1, radius, options, roughElement,centerX, centerY, rotation)
+      result = new Circle(x1, y1, radius, options, roughElement,centerX, centerY, rotation, id)
       break
     case "line":
       // const {x1, y1, x2, y2, options, roughElement, rotation} = element
-      result = new Line(x1, y1, x2, y2, options, roughElement, rotation)
+      result = new Line(x1, y1, x2, y2, options, roughElement, rotation, id)
       break
     case "text":
-      result = new Text(x1, y1, text, options, rotation, width, height)
+      result = new Text(x1, y1, text, options, rotation, width, height, id)
       break
     default:
       break

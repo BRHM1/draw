@@ -869,6 +869,7 @@ const Canvas = ({ history }) => {
       capturedText.current = shapeRef.current;
       setIsDrawing(!isDrawing);
       // shapeRef.current.draw(contextRef.current, canvasRef);
+      setRerender((prev) => !prev);
     }, 0);
   };
 
@@ -885,6 +886,7 @@ const Canvas = ({ history }) => {
       history.pop();
       removeLastElement();
     }
+    setRerender((prev) => !prev);
     async function addDataToDB() {
       await deleteData(capturedText.current.id);
       await addData(capturedText.current);
@@ -943,11 +945,7 @@ const Canvas = ({ history }) => {
     if (shapeRef.current && buttonDown && !shapes.has(shapeRef.current.type)) {
       shapeRef.current.draw(context, canvasRef);
     }
-
-    if (shapeRef.current && type === "text") {
-      shapeRef.current.draw(context, textRef);
-    }
-
+    
     context.restore();
     contextRef.current = context;
   }, [isDrawing, panOffset.x, panOffset.y, zoom]);
@@ -973,10 +971,6 @@ const Canvas = ({ history }) => {
         contextRef={contextRef}
         clearGizmoOnOperation={clearGizmoOnOperation}
       />
-      <div className="absolute top-10 left-3">
-        {" "}
-        x: {cordinates.x} y: {cordinates.y}{" "}
-      </div>
 
       <textarea
         ref={textRef}

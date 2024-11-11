@@ -282,10 +282,12 @@ export const generateID = () => {
 
 export const hydrate = element => {
   let result = null
-  const { points, options, roughElement, x1, y1, x2, y2, path, fillFlag, fillStyle, strokeStyle,text, rotation , width, height, radius, centerX, centerY, id} = element
+  const { points, options, roughElement, x1, y1, x2, y2, path, fillFlag, fillStyle,color, strokeStyle,text, rotation , width, height, radius, centerX, centerY, id} = element
+  console.log(fillFlag, strokeStyle)
   switch (element.type) {
     case "path":
-      result = new Path(x1, y1, x2, y2, path, options, "black", fillFlag, fillStyle, points, strokeStyle, rotation, id)
+      result = new Path(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation, id)
+      console.log(result)
       break
     case "rectangle":
       // const { x1, y1, width, height, options, roughElement, rotation } = element

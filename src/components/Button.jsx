@@ -1,16 +1,16 @@
 import { useStore } from "../store";
 
-const Button = ({ label, history, clearGizmoOnOperation }) => {
+const Button = ({ label, history, clearGizmoOnOperation, socket, roomID }) => {
   const elements = useStore((state) => state.elements);
   const setRerender = useStore((state) => state.setRerender);
 
   const undo = () => {
-    history.undo();
+    history.undo(socket, roomID);
     clearGizmoOnOperation();
     setRerender(state => !state);
   };
   const redo = () => {
-    history.redo();
+    history.redo(socket, roomID);
     clearGizmoOnOperation();
     setRerender(state => !state);
   };

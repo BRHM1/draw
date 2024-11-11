@@ -1,7 +1,7 @@
 import Button from "./Button";
 import { useStore } from "../store";
 
-const ViewportControl = ({ zoom, history, clearGizmoOnOperation }) => {
+const ViewportControl = ({ zoom, history, clearGizmoOnOperation, socket, roomID }) => {
   const setZoom = useStore((state) => state.setZoom);
   return (
     <div className="flex-col justify-center items-center gap-2 mb-2 ml-2 z-50 absolute bottom-0 left-2">
@@ -10,11 +10,15 @@ const ViewportControl = ({ zoom, history, clearGizmoOnOperation }) => {
           label="Undo"
           history={history}
           clearGizmoOnOperation={clearGizmoOnOperation}
+          socket={socket}
+          roomID={roomID}
         />
         <Button
           label="Redo"
           history={history}
           clearGizmoOnOperation={clearGizmoOnOperation}
+          socket={socket}
+          roomID={roomID}
         />
       </div>
       <div className="flex items-center mt-1 justify-center">

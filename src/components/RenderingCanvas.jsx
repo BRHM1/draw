@@ -18,8 +18,6 @@ const RenderingCanvas = ({ panOffset, history, textAreaRef }) => {
 
   const rerender = useStore((state) => state.rerender);
 
-  const [localElements, setLocalElements] = useState([]);
-
   useLayoutEffect(() => {
     async function fetchData() {
       const data = await getData();
@@ -30,14 +28,12 @@ const RenderingCanvas = ({ panOffset, history, textAreaRef }) => {
         elementMap.set(element.id, element);
       });
       history.setElements(elementMap);
-      setLocalElements(hydrated);
       setHasMounted(true);
     }
     fetchData();
   }, []);
   
   useLayoutEffect(() => {
-    console.log("Local Elements" ,localElements)
     if (!hasMounted) return;
     const renderingCanvas = renderingCanvasRef.current;
     const renderingCanvasContext = renderingCanvas.getContext("2d");
@@ -86,10 +82,8 @@ const RenderingCanvas = ({ panOffset, history, textAreaRef }) => {
         : element.draw(renderingCanvasContext, textAreaRef);
     });
 
-    console.log("history", history.history);
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-    console.log("elements", elements);
   }, [elements, panOffset.x, panOffset.y, zoom, rerender, hasMounted]);
 
   return (

@@ -43,7 +43,6 @@ export class Shape {
 
     Lock(socket, roomID) {
         socket.emit('lock-element' , this.id, roomID)
-        console.log("this shape is locked ", this.id)
     }
 
     Unlock(socket, roomID) {

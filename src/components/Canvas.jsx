@@ -53,7 +53,7 @@ const Canvas = ({ history }) => {
   const [username, setUsername] = useState("");
 
   // this contains the id's of the shapes that are currently being modified by OTHERS
-  const [lockedShapes, setLockedShapes] = useState(new Set()) 
+  const lockedShapes = useRef(new Set());
 
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
@@ -120,42 +120,46 @@ const Canvas = ({ history }) => {
         socket.id
       );
     };
-    
+
     const onReceiveDraw = (data) => {
       if (data === null) return;
       const element = hydrate(data);
       addElement(element);
-      history.addElement(element)
+      history.addElement(element);
     };
     const setUsersInRoom = (users) => {
       setUsers(users);
     };
 
-    const updateLockedShapes = (id , lock) => {
-      if(lock) {
-        setLockedShapes(prev => new Set([...prev, id])) 
+    const updateLockedShapes = (id, lock) => {
+      if (lock) {
+        lockedShapes.current.add(id);
       } else {
-        let newLockedShapes = new Set(lockedShapes)
-        newLockedShapes.delete(id)
-        setLockedShapes(newLockedShapes)
+        // this one don't unlock shapes
+        lockedShapes.current.delete(id);
       }
+    };
+
+    const handleDelete = (id) => {
+      history.removeElement(id);
+      setRerender(prev => !prev)
     }
 
     // LISTENERs
-    socket.on('update-locked-elements' , updateLockedShapes)
+    socket.on("update-locked-elements", updateLockedShapes);
     socket.on("all-users", setUsersInRoom);
     socket.on("receive-draw", onReceiveDraw);
+    socket.on("handle-delete", handleDelete);
     window.addEventListener("mousemove", sendCursorPosition);
 
     // REMOVE OLD LISTENERs
     return () => {
       socket.off("receive-draw", onReceiveDraw);
       socket.off("all-users", setUsersInRoom);
-      socket.off('update-locked-elements' , updateLockedShapes)
+      socket.off("update-locked-elements", updateLockedShapes);
       window.removeEventListener("mousemove", sendCursorPosition);
     };
   }, [roomID, socket, username]);
-  console.log("Locked Elements" , lockedShapes)
   const cursorShapes = {
     draw: "cursor-crosshair",
     shape: "cursor-crosshair",
@@ -279,6 +283,7 @@ const Canvas = ({ history }) => {
       selectedElements.current.forEach(async (element) => {
         await deleteData(element.id);
         await addData(element);
+        socket.emit("send-draw", roomID, element);
       });
     }
     addDataToDB();
@@ -300,10 +305,15 @@ const Canvas = ({ history }) => {
       });
     }
     addDataToDB();
+    if (roomID) {
+      for(let element of newElements){
+        socket.emit("send-draw", roomID, element);
+      }
+    }
 
     // switch the selectedElements and gizmo to the new elements
     selectedElements.current = newElements;
-    selectedElements.current.forEach(element => element.Lock(socket, roomID))
+    selectedElements.current.forEach((element) => element.Lock(socket, roomID));
     contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const containerGizmoCoords = getMinMaxCoordinates(selectedElements.current);
     gizmoRef.current = new Gizmo(
@@ -334,6 +344,7 @@ const Canvas = ({ history }) => {
         let centerScaleOffset = useStore.getState().centerScalingOffset;
         let x = e.clientX * zoom - panOffset.x - centerScaleOffset.x;
         let y = e.clientY * zoom - panOffset.y - centerScaleOffset.y;
+
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
@@ -341,8 +352,14 @@ const Canvas = ({ history }) => {
             const selectedElement = getElementAtPos(x, y, elements);
             resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
             lastResizeState.current = [];
-            
-            if(selectedElement && lockedShapes.has(selectedElement.id)) return
+
+            if (
+              selectedElement &&
+              lockedShapes.current.has(selectedElement.id)
+            ) {
+              console.log("This element is locked by another user");
+              break;
+            }
 
             if (gizmoRef.current?.isMouseResizing(x, y)) {
               // SELECTION SYSTEM: check if the mouse inside a resizing point then start an action and return
@@ -368,15 +385,17 @@ const Canvas = ({ history }) => {
               return;
             } else if (selectedElement) {
               // SELECTION SYSTEM: check if the mouse inside an element then start an action
-              selectedElements.current.forEach((element) => element.Unlock(socket, roomID))
+              selectedElements.current.forEach((element) =>
+                element.Unlock(socket, roomID)
+              );
               selectedElements.current = [];
               selectedElements.current.push(selectedElement);
-              selectedElement.Lock(socket, roomID)
+              selectedElement.Lock(socket, roomID);
               initCoords.current = {
                 x: x,
                 y: y,
               };
-              console.log("it doesn't return")
+              console.log("it doesn't return");
               isDragging.current = true;
               isResizing.current = false;
 
@@ -399,7 +418,9 @@ const Canvas = ({ history }) => {
               contextRef.current.restore();
             } else {
               // SELECTION SYSTEM: if the mouse is not inside any element then start a new selection action
-              selectedElements.current.forEach(element => element.Unlock(socket, roomID))
+              selectedElements.current.forEach((element) =>
+                element.Unlock(socket, roomID)
+              );
               selectedElements.current = [];
               gizmoRef.current = new Gizmo(x, y, x, y, "");
             }
@@ -550,6 +571,10 @@ const Canvas = ({ history }) => {
                 await deleteData(selectedElement.id);
               }
               removeDataFromDB();
+              if (roomID) {
+                selectedElement.hidden = true;
+                socket.emit("delete-element", roomID, selectedElement.id);
+              }
               const action = new RemoveAction([selectedElement], generator);
               history.push(action);
             }
@@ -631,7 +656,7 @@ const Canvas = ({ history }) => {
             } else {
               // SELECTION SYSTEM: if there are no selected elements then draw the selectionBox
               // 3- if we don't have selected elements then we should draw the selectionBox
-              if(!gizmoRef.current) return
+              if (!gizmoRef.current) return;
               gizmoRef.current.updateCoordinates(x, y);
               // console.log("mouseMove: drawing selectionBox");
               contextRef.current.clearRect(
@@ -716,7 +741,9 @@ const Canvas = ({ history }) => {
             selectedElements.current.forEach(async (element) => {
               await deleteData(element.id);
               await addData(element);
+              if(roomID) socket.emit("send-draw", roomID, element);
             });
+
           }
           if (
             (distance.current.x || distance.current.y) &&
@@ -726,6 +753,7 @@ const Canvas = ({ history }) => {
             selectedElements.current.forEach(async (element) => {
               await deleteData(element.id);
               await addData(element);
+              if(roomID) socket.emit("send-draw" , roomID, element)
             });
           }
           isDragging.current = false;
@@ -765,10 +793,13 @@ const Canvas = ({ history }) => {
           //   ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
           // );
 
-          for(let element of getElementsInsideSelectionBox(modifiedSelectionBox, elements)){
-            if(!lockedShapes.has(element.id)) {
-              selectedElements.current.push(element)
-              element.Lock(socket, roomID)
+          for (let element of getElementsInsideSelectionBox(
+            modifiedSelectionBox,
+            elements
+          )) {
+            if (!lockedShapes.current.has(element.id)) {
+              selectedElements.current.push(element);
+              element.Lock(socket, roomID);
             }
           }
           // selectedElements.current.forEach
@@ -867,7 +898,9 @@ const Canvas = ({ history }) => {
   const clearGizmoOnOperation = () => {
     contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
     gizmoRef.current = null;
-    selectedElements.current.forEach((element) => element.Unlock(socket, roomID))
+    selectedElements.current.forEach((element) =>
+      element.Unlock(socket, roomID)
+    );
     selectedElements.current = [];
   };
 
@@ -979,7 +1012,11 @@ const Canvas = ({ history }) => {
         // onMouseLeave={Up}
         // onMouseEnter={Move}
       />
-      <RenderingCanvas panOffset={panOffset} history={history} textAreaRef={textRef} />
+      <RenderingCanvas
+        panOffset={panOffset}
+        history={history}
+        textAreaRef={textRef}
+      />
       {action === "shape" && <OptionsToolbar />}
       {action === "draw" && <PenOptionsToolbar />}
       {selectedElements.current.length > 0 && (
@@ -992,6 +1029,8 @@ const Canvas = ({ history }) => {
         zoom={zoom}
         history={history}
         clearGizmoOnOperation={clearGizmoOnOperation}
+        socket={socket}
+        roomID={roomID}
       />
       {roomID &&
         Object.entries(users).map(

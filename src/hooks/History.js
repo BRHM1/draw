@@ -1,4 +1,4 @@
-import { deleteData, swapObjValues } from "../utils/utils"
+import { deleteData } from "../utils/utils"
 import { addData } from "../utils/utils"
 class History {
     constructor() {
@@ -21,18 +21,18 @@ class History {
         this.redo_idx = -1
     }
 
-    undo() {
+    undo(socket, roomID) {
         if (this.undo_idx < 0) return; // Check if there are any actions to undo
         const action = this.history[this.undo_idx]
-        action.undo()
+        action.undo(socket, roomID)
         this.redo_idx = this.undo_idx
         this.undo_idx--
     }
 
-    redo() {
+    redo(socket, roomID) {
         if (this.redo_idx > this.history.length - 1) return; // Check if there are any actions to redo
         const action = this.history[this.redo_idx]
-        action.redo()
+        action.redo(socket, roomID)
         this.undo_idx = this.redo_idx
         this.redo_idx++
     }
@@ -52,6 +52,10 @@ class History {
 
     addElement(element) {
         this.elements.set(element.id, element)
+    }
+
+    removeElement(id) {
+        this.elements.delete(id)
     }
 }
 
@@ -78,21 +82,23 @@ class DrawAction extends Action {
         this.type = "draw"
     }
 
-    undo() {
+    undo(socket, roomID) {
         this.shapes.forEach(shape => shape.hidden = true)
         async function removeDataFromDB() {
             for (let shape of this.shapes) {
                 await deleteData(shape.id)
+                if(socket && roomID) socket.emit('delete-element', roomID, shape.id)
             }
         }
         removeDataFromDB.bind(this)();
     }
 
-    redo() {
+    redo(socket, roomID) {
         this.shapes.forEach(shape => shape.hidden = false)
         async function pushDataToDB() {
             for (let shape of this.shapes) {
                 await addData(shape)
+                if(socket && roomID) socket.emit('send-draw', roomID, shape)
             }
         }
         pushDataToDB.bind(this)();
@@ -110,23 +116,25 @@ class MoveAction extends Action {
         this.type = "event"
     }
 
-    undo() {
+    undo(socket, roomID) {
         this.shapes.forEach(shape => shape.Move(-this.dx, -this.dy, this.generator))
         async function pushDataToDB() {
             for (let shape of this.shapes) {
                 await deleteData(shape.id)
                 await addData(shape)
+                if(socket && roomID) socket.emit('send-draw', roomID, shape)
             }
         }
         pushDataToDB.bind(this)();
     }
 
-    redo() {
+    redo(socket, roomID) {
         this.shapes.forEach(shape => shape.Move(this.dx, this.dy, this.generator))
         async function pushDataToDB() {
             for (let shape of this.shapes) {
                 await deleteData(shape.id)
                 await addData(shape)
+                if(socket && roomID) socket.emit('send-draw', roomID, shape)
             }
         }
         pushDataToDB.bind(this)();
@@ -141,21 +149,23 @@ class RemoveAction extends Action {
         this.type = "remove"
     }
 
-    undo() {
+    undo(socket, roomID) {
         this.shapes.forEach(shape => shape.hidden = false)
         async function pushDataToDB() {
             for (let shape of this.shapes) {
                 await addData(shape)
+                if(socket && roomID) socket.emit('send-draw', roomID, shape)
             }
         }
         pushDataToDB.bind(this)();
     }
 
-    redo() {
+    redo(socket, roomID) {
         this.shapes.forEach(shape => shape.hidden = true)
         async function removeDataFromDB() {
             for (let shape of this.shapes) {
                 await deleteData(shape.id)
+                if(socket && roomID) socket.emit('delete-element', roomID, shape.id)
             }
         }
         removeDataFromDB.bind(this)();
@@ -171,7 +181,7 @@ class ResizingAction extends Action {
         this.type = "resizing"
     }
 
-    undo() {
+    undo(socket, roomID) {
         for (let i = 0; i < this.shapes.length; i++) {
             for (let key in this.lastState[i]) {
                 let temp = this.shapes[i][key]
@@ -183,12 +193,13 @@ class ResizingAction extends Action {
             for (let shape of this.shapes) {
                 await deleteData(shape.id)
                 await addData(shape)
+                if(socket && roomID) socket.emit('send-draw', roomID, shape)
             }
         }
         pushDataToDB.bind(this)();
     }
 
-    redo() {
+    redo(socket, roomID) {
         for (let i = 0; i < this.shapes.length; i++) {
             for (let key in this.lastState[i]) {
                 let temp = this.shapes[i][key]
@@ -200,6 +211,7 @@ class ResizingAction extends Action {
             for (let shape of this.shapes) {
                 await deleteData(shape.id)
                 await addData(shape)
+                if(socket && roomID) socket.emit('send-draw', roomID, shape)
             }
         }
         pushDataToDB.bind(this)();

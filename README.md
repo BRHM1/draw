@@ -16,7 +16,6 @@ This project is a **clone of [Excalidraw](https://excalidraw.com)**, an open-sou
 - **🔤 Text Tool**: Add text annotations with custom font sizes.
 - **🎯 Select & Move**: Select, move, and resize elements easily.
 - **↩️ Undo/Redo**: Step back and forward through changes.
-- **💾 Save & Export**: Download drawings or export them in a shareable format.
 
 ---
 
@@ -70,7 +69,6 @@ Ensure **Node.js** and **npm** are installed on your machine.
 ## 🛠️ Built With
 
 - **React**: UI Library for building dynamic interfaces
-- **React Konva** *(or Canvas API)*: For rendering on the HTML canvas
 - **CSS Modules/Styled Components**: For custom component styling and animations
 
 ---
@@ -80,7 +78,6 @@ Ensure **Node.js** and **npm** are installed on your machine.
 Here are a few potential future enhancements:
 
 - [ ] 🌐 **Real-Time Collaboration**: Multi-user editing support.
-- [ ] ☁️ **Cloud Storage Options**: Save drawings to cloud services.
 - [ ] ⚡ **Optimizations**: Improve drawing accuracy and performance.
 
 ---

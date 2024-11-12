@@ -1,7 +1,6 @@
-import { getSvgPathFromStroke } from "../utils/utils"
 import { getStroke } from "perfect-freehand";
-import { wrappedLines, isValidNumber } from "../utils/utils";
 import { useStore } from "../store";
+import { getSvgPathFromStroke, isValidNumber, wrappedLines } from "../utils/utils";
 export class Shape {
     constructor(x1, y1, width, height, options, rotation, id) {
         this.x1 = x1
@@ -468,6 +467,7 @@ export class Rectangle extends Shape {
                 break
             case "bottomRight":
                 origin = { x: gizmoRef.x1, y: gizmoRef.y1 }
+                console.log(gizmoRef.width, dx)
                 scaleX = isValidNumber(1 + dx / gizmoRef.width) ? 1 + dx / gizmoRef.width : 1
                 scaleY = isValidNumber(1 + dy / gizmoRef.height) ? 1 + dy / gizmoRef.height : 1
                 if (scaleX === 0 || scaleY === 0) return

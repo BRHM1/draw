@@ -5,6 +5,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
+import { SquareArrowOutUpRight } from "lucide-react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
@@ -142,8 +143,8 @@ const Canvas = ({ history }) => {
 
     const handleDelete = (id) => {
       history.removeElement(id);
-      setRerender(prev => !prev)
-    }
+      setRerender((prev) => !prev);
+    };
 
     // LISTENERs
     socket.on("update-locked-elements", updateLockedShapes);
@@ -306,7 +307,7 @@ const Canvas = ({ history }) => {
     }
     addDataToDB();
     if (roomID) {
-      for(let element of newElements){
+      for (let element of newElements) {
         socket.emit("send-draw", roomID, element);
       }
     }
@@ -385,6 +386,7 @@ const Canvas = ({ history }) => {
               return;
             } else if (selectedElement) {
               // SELECTION SYSTEM: check if the mouse inside an element then start an action
+              console.log(selectedElement);
               selectedElements.current.forEach((element) =>
                 element.Unlock(socket, roomID)
               );
@@ -414,6 +416,7 @@ const Canvas = ({ history }) => {
                 panOffset.x + centerScaleOffset.x,
                 panOffset.y + centerScaleOffset.y
               );
+              console.log("gizmo", gizmoRef.current);
               gizmoRef.current.draw(contextRef);
               contextRef.current.restore();
             } else {
@@ -638,6 +641,7 @@ const Canvas = ({ history }) => {
                     gitMouseDir(),
                     gizmoRef.current
                   );
+                  console.log(element);
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
                     : element.draw(contextRef.current, canvasRef);
@@ -647,6 +651,7 @@ const Canvas = ({ history }) => {
                   dy - lastdy.current,
                   resizingPoint.current
                 );
+                console.log("gizmo", gizmoRef.current);
                 gizmoRef.current.draw(contextRef);
               }
               contextRef.current.restore();
@@ -741,9 +746,8 @@ const Canvas = ({ history }) => {
             selectedElements.current.forEach(async (element) => {
               await deleteData(element.id);
               await addData(element);
-              if(roomID) socket.emit("send-draw", roomID, element);
+              if (roomID) socket.emit("send-draw", roomID, element);
             });
-
           }
           if (
             (distance.current.x || distance.current.y) &&
@@ -753,7 +757,7 @@ const Canvas = ({ history }) => {
             selectedElements.current.forEach(async (element) => {
               await deleteData(element.id);
               await addData(element);
-              if(roomID) socket.emit("send-draw" , roomID, element)
+              if (roomID) socket.emit("send-draw", roomID, element);
             });
           }
           isDragging.current = false;
@@ -945,7 +949,7 @@ const Canvas = ({ history }) => {
     if (shapeRef.current && buttonDown && !shapes.has(shapeRef.current.type)) {
       shapeRef.current.draw(context, canvasRef);
     }
-    
+
     context.restore();
     contextRef.current = context;
   }, [isDrawing, panOffset.x, panOffset.y, zoom]);
@@ -953,10 +957,10 @@ const Canvas = ({ history }) => {
   return (
     <div className="w-full h-screen grid">
       <button
-        className="absolute top-4 right-10 w-20 h-10 text-[18px] font-nova bg-blue-500 text-white rounded-md z-20"
+        className="absolute top-4 right-10 w-10 h-10 text-[18px] font-nova bg-blue-500 text-white rounded-md z-20"
         onClick={handleShare}
       >
-        share
+        <SquareArrowOutUpRight className="mx-auto" />
       </button>
       {isOpen && (
         <Modal

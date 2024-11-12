@@ -3,27 +3,34 @@ import { useStore } from "../store";
 
 const ViewportControl = ({ zoom, history, clearGizmoOnOperation, socket, roomID }) => {
   const setZoom = useStore((state) => state.setZoom);
+  const setRerender = useStore((state) => state.setRerender);
+  const undo = () => {
+    history.undo(socket, roomID);
+    clearGizmoOnOperation();
+    setRerender((state) => !state);
+  };
+  const redo = () => {
+    history.redo(socket, roomID);
+    clearGizmoOnOperation();
+    setRerender((state) => !state);
+  };
   return (
     <div className="flex-col justify-center items-center gap-2 mb-2 ml-2 z-50 absolute bottom-0 left-2">
       <div className="flex gap-1">
         <Button
           label="Undo"
-          history={history}
-          clearGizmoOnOperation={clearGizmoOnOperation}
-          socket={socket}
-          roomID={roomID}
+          callbackFn={undo}
+          hotKey="z"
         />
         <Button
           label="Redo"
-          history={history}
-          clearGizmoOnOperation={clearGizmoOnOperation}
-          socket={socket}
-          roomID={roomID}
+          callbackFn={redo}
+          hotKey="y"
         />
       </div>
       <div className="flex items-center mt-1 justify-center">
         <button
-          className="w-10 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-700 rounded-e-none border-r-2 border-r-white text-white font-bold py-2 px-4 rounded select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+          className="w-10 h-8 flex items-center justify-center bg-blue-50 shadow-lg hover:bg-[#bfdbfe] rounded-e-none border-r-2 border-r-white text-black font-bold py-2 px-4 rounded select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
           onClick={() => {
             clearGizmoOnOperation();
             setZoom(zoom + 0.1);
@@ -32,7 +39,7 @@ const ViewportControl = ({ zoom, history, clearGizmoOnOperation, socket, roomID 
           -
         </button>
         <button
-          className="w-20 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white  py-2 px-4 select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+          className="w-20 h-8 flex items-center justify-center shadow-lg bg-blue-50 hover:bg-[#bfdbfe] text-black  py-2 px-4 select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
           onClick={() => {
             clearGizmoOnOperation();
             setZoom(1);
@@ -47,7 +54,7 @@ const ViewportControl = ({ zoom, history, clearGizmoOnOperation, socket, roomID 
           )}
         </button>
         <button
-          className="w-10 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white border-l-2 border-l-white font-bold py-2 px-4 rounded rounded-s-none select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+          className="w-10 h-8 flex items-center justify-center bg-blue-50 hover:bg-[#bfdbfe] text-black border-l-2 border-l-white font-bold py-2 px-4 shadow-lg rounded rounded-s-none select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
           onClick={() => {
             clearGizmoOnOperation();
             setZoom(zoom - 0.1);

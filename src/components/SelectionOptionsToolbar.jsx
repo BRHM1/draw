@@ -8,7 +8,7 @@ const SelectionOptionsToolbar = ({editSelectedElements, Duplicate}) => {
     editSelectedElements(values)
   }
   return (
-    <div className="bg-blue-200 w-44 h-[54%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
+    <div className="bg-blue-50 w-44 h-[54%] shadow-md p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
       {/* sliders for stroke width and path width */}
         <Slider handleOptions={handleOptions} min={0} max={100} property="Border Width" defaultValue={50} ratio={100} />
         <Slider handleOptions={handleOptions} min={0} max={100} property="Stroke Width" defaultValue={50} ratio={100} />

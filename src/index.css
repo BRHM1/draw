@@ -16,4 +16,8 @@ body {
     padding: 0;
 }
 
+div {
+    /* @apply text-blue-800; */
+}
+
   

@@ -24,6 +24,7 @@ class History {
     undo(socket, roomID) {
         if (this.undo_idx < 0) return; // Check if there are any actions to undo
         const action = this.history[this.undo_idx]
+        if(!action) return
         action.undo(socket, roomID)
         this.redo_idx = this.undo_idx
         this.undo_idx--
@@ -32,6 +33,7 @@ class History {
     redo(socket, roomID) {
         if (this.redo_idx > this.history.length - 1) return; // Check if there are any actions to redo
         const action = this.history[this.redo_idx]
+        if(!action) return
         action.redo(socket, roomID)
         this.undo_idx = this.redo_idx
         this.redo_idx++

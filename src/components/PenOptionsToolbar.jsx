@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useStore } from "../store";
 
 const PenOptionsToolbar = () => {
-
   const setFieldInPenOptions = useStore((state) => state.setFieldInPenOptions);
   const penColor = useStore((state) => state.setPenColor);
 
@@ -34,14 +33,13 @@ const PenOptionsToolbar = () => {
     },
   ];
 
-
   const handleColorChange = (e) => {
     penColor(e.target.value);
   };
 
   return (
-    <div className="bg-blue-50 shadow-lg w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
-      <div className="text-lg font-bold">Pen Options</div>
+    <div className="bg-blue-50 shadow-lg w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
+      <div className="text-lg font-medium pb-2">Pen Options</div>
       <div className="flex items-center justify-start">
         <label>Color</label>
         <input type="color" className="ml-8" onChange={handleColorChange} />
@@ -80,19 +78,12 @@ const PenOptionsToolbar = () => {
   );
 };
 
-const Slider = ({
-  handleOptions,
-  min,
-  max,
-  property,
-  defaultValue,
-  ratio,
-}) => {
+const Slider = ({ handleOptions, min, max, property, defaultValue, ratio }) => {
   const penOptions = useStore((state) => state.penOptions);
   const handleChange = (e) => {
     if (!property) return;
     if (property === "end" || property === "start") {
-      let obj = {...penOptions[property]};
+      let obj = { ...penOptions[property] };
       obj.taper = e.target.value / ratio;
       handleOptions(property, obj);
     } else {
@@ -133,10 +124,7 @@ const Options = ({
       <label>{label}</label>
       <div className="flex items-center justify-start gap-8 ml-2">
         <label>Cap</label>
-        <Toggler
-          handleOptions={handleOptions}
-          property={property}
-        />
+        <Toggler handleOptions={handleOptions} property={property} />
       </div>
       <div className="flex items-center justify-start gap-4 ml-2">
         <Slider
@@ -157,9 +145,9 @@ const Toggler = ({ handleOptions, property }) => {
   const penOptions = useStore((state) => state.penOptions);
   const handleToggle = () => {
     setIsChecked((last) => !last);
-    let obj = {...penOptions[property]};
+    let obj = { ...penOptions[property] };
     obj.cap = !isChecked;
-    handleOptions(property ,obj);
+    handleOptions(property, obj);
   };
 
   return (

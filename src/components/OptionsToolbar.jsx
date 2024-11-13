@@ -10,7 +10,7 @@ const OptionsToolbar = () => {
   const setFeildInOptions = useStore((state) => state.setFeildInOptions);
 
   return (
-    <div className="bg-blue-50 shadow-lg w-44 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
+    <div className="bg-blue-50 shadow-lg w-44 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
       <StrokeOptions handleOptions={setFeildInOptions} />
       <BackgroundOptions handleOptions={setFeildInOptions} />
       <FillOptions handleOptions={setFeildInOptions} />
@@ -543,7 +543,10 @@ const SloppinessOptions = ({ handleOptions }) => {
 
 const RandomnessSlider = ({ handleOptions }) => {
   const handleRandomness = (e) => {
-    handleOptions( "maxRandomnessOffset", Math.floor((e.target.value / 100) * 10));
+    handleOptions(
+      "maxRandomnessOffset",
+      Math.floor((e.target.value / 100) * 10)
+    );
   };
   return (
     <div className="mt-1">

@@ -1,7 +1,14 @@
 import Button from "./Button";
 import { useStore } from "../store";
 
-const ViewportControl = ({ zoom, history, clearGizmoOnOperation, socket, roomID }) => {
+const ViewportControl = ({
+  zoom,
+  history,
+  clearGizmoOnOperation,
+  socket,
+  roomID,
+  textRef,
+}) => {
   const setZoom = useStore((state) => state.setZoom);
   const setRerender = useStore((state) => state.setRerender);
   const undo = () => {
@@ -17,16 +24,8 @@ const ViewportControl = ({ zoom, history, clearGizmoOnOperation, socket, roomID 
   return (
     <div className="flex-col justify-center items-center gap-2 mb-2 ml-2 z-50 absolute bottom-0 left-2">
       <div className="flex gap-1">
-        <Button
-          label="Undo"
-          callbackFn={undo}
-          hotKey="z"
-        />
-        <Button
-          label="Redo"
-          callbackFn={redo}
-          hotKey="y"
-        />
+        <Button label="Undo" callbackFn={undo} hotKey="z" />
+        <Button label="Redo" callbackFn={redo} hotKey="y" />
       </div>
       <div className="flex items-center mt-1 justify-center">
         <button

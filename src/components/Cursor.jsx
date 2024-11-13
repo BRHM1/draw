@@ -1,7 +1,7 @@
 import { PiCursorLight } from "react-icons/pi";
 import { useEffect, useRef, useState } from "react";
 
-const Cursor = ({ socket, roomID, name , id}) => {
+const Cursor = ({ socket, roomID, name, id }) => {
   const cursorRef = useRef(null);
   const [cursorCoords, setCursorCoords] = useState({ x: 0, y: 0 });
 
@@ -29,7 +29,7 @@ const Cursor = ({ socket, roomID, name , id}) => {
       <div className={`relative`}>
         <PiCursorLight className="text-2xl bg-transparent" />
       </div>
-      <div className="w-fit h-fit font-nova outline-none bg-transparent  shadow-[9px_9px_13px_2px_rgba(28,_1,_193,_0.09)] p-[3px] rounded-md relative top-1 left-5 border-t-2 border-l-2 border-blue-300">
+      <div className="w-fit h-fit font-poppins outline-none bg-transparent  shadow-[9px_9px_13px_2px_rgba(28,_1,_193,_0.09)] p-[3px] rounded-md relative top-1 left-5 border-t-2 border-l-2 border-blue-300">
         {name}
       </div>
     </div>

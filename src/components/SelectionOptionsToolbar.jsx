@@ -1,34 +1,41 @@
-import {useState, useRef} from 'react';
-import {PiDotsNineBold, PiEmptyLight} from 'react-icons/pi';
+import { useState, useRef } from "react";
+import { PiDotsNineBold, PiEmptyLight } from "react-icons/pi";
 import { IoCopy } from "react-icons/io5";
 import rough from "roughjs/bundled/rough.esm";
 
-const SelectionOptionsToolbar = ({editSelectedElements, Duplicate}) => {
+const SelectionOptionsToolbar = ({ editSelectedElements, Duplicate }) => {
   const handleOptions = (values) => {
-    editSelectedElements(values)
-  }
+    editSelectedElements(values);
+  };
   return (
-    <div className="bg-blue-50 w-44 h-[54%] shadow-md p-5 rounded-md absolute left-0 top-16 ml-3 font-nova flex-col items-center justify-center z-20">
+    <div className="bg-blue-50 w-44 h-[54%] shadow-md p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
       {/* sliders for stroke width and path width */}
-        <Slider handleOptions={handleOptions} min={0} max={100} property="Border Width" defaultValue={50} ratio={100} />
-        <Slider handleOptions={handleOptions} min={0} max={100} property="Stroke Width" defaultValue={50} ratio={100} />
-        <StrokeOptions handleOptions={handleOptions} />
-        <BackgroundOptions handleOptions={handleOptions} />
-        <FillOptions handleOptions={handleOptions} />
-        <hr  className="mt-5 mb-2 border border-t-1 border-slate-400" />
-        <Actions handleOptions={handleOptions}  Duplicate={Duplicate}/>
+      <Slider
+        handleOptions={handleOptions}
+        min={0}
+        max={100}
+        property="Border Width"
+        defaultValue={50}
+        ratio={100}
+      />
+      <Slider
+        handleOptions={handleOptions}
+        min={0}
+        max={100}
+        property="Stroke Width"
+        defaultValue={50}
+        ratio={100}
+      />
+      <StrokeOptions handleOptions={handleOptions} />
+      <BackgroundOptions handleOptions={handleOptions} />
+      <FillOptions handleOptions={handleOptions} />
+      <hr className="mt-5 mb-2 border border-t-1 border-slate-400" />
+      <Actions handleOptions={handleOptions} Duplicate={Duplicate} />
     </div>
   );
 };
 
-const Slider = ({
-  handleOptions,
-  min,
-  max,
-  property,
-  defaultValue,
-  ratio,
-}) => {
+const Slider = ({ handleOptions, min, max, property, defaultValue, ratio }) => {
   const handleChange = (e) => {
     handleOptions({ [property]: e.target.value / ratio });
   };
@@ -72,7 +79,7 @@ const FillOptions = ({ handleOptions }) => {
           title="Hachure (Alt-Click)"
           data-testid="fill-hachure"
           id="1"
-         className={`w-6 h-6 ${
+          className={`w-6 h-6 ${
             fillStyle === "hachure"
               ? "border-2 border-blue-400 rounded-md transition-all"
               : ""
@@ -258,7 +265,9 @@ const BackgroundOptions = ({ handleOptions }) => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setBackgroundColor(options[optionsId]);
-    e.target.value ? handleOptions({ fill: e.target.value }) : handleOptions({ fill: options[optionsId] });
+    e.target.value
+      ? handleOptions({ fill: e.target.value })
+      : handleOptions({ fill: options[optionsId] });
   };
   return (
     <div className="mt-1">
@@ -309,7 +318,9 @@ const StrokeOptions = ({ handleOptions }) => {
   const handleColorChange = (e) => {
     let optionsId = e.target.id;
     setStrokeColor(options[optionsId]);
-    e.target.value ? handleOptions({ strokeColor: e.target.value }) : handleOptions({ strokeColor: options[optionsId] });
+    e.target.value
+      ? handleOptions({ strokeColor: e.target.value })
+      : handleOptions({ strokeColor: options[optionsId] });
   };
   return (
     <div>
@@ -351,18 +362,18 @@ const StrokeOptions = ({ handleOptions }) => {
 const Actions = ({ handleOptions, Duplicate }) => {
   const generator = rough.generator();
   return (
-    <div >
+    <div>
       <div className="">Actions</div>
       <div className="flex items-center justify-start gap-1">
         <button
           onClick={() => Duplicate(generator)}
-         className="w-6 h-6 flex items-center justify-center bg-blue-100 hover:bg-blue-300 transition-all rounded-md shadow-md"
+          className="w-6 h-6 flex items-center justify-center bg-blue-100 hover:bg-blue-300 transition-all rounded-md shadow-md"
         >
-          <IoCopy /> 
+          <IoCopy />
         </button>
       </div>
     </div>
   );
-}
+};
 
 export default SelectionOptionsToolbar;

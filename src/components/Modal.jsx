@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 
 const Modal = ({ open, onClose, handleEndSession, roomID }) => {
   const usernameRef = useRef(null);
-  const [username , setUsername] = useState("");
+  const [username, setUsername] = useState("");
   const copyToClipboard = () => {
     const text = document.getElementById("link").value;
     navigator.clipboard.writeText(text).then(
@@ -19,10 +19,10 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
       {open && (
         <BackDrop open={open} onClose={onClose} username={username}>
           <div
-            className="bg-white p-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] rounded-md font-nova"
+            className="bg-white p-10 absolute  top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] rounded-2xl font-poppins"
             onClick={(e) => e.stopPropagation()}
           >
-            <h1 className="text-2xl font-bold font-nova text-center">
+            <h1 className="text-2xl font-medium font-poppins text-center">
               Live Collaboration
             </h1>
             <p className="text-sm text-center mt-3">

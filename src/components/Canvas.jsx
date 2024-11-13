@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { SquareArrowOutUpRight } from "lucide-react";
+import { SquareArrowOutUpRight, Github } from "lucide-react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
@@ -102,6 +102,15 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
+  const cursorShapes = {
+    draw: "cursor-crosshair",
+    shape: "cursor-crosshair",
+    text: "cursor-text",
+    select: "cursor-grabbing",
+    erase: "cursor-pointer",
+    pan: "cursor-grab",
+  };
+
   useEffect(() => {
     if (!roomID) return;
     socket.emit("join-room", roomID, username);
@@ -161,20 +170,45 @@ const Canvas = ({ history }) => {
       window.removeEventListener("mousemove", sendCursorPosition);
     };
   }, [roomID, socket, username]);
-  const cursorShapes = {
-    draw: "cursor-crosshair",
-    shape: "cursor-crosshair",
-    text: "cursor-text",
-    select: "cursor-grabbing",
-    erase: "cursor-pointer",
-    pan: "cursor-grab",
-  };
 
+  // BACKSPACE DELETE
+  useEffect(() => {
+    const handleDelete = (e) => {
+      if (e.key !== "Backspace" || selectedElements.current.length === 0)
+        return;
+      selectedElements.current.forEach((element) => {
+        if (element.hidden === false) {
+          element.hidden = true;
+          async function removeDataFromDB() {
+            await deleteData(element.id);
+          }
+          removeDataFromDB();
+          if (roomID) {
+            element.hidden = true;
+            socket.emit("delete-element", roomID, element.id);
+          }
+        }
+        removeElementById(element.id);
+      });
+      gizmoRef.current = null;
+      // clear the drawing canvas
+      contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      // make an action to be able to undo it
+      const action = new RemoveAction([...selectedElements.current], generator);
+      history.push(action);
+      selectedElements.current = [];
+
+      setRerender((prev) => !prev);
+    };
+    window.addEventListener("keydown", handleDelete);
+    return () => {
+      window.removeEventListener("keydown", handleDelete);
+    };
+  }, [selectedElements, roomID, history, generator]);
+
+  
   const handleShare = () => {
     setIsOpen(true);
-
-    // set up the socket connection to the server --- should be on the share button click
-    // listen for the connection to the server --- should be on the share button click
     const id = generateID();
     if (!roomID) setRoomID(id);
   };
@@ -382,11 +416,9 @@ const Canvas = ({ history }) => {
               };
               isDragging.current = true;
               isResizing.current = false;
-              // console.log("mouseDown: inside gizmo");
               return;
             } else if (selectedElement) {
               // SELECTION SYSTEM: check if the mouse inside an element then start an action
-              console.log(selectedElement);
               selectedElements.current.forEach((element) =>
                 element.Unlock(socket, roomID)
               );
@@ -397,7 +429,6 @@ const Canvas = ({ history }) => {
                 x: x,
                 y: y,
               };
-              console.log("it doesn't return");
               isDragging.current = true;
               isResizing.current = false;
 
@@ -416,7 +447,6 @@ const Canvas = ({ history }) => {
                 panOffset.x + centerScaleOffset.x,
                 panOffset.y + centerScaleOffset.y
               );
-              console.log("gizmo", gizmoRef.current);
               gizmoRef.current.draw(contextRef);
               contextRef.current.restore();
             } else {
@@ -630,7 +660,6 @@ const Canvas = ({ history }) => {
               } else if (isResizing.current) {
                 // SELECTION SYSTEM: if the action is resizing then resize the selected elements
                 // hide, resize, and draw the selected elements
-                // console.log("Gizmo" , gizmoRef.current)
                 selectedElements.current.forEach((element) => {
                   element.hidden = true;
                   element.Resize(
@@ -641,7 +670,6 @@ const Canvas = ({ history }) => {
                     gitMouseDir(),
                     gizmoRef.current
                   );
-                  console.log(element);
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
                     : element.draw(contextRef.current, canvasRef);
@@ -651,7 +679,6 @@ const Canvas = ({ history }) => {
                   dy - lastdy.current,
                   resizingPoint.current
                 );
-                console.log("gizmo", gizmoRef.current);
                 gizmoRef.current.draw(contextRef);
               }
               contextRef.current.restore();
@@ -663,7 +690,6 @@ const Canvas = ({ history }) => {
               // 3- if we don't have selected elements then we should draw the selectionBox
               if (!gizmoRef.current) return;
               gizmoRef.current.updateCoordinates(x, y);
-              // console.log("mouseMove: drawing selectionBox");
               contextRef.current.clearRect(
                 0,
                 0,
@@ -698,7 +724,6 @@ const Canvas = ({ history }) => {
       [type, isDrawing]
     ),
     Up = () => {
-      // if(shapeRef.current.type === "text") return 1 &&  console.log("true from up")
       const centerScaleOffset = useStore.getState().centerScalingOffset;
       if (type === "pan") {
         lastPanOffset.current = { x: panOffset.x, y: panOffset.y };
@@ -957,8 +982,9 @@ const Canvas = ({ history }) => {
   return (
     <div className="w-full h-screen grid">
       <button
-        className="absolute top-4 right-10 w-10 h-10 text-[18px] font-nova bg-blue-500 text-white rounded-md z-20"
+        className="absolute top-4 right-10 w-10 h-10 text-[18px] font-poppins bg-blue-500 text-white rounded-md z-20"
         onClick={handleShare}
+        title="Share board"
       >
         <SquareArrowOutUpRight className="mx-auto" />
       </button>
@@ -1029,7 +1055,14 @@ const Canvas = ({ history }) => {
         clearGizmoOnOperation={clearGizmoOnOperation}
         socket={socket}
         roomID={roomID}
+        textRef={textRef}
       />
+      <button
+        className="absolute bottom-5 right-5 z-[10002] bg-blue-50 rounded-2xl p-1 shadow-2xl"
+        onClick={() => window.open("https://github.com/BRHM1/draw", "_blank")}
+      >
+        <Github />
+      </button>
       {roomID &&
         Object.entries(users).map(
           (user) =>

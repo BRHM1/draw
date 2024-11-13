@@ -9,8 +9,6 @@ const RenderingCanvas = ({ panOffset, history, textAreaRef }) => {
   const [hasMounted, setHasMounted] = useState(false);
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
 
-  const elements = useStore((state) => state.elements);
-
   const zoom = useStore((state) => state.zoom);
   const setCenterScalingOffset = useStore(
     (state) => state.setCenterScalingOffset
@@ -84,7 +82,7 @@ const RenderingCanvas = ({ panOffset, history, textAreaRef }) => {
 
     renderingCanvasContext.restore();
     renderingContextRef.current = renderingCanvasContext;
-  }, [elements, panOffset.x, panOffset.y, zoom, rerender, hasMounted]);
+  }, [panOffset.x, panOffset.y, zoom, rerender, hasMounted]);
 
   return (
     <canvas

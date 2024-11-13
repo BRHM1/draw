@@ -66,6 +66,25 @@ class History {
         this.undo_idx = -1
         this.redo_idx = -1
     }
+
+    clearEmptyTexts() {
+        for (let element of this.elements.values()) {
+            if (element.type === "text" && element.text === "") {
+                console.log("deleting empty text")
+                this.elements.delete(element.id)
+            }
+        }
+        for (let action of this.history) {
+            action.shapes = action.shapes.filter(shape => this.elements.has(shape.id))
+            if (action.shapes.length === 0) {
+                this.history = this.history.filter(a => a !== action)
+            }
+        }
+    }
+
+    getElements() {
+        return [...this.elements.values()]
+    }
 }
 
 class Action {

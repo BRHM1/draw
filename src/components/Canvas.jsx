@@ -86,12 +86,8 @@ const Canvas = ({ history }) => {
 
   const distance = useRef({ x: 0, y: 0 });
 
-  const removeLastElement = useStore((state) => state.removeLastElement);
-  const removeElementById = useStore((state) => state.removeElementById);
   const options = useStore((state) => state.options);
   const penOptions = useStore((state) => state.penOptions);
-  const addElement = useStore((state) => state.addElement);
-  const elements = useStore((state) => state.elements);
   const action = useStore((state) => state.action);
   const type = useStore((state) => state.type);
 
@@ -137,7 +133,10 @@ const Canvas = ({ history }) => {
     const onReceiveDraw = (data) => {
       if (data === null) return;
       const element = hydrate(data);
-      addElement(element);
+      // use rerender to force the rendering canvas to re-render instead of adding the element to the elements array
+      setRerender((prev) => !prev);
+      // addElement(element);
+      
       history.addElement(element);
     };
     const setUsersInRoom = (users) => {
@@ -188,7 +187,7 @@ const Canvas = ({ history }) => {
           socket.emit("delete-element", roomID, element.id);
         }
       }
-      removeElementById(element.id);
+      setRerender((prev) => !prev);
     });
     gizmoRef.current = null;
     // clear the drawing canvas
@@ -334,7 +333,6 @@ const Canvas = ({ history }) => {
     selectedElements.current.forEach((element) => {
       let newElement = element.Duplicate(generator);
       newElements.push(newElement);
-      addElement(newElement);
     });
     let action = new DrawAction(newElements, generator);
     history.push(action);
@@ -349,7 +347,7 @@ const Canvas = ({ history }) => {
         socket.emit("send-draw", roomID, element);
       }
     }
-
+    setRerender((prev) => !prev);
     // switch the selectedElements and gizmo to the new elements
     selectedElements.current = newElements;
     selectedElements.current.forEach((element) => element.Lock(socket, roomID));
@@ -387,7 +385,7 @@ const Canvas = ({ history }) => {
         switch (type) {
           case "select":
             // 1- get the element at the position of the mouse
-            const elements = [...history.elements.values()];
+            const elements = history.getElements();
             const selectedElement = getElementAtPos(x, y, elements);
             resizingPoint.current = gizmoRef.current?.isMouseResizing(x, y);
             lastResizeState.current = [];
@@ -599,7 +597,7 @@ const Canvas = ({ history }) => {
             setIsDrawing(!isDrawing);
             break;
           case "erase":
-            const elements = [...history.elements.values()];
+            const elements = history.getElements();
             const selectedElement = getElementAtPos(x, y, elements);
             if (selectedElement === null) return;
             if (selectedElement && selectedElement.hidden === false) {
@@ -615,7 +613,7 @@ const Canvas = ({ history }) => {
               const action = new RemoveAction([selectedElement], generator);
               history.push(action);
             }
-            removeElementById(selectedElement.id);
+            setRerender((prev) => !prev);
             break;
           case "select":
             if (
@@ -623,11 +621,7 @@ const Canvas = ({ history }) => {
               isSelectedElementRemoved.current
             ) {
               isSelectedElementRemoved.current = false;
-              selectedElements.current.forEach((element) => {
-                removeElementById(element.id);
-                setRerender((prev) => !prev);
-                // to save the last position of the element before moving it to be able to make undo for selection cases
-              });
+              setRerender((prev) => !prev);
             }
             if (selectedElements.current.length > 0) {
               // SELECTION SYSTEM: if there are selected elements then apply the action
@@ -750,7 +744,7 @@ const Canvas = ({ history }) => {
           // pushing the elements back to the rendering canvas
           selectedElements.current.forEach((element) => {
             element.hidden = false;
-            if (distance.current.x || distance.current.y) addElement(element);
+            if (distance.current.x || distance.current.y) setRerender((prev) => !prev);
           });
 
           // adding the action to the history to be able to undo it
@@ -820,7 +814,7 @@ const Canvas = ({ history }) => {
             x2: gizmoRef.current?.x1 + gizmoRef.current?.width,
             y2: gizmoRef.current?.y1 + gizmoRef.current?.height,
           };
-          const elements = [...history.elements.values()];
+          const elements = history.getElements();
           // 2- if there is no action is started so we get elements inside selectionBox and draw the gizmo around them
           // selectedElements.current.push(
           //   ...getElementsInsideSelectionBox(modifiedSelectionBox, elements)
@@ -878,8 +872,8 @@ const Canvas = ({ history }) => {
       } // ---------- selection ends -------------
       setButtonDown(false);
       if (!["erase", "pan", "select"].includes(type)) {
-        addElement(shapeRef.current);
-        shapeRef.current.Refine();
+        
+        
         // adding the new element to the DB
         async function addDataToDB() {
           await addData(shapeRef.current);
@@ -889,9 +883,11 @@ const Canvas = ({ history }) => {
         if (roomID) {
           socket.emit("send-draw", roomID, shapeRef.current);
         }
+        shapeRef.current.Refine();
         // adding the new element to the history
         const action = new DrawAction([shapeRef.current], generator);
         history.push(action);
+        setRerender((prev) => !prev);
       }
     };
 
@@ -915,12 +911,11 @@ const Canvas = ({ history }) => {
   };
 
   const onBlur = () => {
-    if (elements[elements.length - 1]?.text === "") {
-      history.pop();
-      removeLastElement();
-    }
+    history.clearEmptyTexts();
     setRerender((prev) => !prev);
+    
     async function addDataToDB() {
+      if(!capturedText.current) return;
       await deleteData(capturedText.current.id);
       await addData(capturedText.current);
     }

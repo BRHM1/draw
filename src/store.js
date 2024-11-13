@@ -47,25 +47,7 @@ export const useStore = create((set) => ({
     penColor: "#000000",
     zoom: 1,
     centerScalingOffset: { x: 0, y: 0 },
-    elements: [],
     rerender: false,
-    addElement: (element) =>
-        set(produce((state) => {
-            state.elements.push(element); // dont change the reference of the elements array
-        })),
-    removeLastElement: () =>
-        set(produce((state) => {
-            state.elements.pop();
-        })),
-    clearElements: () =>
-        set(produce((state) => {
-            state.elements.length = 0;
-        })),
-    removeElementById: (id) => {
-        set(produce((state) => {
-            state.elements = state.elements.filter((element) => element.id !== id);
-        }));
-    },
     setAction: (action) =>
         set(produce((state) => {
             state.action = action;

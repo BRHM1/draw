@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 const Cursor = ({ socket, roomID, name, id }) => {
   const cursorRef = useRef(null);
-  const [cursorCoords, setCursorCoords] = useState({ x: 0, y: 0 });
+  const [cursorCoords, setCursorCoords] = useState({ x: Math.random() * 500, y: Math.random() * 500 });
 
   const recieveCursorHandler = (data, senderID) => {
     if (!cursorRef.current || senderID !== id) return;

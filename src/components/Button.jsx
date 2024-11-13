@@ -2,9 +2,7 @@ import { useStore } from "../store";
 import { Undo2, Redo2 } from "lucide-react";
 import { useEffect } from "react";
 
-const Button = ({ label, callbackFn, hotKey }) => {
-  const action = useStore((state) => state.action);
-  // i need a way to check if there is active text element
+const Button = ({ label, callbackFn, hotKey, roomID }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === hotKey) {
@@ -17,7 +15,7 @@ const Button = ({ label, callbackFn, hotKey }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [roomID]);
 
   return (
     <button

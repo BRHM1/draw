@@ -1,9 +1,12 @@
 import { BackDrop } from "./Modal";
-
+import {motion} from "framer-motion";
 const ClearModal = ({ open, onClose, clearCanvas }) => {
   return (
     <BackDrop onClose={onClose}>
-      <div
+      <motion.div
+        initial={{ scale: 0, y: "-50%" , x: "-50%"}}
+        animate={{ scale: 1, y: "-50%", x: "-50%" }}
+        transition={{ duration: 0.2 }}
         className="bg-white p-10 absolute border border-red-800  top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] rounded-2xl font-poppins flex flex-col justify-start items-center"
         onClick={(e) => e.stopPropagation()}
       >
@@ -30,7 +33,7 @@ const ClearModal = ({ open, onClose, clearCanvas }) => {
             Confirm
           </button>
         </div>
-      </div>
+      </motion.div>
     </BackDrop>
   );
 };

@@ -3,13 +3,17 @@ import { PiDotsNineBold, PiEmptyLight } from "react-icons/pi";
 import { BsTrash3Fill } from "react-icons/bs";
 import { IoCopy } from "react-icons/io5";
 import rough from "roughjs/bundled/rough.esm";
-
+import {motion} from "framer-motion";
 const SelectionOptionsToolbar = ({ editSelectedElements, Duplicate, onDelete }) => {
   const handleOptions = (values) => {
     editSelectedElements(values);
   };
   return (
-    <div className="bg-blue-50 w-44 h-[54%] shadow-md p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
+    <motion.div
+    initial={{ opacity: 0, x: -200 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.2 }}
+    className="bg-blue-50 w-44 h-[54%] shadow-md p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
       {/* sliders for stroke width and path width */}
       <Slider
         handleOptions={handleOptions}
@@ -32,7 +36,7 @@ const SelectionOptionsToolbar = ({ editSelectedElements, Duplicate, onDelete }) 
       <FillOptions handleOptions={handleOptions} />
       <hr className="mt-5 mb-2 border border-t-1 border-slate-400" />
       <Actions handleOptions={handleOptions} Duplicate={Duplicate} onDelete={onDelete} />
-    </div>
+    </motion.div>
   );
 };
 

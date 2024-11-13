@@ -5,12 +5,17 @@ import { TbLineDotted } from "react-icons/tb";
 import { PiDotsNineBold } from "react-icons/pi";
 import { TfiLayoutLineSolid } from "react-icons/tfi";
 import { useStore } from "../store";
-
+import { motion } from "framer-motion";
 const OptionsToolbar = () => {
   const setFeildInOptions = useStore((state) => state.setFeildInOptions);
 
   return (
-    <div className="bg-blue-50 shadow-lg w-44 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
+    <motion.div
+      initial={{ obacity: 0, x: -200 }}
+      animate={{ obacity: 1, x: 0 }}
+      transition={{ duration: 0.2 }}
+      className="bg-blue-50 shadow-lg w-44 h-[58%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20"
+    >
       <StrokeOptions handleOptions={setFeildInOptions} />
       <BackgroundOptions handleOptions={setFeildInOptions} />
       <FillOptions handleOptions={setFeildInOptions} />
@@ -18,7 +23,7 @@ const OptionsToolbar = () => {
       <StrokeStyleOptions handleOptions={setFeildInOptions} />
       <SloppinessOptions handleOptions={setFeildInOptions} />
       <RandomnessSlider handleOptions={setFeildInOptions} />
-    </div>
+    </motion.div>
   );
 };
 

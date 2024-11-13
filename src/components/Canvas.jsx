@@ -206,7 +206,7 @@ const Canvas = ({ history }) => {
     // make an action to be able to undo it
     const action = new RemoveAction([...selectedElements.current], generator);
     history.push(action);
-    selectedElements.current = [];
+    selectedElements.current.length = 0;
 
     setRerender((prev) => !prev);
   };
@@ -401,9 +401,11 @@ const Canvas = ({ history }) => {
       alert("Please upload a valid JSON file.");
       return;
     }
+    contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const addToDB = async (element) => {
       await addData(element);
     };
+    history.clear();
     reader.onload = (e) => {
       const data = JSON.parse(e.target.result);
       history.clear();
@@ -1035,23 +1037,32 @@ const Canvas = ({ history }) => {
   return (
     <div className="w-full h-screen grid">
 
-      <button
+      <motion.button
+        initial={{ y: -100, opacity: 0.3 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.2 }}
         className="absolute top-4 left-6 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20"
         onClick={() => setIsClearOpen(true)}
         title="Clear board"
       >
         <Trash2 className="mx-auto" size={18} />
-      </button>
+      </motion.button>
      
-      <button
+      <motion.button
+        initial={{ y: -100, opacity: 0.3 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className="absolute top-4 left-16 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20"
         onClick={() => Save()}
         title="Save board"
       >
         <Download className="mx-auto" size={18} />
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
+        initial={{ y: -100, opacity: 0.3 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
         className="absolute appearance-none top-4 left-[6.5rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 grid place-items-center"
         onClick={() => document.getElementById("file").click()}
         title="Load board"
@@ -1064,9 +1075,12 @@ const Canvas = ({ history }) => {
           title="Load board"
           style={{ display: "none", position: "absolute", zIndex: -1 }}
         />
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
+        initial={{ y: -100, opacity: 0.3 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className="absolute top-4 left-[9rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 hover:w-28 transition-all"
         onClick={handleShare}
         onMouseEnter={() => setShareHover(true)}
@@ -1077,7 +1091,7 @@ const Canvas = ({ history }) => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
         className="text-center" >Go Live!</motion.p>}
-      </button>
+      </motion.button>
 
       {isClearOpen && (
         <ClearModal
@@ -1156,14 +1170,16 @@ const Canvas = ({ history }) => {
         clearGizmoOnOperation={clearGizmoOnOperation}
         socket={socket}
         roomID={roomID}
-        textRef={textRef}
       />
-      <button
+      <motion.button
+        initial={{ x: 100, opacity: 0.3 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className="absolute bottom-5 right-5 z-[10002] bg-blue-50 rounded-2xl p-1 shadow-2xl"
         onClick={() => window.open("https://github.com/BRHM1/draw", "_blank")}
       >
         <Github />
-      </button>
+      </motion.button>
       {roomID &&
         Object.entries(users).map(
           (user) =>

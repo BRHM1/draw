@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-
+import {motion} from "framer-motion";
 const Modal = ({ open, onClose, handleEndSession, roomID }) => {
   const usernameRef = useRef(null);
   const [username, setUsername] = useState("");
@@ -18,7 +18,10 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
     <div>
       {open && (
         <BackDrop open={open} onClose={onClose} username={username}>
-          <div
+          <motion.div
+            initial={{ scale: 0, x: "-50%", y: "-50%" }}
+            animate={{ scale: 1 , x: "-50%", y: "-50%"} }
+            transition={{ duration: 0.2 }}
             className="bg-white p-10 absolute  top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1000] rounded-2xl font-poppins"
             onClick={(e) => e.stopPropagation()}
           >
@@ -71,7 +74,7 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
                 End Session
               </button>
             </div>
-          </div>
+          </motion.div>
         </BackDrop>
       )}
     </div>

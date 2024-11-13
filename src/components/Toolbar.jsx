@@ -4,17 +4,17 @@ import { RxEraser } from "react-icons/rx";
 import { LuPen } from "react-icons/lu";
 import { FaRegCircle, FaMinus, FaRegSquareFull } from "react-icons/fa6";
 import { TbOvalVertical } from "react-icons/tb";
-import { PiCursorClickBold , PiTextT  } from "react-icons/pi";
+import { PiCursorClickBold, PiTextT } from "react-icons/pi";
 import { FaRegHand } from "react-icons/fa6";
-
+import { motion } from "framer-motion";
 import { twMerge } from "tailwind-merge";
 
 import { useStore } from "../store";
 
 const Toolbar = (props) => {
-  const setAction = useStore((state) => state.setAction)
-  const selectedType = useStore((state) => state.type)
-  const setType = useStore((state) => state.setType)
+  const setAction = useStore((state) => state.setAction);
+  const selectedType = useStore((state) => state.type);
+  const setType = useStore((state) => state.setType);
   const buttons = [
     {
       name: "draw",
@@ -43,12 +43,22 @@ const Toolbar = (props) => {
     },
     {
       name: "shape",
-      icon: <div className="500 flex items-center justify-center">
-        <svg width="40" height="40" className="scale-90" >
-        <ellipse cx="20" cy="20" rx="10" ry="7" fill="none" stroke="black"  strokeWidth={"1.7px"} />
-        Sorry, inline SVG isn't supported by your browser.  
-            </svg>
-      </div>,
+      icon: (
+        <div className="500 flex items-center justify-center">
+          <svg width="40" height="40" className="scale-90">
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="10"
+              ry="7"
+              fill="none"
+              stroke="black"
+              strokeWidth={"1.7px"}
+            />
+            Sorry, inline SVG isn't supported by your browser.
+          </svg>
+        </div>
+      ),
       type: "Ellipse",
     },
     {
@@ -68,11 +78,14 @@ const Toolbar = (props) => {
     },
   ];
   return (
-    <div
+    <motion.div
       className={twMerge(
         "min-w-[30rem] h-10 bg-blue-50 shadow-lg z-10 grid place-content-center grid-cols-9 rounded-md mt-3 ",
         props.className
       )}
+      initial={{ opacity: 0, y: -100 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
       {buttons.map((button, index) => (
         <button
@@ -81,19 +94,18 @@ const Toolbar = (props) => {
             setAction(button.name);
             setType(button.type);
             props.clearGizmoOnOperation();
-          }}    
+          }}
           className={twMerge(
             `w-10 h-8 grid place-content-center justify-self-center rounded-md `,
             selectedType === button.type
               ? "bg-blue-200"
-              : "bg-blue-50 hover:bg-blue-100",
-           
+              : "bg-blue-50 hover:bg-blue-100"
           )}
         >
           {button.icon}
         </button>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

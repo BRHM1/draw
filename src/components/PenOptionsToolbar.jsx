@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useStore } from "../store";
-
+import { motion } from "framer-motion";
 const PenOptionsToolbar = () => {
   const setFieldInPenOptions = useStore((state) => state.setFieldInPenOptions);
   const penColor = useStore((state) => state.setPenColor);
@@ -38,7 +38,11 @@ const PenOptionsToolbar = () => {
   };
 
   return (
-    <div className="bg-blue-50 shadow-lg w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
+    <motion.div 
+    initial={{ opacity: 0, x: -200 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.2 }}
+    className="bg-blue-50 shadow-lg w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
       <div className="text-lg font-medium pb-2">Pen Options</div>
       <div className="flex items-center justify-start">
         <label>Color</label>
@@ -74,7 +78,7 @@ const PenOptionsToolbar = () => {
         <Toggler handleOptions={handleOptions} />
       </div> */}
       {/* <Slider handleOptions={handleOptions} min={1} max={100} property="size" defaultValue={8} /> */}
-    </div>
+    </motion.div>
   );
 };
 

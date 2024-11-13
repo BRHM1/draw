@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { SquareArrowOutUpRight, Github } from "lucide-react";
+import { SquareArrowOutUpRight, Github, Trash2  } from "lucide-react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
@@ -34,6 +34,7 @@ import {
   generateID,
   hydrate,
   deleteData,
+  clearData,
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -43,11 +44,13 @@ import ViewportControl from "./ViewportControl";
 import SelectionOptionsToolbar from "./SelectionOptionsToolbar";
 import Modal from "./Modal";
 import Cursor from "./Cursor";
+import ClearModal from "./ClearModal";
 
 const socket = io("http://localhost:3000");
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClearOpen, setIsClearOpen] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const [roomID, setRoomID] = useState(urlParams.get("roomID"));
   const [users, setUsers] = useState([]); // {id: , name: , cursor: {x: , y: }}
@@ -61,7 +64,7 @@ const Canvas = ({ history }) => {
   const roughCanvasRef = useRef(null);
   const textRef = useRef(null);
   const shapeRef = useRef(null);
-  const [cordinates, setCordinates] = useState({ x: 0, y: 0 });
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [buttonDown, setButtonDown] = useState(false);
   const selectedElements = useRef([]);
@@ -940,6 +943,17 @@ const Canvas = ({ history }) => {
     setUsername(name);
   };
 
+  const clearCanvas = () => {
+    contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    history.clear();
+    // delete elements from browser DB
+    async function clearDataFromDB() {
+      await clearData();
+    }
+    clearDataFromDB();
+    setRerender((prev) => !prev);
+  }
+
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
@@ -982,7 +996,7 @@ const Canvas = ({ history }) => {
   return (
     <div className="w-full h-screen grid">
       <button
-        className="absolute top-4 right-10 w-10 h-10 text-[18px] font-poppins bg-blue-500 text-white rounded-md z-20"
+        className="absolute top-4 right-10 w-10 h-10 shadow-xl text-[18px] font-poppins bg-blue-500 text-white rounded-md z-20"
         onClick={handleShare}
         title="Share board"
       >
@@ -996,6 +1010,22 @@ const Canvas = ({ history }) => {
           onClose={onCloseModal}
         />
       )}
+
+      <button
+        className="absolute top-4 right-24 shadow-xl w-10 h-10 text-[18px] font-poppins bg-blue-500 text-white rounded-md z-20"
+        onClick={() => setIsClearOpen(true)}
+        title="Clear board"
+      >
+        <Trash2 className="mx-auto" />
+      </button>
+      {isClearOpen && (
+        <ClearModal
+          open={isClearOpen}
+          onClose={() => setIsClearOpen(false)}
+          clearCanvas={clearCanvas}
+        />
+      )}
+
       <Toolbar
         className={"row-start-1 col-start-1 justify-self-center left-1/4 z-20"}
         contextRef={contextRef}

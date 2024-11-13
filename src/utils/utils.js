@@ -237,6 +237,29 @@ export const deleteData = (id) => {
   });
 };
 
+export const clearData = () => {
+  return new Promise((resolve) => {
+    const request = window.indexedDB.open('myDB', 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction('elements', 'readwrite');
+      const store = tx.objectStore('elements');
+      store.clear();
+      resolve('Cleared');
+    };
+
+    request.onerror = () => {
+      const error = request.error?.message
+      if (error) {
+        resolve(error);
+      } else {
+        resolve('Unknown error');
+      }
+    };
+  });
+};
+
 export const getMinMaxCoordinates = (elements) => {
   let minX = Infinity
   let minY = Infinity

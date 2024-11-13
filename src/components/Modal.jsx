@@ -78,11 +78,11 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
   );
 };
 
-const BackDrop = ({ children, open, onClose, username }) => {
+const BackDrop = ({ children, onClose, username }) => {
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 z-[999]"
-      onClick={onClose.bind(null, username)}
+      onClick={() => onClose(username)}
     >
       {children}
     </div>
@@ -90,3 +90,4 @@ const BackDrop = ({ children, open, onClose, username }) => {
 };
 
 export default Modal;
+export { BackDrop };

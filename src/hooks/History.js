@@ -59,6 +59,13 @@ class History {
     removeElement(id) {
         this.elements.delete(id)
     }
+
+    clear() {
+        this.history = []
+        this.elements = new Map()
+        this.undo_idx = -1
+        this.redo_idx = -1
+    }
 }
 
 class Action {

@@ -11,7 +11,7 @@ const ClearModal = ({ open, onClose, clearCanvas }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <h1 className="text-2xl font-medium font-poppins text-center">
-          Clear Canvas
+          Clear Board
         </h1>
         <p className="text-sm text-center mt-1  ">
           Are you sure you want to clear the canvas?

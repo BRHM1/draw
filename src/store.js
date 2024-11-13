@@ -14,7 +14,7 @@ export const useStore = create((set) => ({
         dashOffset: -1,
         disableMultiStroke: true,
         disableMultiStrokeFill: false,
-        fill: "babyblue",
+        fill: "purple",
         fillShapeRoughnessGain: 0.8,
         fillStyle: "solid",
         fillWeight: -1,

@@ -195,7 +195,7 @@ const Canvas = ({ history }) => {
         removeDataFromDB();
         if (roomID) {
           element.hidden = true;
-          socket.emit("delete-element", roomID, element.id);
+          if(roomID) socket.emit("delete-element", roomID, element.id);
         }
       }
       setRerender((prev) => !prev);
@@ -332,7 +332,7 @@ const Canvas = ({ history }) => {
       selectedElements.current.forEach(async (element) => {
         await deleteData(element.id);
         await addData(element);
-        socket.emit("send-draw", roomID, element);
+        if(roomID) socket.emit("send-draw", roomID, element);
       });
     }
     addDataToDB();
@@ -625,21 +625,26 @@ const Canvas = ({ history }) => {
           case "draw":
             shapeRef.current.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
+            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
             break;
           case "Rectangle":
             shapeRef.current.updateDimensions(x, y, generator);
+            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "Circle":
             shapeRef.current.updateDimensions(x, y, generator);
+            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "Ellipse":
             shapeRef.current.updateDimensions(x, y, generator);
+            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "Line":
             shapeRef.current.updateDimensions(x, y, generator);
+            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "erase":
@@ -654,7 +659,7 @@ const Canvas = ({ history }) => {
               removeDataFromDB();
               if (roomID) {
                 selectedElement.hidden = true;
-                socket.emit("delete-element", roomID, selectedElement.id);
+                if(roomID) socket.emit("delete-element", roomID, selectedElement.id);
               }
               const action = new RemoveAction([selectedElement], generator);
               history.push(action);
@@ -698,6 +703,7 @@ const Canvas = ({ history }) => {
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
                     : element.draw(contextRef.current, canvasRef);
+                    if(roomID) socket.emit("send-draw", roomID, element);
                 });
                 gizmoRef.current.Move(dx - lastdx.current, dy - lastdy.current);
                 gizmoRef.current.draw(contextRef);
@@ -717,6 +723,7 @@ const Canvas = ({ history }) => {
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
                     : element.draw(contextRef.current, canvasRef);
+                  if(roomID) socket.emit("send-draw", roomID, element);
                 });
                 gizmoRef.current.Resize(
                   dx - lastdx.current,
@@ -816,7 +823,6 @@ const Canvas = ({ history }) => {
             selectedElements.current.forEach(async (element) => {
               await deleteData(element.id);
               await addData(element);
-              if (roomID) socket.emit("send-draw", roomID, element);
             });
           }
           if (
@@ -827,7 +833,6 @@ const Canvas = ({ history }) => {
             selectedElements.current.forEach(async (element) => {
               await deleteData(element.id);
               await addData(element);
-              if (roomID) socket.emit("send-draw", roomID, element);
             });
           }
           isDragging.current = false;
@@ -925,9 +930,7 @@ const Canvas = ({ history }) => {
         }
         addDataToDB();
         // sending the draw data to the server
-        if (roomID) {
-          socket.emit("send-draw", roomID, shapeRef.current);
-        }
+        
         shapeRef.current.Refine();
         // adding the new element to the history
         const action = new DrawAction([shapeRef.current], generator);

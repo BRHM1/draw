@@ -1,5 +1,6 @@
 import Button from "./Button";
 import { useStore } from "../store";
+import { Minus, Plus } from "lucide-react";
 
 const ViewportControl = ({
   zoom,
@@ -29,16 +30,16 @@ const ViewportControl = ({
       </div>
       <div className="flex items-center mt-1 justify-center">
         <button
-          className="w-10 h-8 flex items-center justify-center bg-blue-50 shadow-lg hover:bg-[#bfdbfe] rounded-e-none border-r-2 border-r-white text-black font-bold py-2 px-4 rounded select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+          className="w-12 h-8 flex items-center justify-center bg-blue-50 shadow-lg hover:bg-[#bfdbfe] rounded-e-none border-r-2 border-r-white text-black font-bold py-2 px-4 rounded select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
           onClick={() => {
             clearGizmoOnOperation();
             setZoom(zoom + 0.1);
           }}
         >
-          -
+          <Minus className="mx-auto"  />
         </button>
         <button
-          className="w-20 h-8 flex items-center justify-center shadow-lg bg-blue-50 hover:bg-[#bfdbfe] text-black  py-2 px-4 select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+          className="w-16 h-8 flex items-center justify-center shadow-lg bg-blue-50 hover:bg-[#bfdbfe] text-black  py-2 px-2 select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
           onClick={() => {
             clearGizmoOnOperation();
             setZoom(1);
@@ -49,17 +50,17 @@ const ViewportControl = ({
           {zoom === 1.1 && <span>90 %</span>}
 
           {zoom !== 1 && zoom !== 0.9 && zoom !== 1.1 && (
-            <span>{`${210 - Math.floor(zoom * 100)} %`}</span>
+            <span>{`${210 - Math.floor(zoom * 100)}%`}</span>
           )}
         </button>
         <button
-          className="w-10 h-8 flex items-center justify-center bg-blue-50 hover:bg-[#bfdbfe] text-black border-l-2 border-l-white font-bold py-2 px-4 shadow-lg rounded rounded-s-none select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+          className="w-12 h-8 flex items-center justify-center bg-blue-50 hover:bg-[#bfdbfe] text-black border-l-2 border-l-white font-bold py-2 px-4 shadow-lg rounded rounded-s-none select-none disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
           onClick={() => {
             clearGizmoOnOperation();
             setZoom(zoom - 0.1);
           }}
         >
-          +
+          <Plus className="mx-auto" />
         </button>
       </div>
     </div>

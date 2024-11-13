@@ -5,7 +5,14 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { SquareArrowOutUpRight, Github, Trash2 } from "lucide-react";
+import {
+  SquareArrowOutUpRight,
+  Github,
+  Trash2,
+  Download,
+  Upload,
+  Users,
+} from "lucide-react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
@@ -45,12 +52,16 @@ import SelectionOptionsToolbar from "./SelectionOptionsToolbar";
 import Modal from "./Modal";
 import Cursor from "./Cursor";
 import ClearModal from "./ClearModal";
+import { motion } from "framer-motion";
+
 
 const socket = io("http://localhost:3000");
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClearOpen, setIsClearOpen] = useState(false);
+  const [shareHover , setShareHover] = useState(false);
+
   const urlParams = new URLSearchParams(window.location.search);
   const [roomID, setRoomID] = useState(urlParams.get("roomID"));
   const [users, setUsers] = useState([]); // {id: , name: , cursor: {x: , y: }}
@@ -136,7 +147,7 @@ const Canvas = ({ history }) => {
       // use rerender to force the rendering canvas to re-render instead of adding the element to the elements array
       setRerender((prev) => !prev);
       // addElement(element);
-      
+
       history.addElement(element);
     };
     const setUsersInRoom = (users) => {
@@ -202,8 +213,8 @@ const Canvas = ({ history }) => {
   // BACKSPACE DELETE
   useEffect(() => {
     const handleBackspace = (e) => {
-      if(e.key === "Backspace") handleDelete();  
-    }
+      if (e.key === "Backspace") handleDelete();
+    };
     window.addEventListener("keydown", handleBackspace);
     return () => {
       window.removeEventListener("keydown", handleBackspace);
@@ -371,6 +382,39 @@ const Canvas = ({ history }) => {
     );
     gizmoRef.current.draw(contextRef);
     contextRef.current.restore();
+  };
+
+  const Save = () => {
+    const elements = history.getElements();
+    const data = JSON.stringify(elements);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `canvas-${Date.now()}.json`;
+    a.click();
+  };
+  const Load = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    if (file.type !== "application/json") {
+      alert("Please upload a valid JSON file.");
+      return;
+    }
+    const addToDB = async (element) => {
+      await addData(element);
+    };
+    reader.onload = (e) => {
+      const data = JSON.parse(e.target.result);
+      history.clear();
+      data.forEach((element) => {
+        const newElement = hydrate(element);
+        history.addElement(newElement);
+        addToDB(newElement);
+      });
+      setRerender((prev) => !prev);
+    };
+    reader.readAsText(file);
   };
 
   let Down = useCallback(
@@ -744,7 +788,8 @@ const Canvas = ({ history }) => {
           // pushing the elements back to the rendering canvas
           selectedElements.current.forEach((element) => {
             element.hidden = false;
-            if (distance.current.x || distance.current.y) setRerender((prev) => !prev);
+            if (distance.current.x || distance.current.y)
+              setRerender((prev) => !prev);
           });
 
           // adding the action to the history to be able to undo it
@@ -872,8 +917,6 @@ const Canvas = ({ history }) => {
       } // ---------- selection ends -------------
       setButtonDown(false);
       if (!["erase", "pan", "select"].includes(type)) {
-        
-        
         // adding the new element to the DB
         async function addDataToDB() {
           await addData(shapeRef.current);
@@ -913,9 +956,9 @@ const Canvas = ({ history }) => {
   const onBlur = () => {
     history.clearEmptyTexts();
     setRerender((prev) => !prev);
-    
+
     async function addDataToDB() {
-      if(!capturedText.current) return;
+      if (!capturedText.current) return;
       await deleteData(capturedText.current.id);
       await addData(capturedText.current);
     }
@@ -991,34 +1034,65 @@ const Canvas = ({ history }) => {
 
   return (
     <div className="w-full h-screen grid">
+
       <button
-        className="absolute top-4 right-10 w-10 h-10 shadow-xl text-[18px] font-poppins bg-blue-500 text-white rounded-md z-20"
-        onClick={handleShare}
-        title="Share board"
+        className="absolute top-4 left-6 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20"
+        onClick={() => setIsClearOpen(true)}
+        title="Clear board"
       >
-        <SquareArrowOutUpRight className="mx-auto" />
+        <Trash2 className="mx-auto" size={18} />
       </button>
+     
+      <button
+        className="absolute top-4 left-16 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20"
+        onClick={() => Save()}
+        title="Save board"
+      >
+        <Download className="mx-auto" size={18} />
+      </button>
+
+      <button
+        className="absolute appearance-none top-4 left-[6.5rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 grid place-items-center"
+        onClick={() => document.getElementById("file").click()}
+        title="Load board"
+      >
+        <Upload className="mx-auto" size={18} />
+        <input
+          type="file"
+          id="file"
+          onChange={Load}
+          title="Load board"
+          style={{ display: "none", position: "absolute", zIndex: -1 }}
+        />
+      </button>
+
+      <button
+        className="absolute top-4 left-[9rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 hover:w-28 transition-all"
+        onClick={handleShare}
+        onMouseEnter={() => setShareHover(true)}
+        onMouseLeave={() => setShareHover(false)}
+      >
+        {!shareHover ? <Users size={18} className="mx-auto" /> : <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="text-center" >Go Live!</motion.p>}
+      </button>
+
+      {isClearOpen && (
+        <ClearModal
+          open={isClearOpen}
+          onClose={() => setIsClearOpen(false)}
+          clearCanvas={clearCanvas}
+        />
+      )}
+
       {isOpen && (
         <Modal
           open={isOpen}
           roomID={roomID}
           handleEndSession={handleEndSession}
           onClose={onCloseModal}
-        />
-      )}
-
-      <button
-        className="absolute top-4 right-24 shadow-xl w-10 h-10 text-[18px] font-poppins bg-blue-500 text-white rounded-md z-20"
-        onClick={() => setIsClearOpen(true)}
-        title="Clear board"
-      >
-        <Trash2 className="mx-auto" />
-      </button>
-      {isClearOpen && (
-        <ClearModal
-          open={isClearOpen}
-          onClose={() => setIsClearOpen(false)}
-          clearCanvas={clearCanvas}
         />
       )}
 

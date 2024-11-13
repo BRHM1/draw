@@ -309,7 +309,6 @@ export const hydrate = element => {
   switch (element.type) {
     case "path":
       result = new Path(x1, y1, x2, y2, path, options, color, fillFlag, fillStyle, points, strokeStyle, rotation, id)
-      console.log(result)
       break
     case "rectangle":
       // const { x1, y1, width, height, options, roughElement, rotation } = element
@@ -333,3 +332,4 @@ export const hydrate = element => {
   }
   return result
 }
+

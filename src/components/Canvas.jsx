@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { SquareArrowOutUpRight, Github, Trash2  } from "lucide-react";
+import { SquareArrowOutUpRight, Github, Trash2 } from "lucide-react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
 import { useStore } from "../store";
@@ -174,42 +174,43 @@ const Canvas = ({ history }) => {
     };
   }, [roomID, socket, username]);
 
+  const handleDelete = () => {
+    if (selectedElements.current.length === 0) return;
+    selectedElements.current.forEach((element) => {
+      if (element.hidden === false) {
+        element.hidden = true;
+        async function removeDataFromDB() {
+          await deleteData(element.id);
+        }
+        removeDataFromDB();
+        if (roomID) {
+          element.hidden = true;
+          socket.emit("delete-element", roomID, element.id);
+        }
+      }
+      removeElementById(element.id);
+    });
+    gizmoRef.current = null;
+    // clear the drawing canvas
+    contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    // make an action to be able to undo it
+    const action = new RemoveAction([...selectedElements.current], generator);
+    history.push(action);
+    selectedElements.current = [];
+
+    setRerender((prev) => !prev);
+  };
   // BACKSPACE DELETE
   useEffect(() => {
-    const handleDelete = (e) => {
-      if (e.key !== "Backspace" || selectedElements.current.length === 0)
-        return;
-      selectedElements.current.forEach((element) => {
-        if (element.hidden === false) {
-          element.hidden = true;
-          async function removeDataFromDB() {
-            await deleteData(element.id);
-          }
-          removeDataFromDB();
-          if (roomID) {
-            element.hidden = true;
-            socket.emit("delete-element", roomID, element.id);
-          }
-        }
-        removeElementById(element.id);
-      });
-      gizmoRef.current = null;
-      // clear the drawing canvas
-      contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      // make an action to be able to undo it
-      const action = new RemoveAction([...selectedElements.current], generator);
-      history.push(action);
-      selectedElements.current = [];
-
-      setRerender((prev) => !prev);
-    };
-    window.addEventListener("keydown", handleDelete);
+    const handleBackspace = (e) => {
+      if(e.key === "Backspace") handleDelete();  
+    }
+    window.addEventListener("keydown", handleBackspace);
     return () => {
-      window.removeEventListener("keydown", handleDelete);
+      window.removeEventListener("keydown", handleBackspace);
     };
   }, [selectedElements, roomID, history, generator]);
 
-  
   const handleShare = () => {
     setIsOpen(true);
     const id = generateID();
@@ -952,7 +953,7 @@ const Canvas = ({ history }) => {
     }
     clearDataFromDB();
     setRerender((prev) => !prev);
-  }
+  };
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -1077,6 +1078,7 @@ const Canvas = ({ history }) => {
         <SelectionOptionsToolbar
           editSelectedElements={editSelectedElements}
           Duplicate={Duplicate}
+          onDelete={handleDelete}
         />
       )}
       <ViewportControl

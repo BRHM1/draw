@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
 import { PiDotsNineBold, PiEmptyLight } from "react-icons/pi";
+import { BsTrash3Fill } from "react-icons/bs";
 import { IoCopy } from "react-icons/io5";
 import rough from "roughjs/bundled/rough.esm";
 
-const SelectionOptionsToolbar = ({ editSelectedElements, Duplicate }) => {
+const SelectionOptionsToolbar = ({ editSelectedElements, Duplicate, onDelete }) => {
   const handleOptions = (values) => {
     editSelectedElements(values);
   };
@@ -30,7 +31,7 @@ const SelectionOptionsToolbar = ({ editSelectedElements, Duplicate }) => {
       <BackgroundOptions handleOptions={handleOptions} />
       <FillOptions handleOptions={handleOptions} />
       <hr className="mt-5 mb-2 border border-t-1 border-slate-400" />
-      <Actions handleOptions={handleOptions} Duplicate={Duplicate} />
+      <Actions handleOptions={handleOptions} Duplicate={Duplicate} onDelete={onDelete} />
     </div>
   );
 };
@@ -359,7 +360,7 @@ const StrokeOptions = ({ handleOptions }) => {
   );
 };
 
-const Actions = ({ handleOptions, Duplicate }) => {
+const Actions = ({ handleOptions, Duplicate, onDelete }) => {
   const generator = rough.generator();
   return (
     <div>
@@ -367,9 +368,15 @@ const Actions = ({ handleOptions, Duplicate }) => {
       <div className="flex items-center justify-start gap-1">
         <button
           onClick={() => Duplicate(generator)}
-          className="w-6 h-6 flex items-center justify-center bg-blue-100 hover:bg-blue-300 transition-all rounded-md shadow-md"
+          className="w-6 h-6 flex items-center justify-center bg-blue-100 hover:bg-blue-300 transition-all rounded-md shadow-lg"
         >
           <IoCopy />
+        </button>
+        <button
+          onClick={onDelete}
+          className="w-6 h-6 flex items-center justify-center bg-blue-100 hover:bg-blue-300 transition-all rounded-md shadow-lg"
+        >
+           <BsTrash3Fill />
         </button>
       </div>
     </div>

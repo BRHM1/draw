@@ -70,7 +70,6 @@ class History {
     clearEmptyTexts() {
         for (let element of this.elements.values()) {
             if (element.type === "text" && element.text === "") {
-                console.log("deleting empty text")
                 this.elements.delete(element.id)
             }
         }

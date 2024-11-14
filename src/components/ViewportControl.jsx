@@ -12,7 +12,6 @@ const ViewportControl = ({
   const setZoom = useStore((state) => state.setZoom);
   const setRerender = useStore((state) => state.setRerender);
   const undo = () => {
-    console.log(socket, roomID);
     history.undo(socket, roomID);
     clearGizmoOnOperation();
     setRerender((state) => !state);

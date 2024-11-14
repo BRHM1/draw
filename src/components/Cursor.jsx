@@ -1,12 +1,18 @@
 import { PiCursorLight } from "react-icons/pi";
 import { useEffect, useRef, useState } from "react";
+import { useStore } from "../store";
 
-const Cursor = ({ socket, roomID, name, id }) => {
+const Cursor = ({ socket, roomID, name, id, panOffset }) => {
   const cursorRef = useRef(null);
   const [cursorCoords, setCursorCoords] = useState({ x: Math.random() * 500, y: Math.random() * 500 });
 
+  const zoom = useStore((state) => state.zoom);
+  const centerScalingOffset = useStore((state) => state.centerScalingOffset);
+
   const recieveCursorHandler = (data, senderID) => {
     if (!cursorRef.current || senderID !== id) return;
+    data.x = (data.x + (centerScalingOffset.x - panOffset.x)) / zoom;
+    data.y = (data.y + (centerScalingOffset.y - panOffset.y)) / zoom;
     setCursorCoords(data);
   };
 
@@ -15,7 +21,7 @@ const Cursor = ({ socket, roomID, name, id }) => {
     return () => {
       socket.off("receive-cursor", recieveCursorHandler);
     };
-  }, [socket, cursorCoords, roomID]);
+  }, [socket, cursorCoords, roomID, panOffset, zoom, centerScalingOffset]);
 
   return (
     <div

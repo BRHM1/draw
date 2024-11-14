@@ -84,6 +84,7 @@ const Canvas = ({ history }) => {
   const lastdy = useRef(0);
   const isSelectedElementRemoved = useRef(true);
   const setRerender = useStore((state) => state.setRerender);
+  const setType = useStore((state) => state.setType);
   const capturedText = useRef(null);
 
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -143,12 +144,9 @@ const Canvas = ({ history }) => {
 
     const onReceiveDraw = (data) => {
       if (data === null) return;
-      const element = hydrate(data);
-      // use rerender to force the rendering canvas to re-render instead of adding the element to the elements array
-      setRerender((prev) => !prev);
-      // addElement(element);
-
+      const element = hydrate(data);      
       history.addElement(element);
+      setRerender((prev) => !prev);
     };
     const setUsersInRoom = (users) => {
       setUsers(users);
@@ -207,9 +205,11 @@ const Canvas = ({ history }) => {
     const action = new RemoveAction([...selectedElements.current], generator);
     history.push(action);
     selectedElements.current.length = 0;
-
+    setIsDrawing(!isDrawing);
     setRerender((prev) => !prev);
   };
+
+
   // BACKSPACE DELETE
   useEffect(() => {
     const handleBackspace = (e) => {
@@ -220,6 +220,41 @@ const Canvas = ({ history }) => {
       window.removeEventListener("keydown", handleBackspace);
     };
   }, [selectedElements, roomID, history, generator]);
+
+  const lastType = useRef(type);
+  // SPACE PAN
+  useEffect(() => {
+    // if type !== pan then save the last type    
+    const handleSpace = (e) => {
+      if (e.key === " " && textRef.current !== document.activeElement){
+        // check if the type is not pan then change the type to pan
+        if (useStore.getState().action !== "pan") {
+          lastType.current = useStore.getState().type;
+        }
+        selectedElements.current.forEach((element) => element.Unlock(socket, roomID));
+        selectedElements.current = [];
+        gizmoRef.current = null;
+        useStore.setState({ type: "pan" });
+        // set the cursor to grab
+        useStore.setState({ action: "pan" });
+      }
+    }
+    const handleSpaceUp = (e) => {
+      if (e.key === " " && textRef.current !== document.activeElement){
+        // if the type is pan then change it back to the last type
+        useStore.setState({ type: lastType.current });
+        useStore.setState({ action: shapes.has(lastType.current.toLowerCase()) ? "shape" : lastType.current });
+      }
+    }
+    window.addEventListener("keydown", handleSpace);
+    window.addEventListener("keyup", handleSpaceUp);
+    return () => {
+      window.removeEventListener("keydown", handleSpace);
+      window.removeEventListener("keyup", handleSpaceUp);
+    }
+  }, []);
+
+
 
   const handleShare = () => {
     setIsOpen(true);
@@ -440,7 +475,6 @@ const Canvas = ({ history }) => {
               selectedElement &&
               lockedShapes.current.has(selectedElement.id)
             ) {
-              console.log("This element is locked by another user");
               break;
             }
 
@@ -507,6 +541,11 @@ const Canvas = ({ history }) => {
             }
             break;
           case "text":
+            if(shapeRef.current?.type === "text" && shapeRef.current.value !== "") {
+              // capturedText
+              shapeRef.current = null;
+              return;
+            };
             shapeRef.current = new Text(
               x,
               y,
@@ -924,6 +963,7 @@ const Canvas = ({ history }) => {
       } // ---------- selection ends -------------
       setButtonDown(false);
       if (!["erase", "pan", "select"].includes(type)) {
+        if(!shapeRef.current) return;
         // adding the new element to the DB
         async function addDataToDB() {
           await addData(shapeRef.current);
@@ -961,7 +1001,6 @@ const Canvas = ({ history }) => {
   const onBlur = () => {
     history.clearEmptyTexts();
     setRerender((prev) => !prev);
-
     async function addDataToDB() {
       if (!capturedText.current) return;
       await deleteData(capturedText.current.id);
@@ -1193,6 +1232,7 @@ const Canvas = ({ history }) => {
                 socket={socket}
                 roomID={roomID}
                 name={user[1]}
+                panOffset={panOffset}
               />
             )
         )}

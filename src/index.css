@@ -16,8 +16,8 @@ body {
     padding: 0;
 }
 
-div {
-    /* @apply text-blue-800; */
+button {
+    @apply active:scale-90 transition-transform duration-150 ease-in-out;
 }
 
   

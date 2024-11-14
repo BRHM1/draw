@@ -58,7 +58,7 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="bg-blue-500  text-white rounded-md p-1 w-[25%]"
+                    className="bg-blue-500  text-white rounded-md p-1 w-[25%] active:scale-95 transition-all"
                   >
                     Copy
                   </button>

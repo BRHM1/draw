@@ -1122,7 +1122,7 @@ const Canvas = ({ history }) => {
       <motion.button
         initial={{ y: -100, opacity: 0.3 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.5 }}
         className="absolute top-4 left-[9rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 hover:w-28 transition-all"
         onClick={handleShare}
         onMouseEnter={() => setShareHover(true)}

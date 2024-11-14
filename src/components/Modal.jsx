@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import {motion} from "framer-motion";
 const Modal = ({ open, onClose, handleEndSession, roomID }) => {
+  // this should take the URL of the current page and append the roomID to it
+  const URL = window.location.href + `?roomID=${roomID}`;
   const usernameRef = useRef(null);
   const [username, setUsername] = useState("");
   const copyToClipboard = () => {
@@ -53,7 +55,7 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
                     name="link"
                     id="link"
                     readOnly
-                    value={`http://localhost:5173/?roomID=${roomID}`}
+                    value={URL}
                     className="border border-gray-300 rounded-md p-1 focus:border-none w-[70%]"
                   />
                   <button

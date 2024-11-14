@@ -55,7 +55,7 @@ import ClearModal from "./ClearModal";
 import { motion } from "framer-motion";
 
 
-const socket = io("http://localhost:3000");
+const socket = io(import.meta.env.VITE_SERVER_URL);
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);

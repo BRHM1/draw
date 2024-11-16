@@ -42,6 +42,7 @@ import {
   hydrate,
   deleteData,
   clearData,
+  getData,
 } from "../utils/utils";
 import OptionsToolbar from "./OptionsToolbar";
 import PenOptionsToolbar from "./PenOptionsToolbar";
@@ -423,14 +424,18 @@ const Canvas = ({ history }) => {
   };
 
   const Save = () => {
-    const elements = history.getElements();
-    const data = JSON.stringify(elements);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `canvas-${Date.now()}.json`;
-    a.click();
+    const getElementsFromDB = async () => {
+      const  elements = await getData() 
+      console.log(elements)
+      const data = JSON.stringify(elements);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `canvas-${Date.now()}.json`;
+      a.click();
+    }
+    getElementsFromDB()
   };
   const Load = (e) => {
     const file = e.target.files[0];

@@ -53,14 +53,14 @@ import Modal from "./Modal";
 import Cursor from "./Cursor";
 import ClearModal from "./ClearModal";
 import { motion } from "framer-motion";
-
+import ShortcutMessage from "./ShortcutMessage";
 
 const socket = io(import.meta.env.VITE_SERVER_URL);
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClearOpen, setIsClearOpen] = useState(false);
-  const [shareHover , setShareHover] = useState(false);
+  const [shareHover, setShareHover] = useState(false);
 
   const urlParams = new URLSearchParams(window.location.search);
   const [roomID, setRoomID] = useState(urlParams.get("roomID"));
@@ -144,7 +144,7 @@ const Canvas = ({ history }) => {
 
     const onReceiveDraw = (data) => {
       if (data === null) return;
-      const element = hydrate(data);      
+      const element = hydrate(data);
       history.addElement(element);
       setRerender((prev) => !prev);
     };
@@ -193,7 +193,7 @@ const Canvas = ({ history }) => {
         removeDataFromDB();
         if (roomID) {
           element.hidden = true;
-          if(roomID) socket.emit("delete-element", roomID, element.id);
+          if (roomID) socket.emit("delete-element", roomID, element.id);
         }
       }
       setRerender((prev) => !prev);
@@ -209,11 +209,10 @@ const Canvas = ({ history }) => {
     setRerender((prev) => !prev);
   };
 
-
-  // BACKSPACE DELETE
+  // BACKSPACE && DELETE DELETE
   useEffect(() => {
     const handleBackspace = (e) => {
-      if (e.key === "Backspace") handleDelete();
+      if (e.key === "Backspace" || e.key === "Delete") handleDelete();
     };
     window.addEventListener("keydown", handleBackspace);
     return () => {
@@ -224,37 +223,41 @@ const Canvas = ({ history }) => {
   const lastType = useRef(type);
   // SPACE PAN
   useEffect(() => {
-    // if type !== pan then save the last type    
+    // if type !== pan then save the last type
     const handleSpace = (e) => {
-      if (e.key === " " && textRef.current !== document.activeElement){
+      if (e.key === " " && textRef.current !== document.activeElement && shapeRef.current === null && e.buttons !== 1) {
         // check if the type is not pan then change the type to pan
         if (useStore.getState().action !== "pan") {
           lastType.current = useStore.getState().type;
         }
-        selectedElements.current.forEach((element) => element.Unlock(socket, roomID));
+        selectedElements.current.forEach((element) =>
+          element.Unlock(socket, roomID)
+        );
         selectedElements.current = [];
         gizmoRef.current = null;
         useStore.setState({ type: "pan" });
         // set the cursor to grab
         useStore.setState({ action: "pan" });
       }
-    }
+    };
     const handleSpaceUp = (e) => {
-      if (e.key === " " && textRef.current !== document.activeElement){
+      if (e.key === " " && textRef.current !== document.activeElement) {
         // if the type is pan then change it back to the last type
         useStore.setState({ type: lastType.current });
-        useStore.setState({ action: shapes.has(lastType.current.toLowerCase()) ? "shape" : lastType.current });
+        useStore.setState({
+          action: shapes.has(lastType.current.toLowerCase())
+            ? "shape"
+            : lastType.current,
+        });
       }
-    }
+    };
     window.addEventListener("keydown", handleSpace);
     window.addEventListener("keyup", handleSpaceUp);
     return () => {
       window.removeEventListener("keydown", handleSpace);
       window.removeEventListener("keyup", handleSpaceUp);
-    }
+    };
   }, []);
-
-
 
   const handleShare = () => {
     setIsOpen(true);
@@ -367,7 +370,7 @@ const Canvas = ({ history }) => {
       selectedElements.current.forEach(async (element) => {
         await deleteData(element.id);
         await addData(element);
-        if(roomID) socket.emit("send-draw", roomID, element);
+        if (roomID) socket.emit("send-draw", roomID, element);
       });
     }
     addDataToDB();
@@ -541,11 +544,14 @@ const Canvas = ({ history }) => {
             }
             break;
           case "text":
-            if(shapeRef.current?.type === "text" && shapeRef.current.value !== "") {
+            if (
+              shapeRef.current?.type === "text" &&
+              shapeRef.current.value !== ""
+            ) {
               // capturedText
               shapeRef.current = null;
               return;
-            };
+            }
             shapeRef.current = new Text(
               x,
               y,
@@ -662,28 +668,28 @@ const Canvas = ({ history }) => {
         let y = e.clientY * zoom - panOffset.y - centerScaleOffset.y;
         switch (type) {
           case "draw":
-            shapeRef.current.updateDimensions(x, y, generator);
+            shapeRef.current?.updateDimensions(x, y, generator);
             setIsDrawing(!isDrawing);
-            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
+            if (roomID) socket.emit("send-draw", roomID, shapeRef.current);
             break;
           case "Rectangle":
-            shapeRef.current.updateDimensions(x, y, generator);
-            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
+            shapeRef.current?.updateDimensions(x, y, generator);
+            if (roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "Circle":
-            shapeRef.current.updateDimensions(x, y, generator);
-            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
+            shapeRef.current?.updateDimensions(x, y, generator);
+            if (roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "Ellipse":
-            shapeRef.current.updateDimensions(x, y, generator);
-            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
+            shapeRef.current?.updateDimensions(x, y, generator);
+            if (roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "Line":
-            shapeRef.current.updateDimensions(x, y, generator);
-            if(roomID) socket.emit("send-draw", roomID, shapeRef.current);
+            shapeRef.current?.updateDimensions(x, y, generator);
+            if (roomID) socket.emit("send-draw", roomID, shapeRef.current);
             setIsDrawing(!isDrawing);
             break;
           case "erase":
@@ -698,7 +704,8 @@ const Canvas = ({ history }) => {
               removeDataFromDB();
               if (roomID) {
                 selectedElement.hidden = true;
-                if(roomID) socket.emit("delete-element", roomID, selectedElement.id);
+                if (roomID)
+                  socket.emit("delete-element", roomID, selectedElement.id);
               }
               const action = new RemoveAction([selectedElement], generator);
               history.push(action);
@@ -742,7 +749,7 @@ const Canvas = ({ history }) => {
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
                     : element.draw(contextRef.current, canvasRef);
-                    if(roomID) socket.emit("send-draw", roomID, element);
+                  if (roomID) socket.emit("send-draw", roomID, element);
                 });
                 gizmoRef.current.Move(dx - lastdx.current, dy - lastdy.current);
                 gizmoRef.current.draw(contextRef);
@@ -762,7 +769,7 @@ const Canvas = ({ history }) => {
                   shapes.has(element.type)
                     ? element.draw(roughCanvasRef.current)
                     : element.draw(contextRef.current, canvasRef);
-                  if(roomID) socket.emit("send-draw", roomID, element);
+                  if (roomID) socket.emit("send-draw", roomID, element);
                 });
                 gizmoRef.current.Resize(
                   dx - lastdx.current,
@@ -962,21 +969,23 @@ const Canvas = ({ history }) => {
         }
       } // ---------- selection ends -------------
       setButtonDown(false);
+      
       if (!["erase", "pan", "select"].includes(type)) {
-        if(!shapeRef.current) return;
+        if (!shapeRef.current) return;
         // adding the new element to the DB
         async function addDataToDB() {
           await addData(shapeRef.current);
         }
         addDataToDB();
         // sending the draw data to the server
-        
+
         shapeRef.current.Refine();
         // adding the new element to the history
         const action = new DrawAction([shapeRef.current], generator);
         history.push(action);
         setRerender((prev) => !prev);
       }
+      if(shapeRef.current.type !== "text") shapeRef.current = null;
     };
 
   const KeyDown = () => {
@@ -1078,7 +1087,21 @@ const Canvas = ({ history }) => {
 
   return (
     <div className="w-full h-screen grid">
-
+      {selectedElements.current.length > 0 ? (
+        <ShortcutMessage
+          message={"To delete selected elements, use Backspace or Delete"}
+          className={
+            "top-14 left-1/2 transform -translate-x-1/2 pointer-events-none"
+          }
+        />
+      ) : (
+        <ShortcutMessage
+          className={
+            "top-14 left-1/2 transform -translate-x-1/2 pointer-events-none"
+          }
+          message={"To move canvas, hold spacebar while dragging"}
+        />
+      )}
       <motion.button
         initial={{ y: -100, opacity: 0.3 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1089,7 +1112,7 @@ const Canvas = ({ history }) => {
       >
         <Trash2 className="mx-auto" size={18} />
       </motion.button>
-     
+
       <motion.button
         initial={{ y: -100, opacity: 0.3 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1128,11 +1151,18 @@ const Canvas = ({ history }) => {
         onMouseEnter={() => setShareHover(true)}
         onMouseLeave={() => setShareHover(false)}
       >
-        {!shareHover ? <Users size={18} className="mx-auto" /> : <motion.p 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="text-center" >Go Live!</motion.p>}
+        {!shareHover ? (
+          <Users size={18} className="mx-auto" />
+        ) : (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="text-center"
+          >
+            Go Live!
+          </motion.p>
+        )}
       </motion.button>
 
       {isClearOpen && (

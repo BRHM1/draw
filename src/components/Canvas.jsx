@@ -55,7 +55,7 @@ import ClearModal from "./ClearModal";
 import { motion } from "framer-motion";
 import ShortcutMessage from "./ShortcutMessage";
 
-const socket = io(import.meta.env.VITE_SERVER_URL);
+const socket = io("https://drawing-app-backend-gg4i.onrender.com");
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);

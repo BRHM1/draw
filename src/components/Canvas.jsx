@@ -56,7 +56,7 @@ import ClearModal from "./ClearModal";
 import { motion } from "framer-motion";
 import ShortcutMessage from "./ShortcutMessage";
 
-const PROD = "https://drawing-app-backend-le7s.onrender.com"
+const PROD = "https://drawing-app-backend-le7s.onrender.com";
 const socket = io(PROD);
 
 const Canvas = ({ history }) => {
@@ -113,6 +113,8 @@ const Canvas = ({ history }) => {
 
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
+  const [toggleOptions, setToggleOptions] = useState(true);
+
 
   const cursorShapes = {
     draw: "cursor-crosshair",
@@ -226,7 +228,12 @@ const Canvas = ({ history }) => {
   useEffect(() => {
     // if type !== pan then save the last type
     const handleSpace = (e) => {
-      if (e.key === " " && textRef.current !== document.activeElement && shapeRef.current === null && e.buttons !== 1) {
+      if (
+        e.key === " " &&
+        textRef.current !== document.activeElement &&
+        shapeRef.current === null &&
+        e.buttons !== 1
+      ) {
         // check if the type is not pan then change the type to pan
         if (useStore.getState().action !== "pan") {
           lastType.current = useStore.getState().type;
@@ -427,8 +434,8 @@ const Canvas = ({ history }) => {
 
   const Save = () => {
     const getElementsFromDB = async () => {
-      const  elements = await getData() 
-      console.log(elements)
+      const elements = await getData();
+      console.log(elements);
       const data = JSON.stringify(elements);
       const blob = new Blob([data], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -436,8 +443,8 @@ const Canvas = ({ history }) => {
       a.href = url;
       a.download = `canvas-${Date.now()}.json`;
       a.click();
-    }
-    getElementsFromDB()
+    };
+    getElementsFromDB();
   };
   const Load = (e) => {
     const file = e.target.files[0];
@@ -976,7 +983,7 @@ const Canvas = ({ history }) => {
         }
       } // ---------- selection ends -------------
       setButtonDown(false);
-      
+
       if (!["erase", "pan", "select"].includes(type)) {
         if (!shapeRef.current) return;
         // adding the new element to the DB
@@ -992,7 +999,7 @@ const Canvas = ({ history }) => {
         history.push(action);
         setRerender((prev) => !prev);
       }
-      if(shapeRef.current.type !== "text") shapeRef.current = null;
+      if (shapeRef.current.type !== "text") shapeRef.current = null;
     };
 
   const KeyDown = () => {
@@ -1109,11 +1116,13 @@ const Canvas = ({ history }) => {
           message={"To move canvas, hold spacebar while dragging"}
         />
       )}
+
+
       <motion.button
-        initial={{ y: -100, opacity: 0.3 }}
+        initial={{ y: -200, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="absolute top-4 left-6 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20"
+        transition={{ duration: 0.5 }}
+        className="absolute top-4 right-2 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 max-[340px]:top-16"
         onClick={() => setIsClearOpen(true)}
         title="Clear board"
       >
@@ -1121,10 +1130,10 @@ const Canvas = ({ history }) => {
       </motion.button>
 
       <motion.button
-        initial={{ y: -100, opacity: 0.3 }}
+        initial={{ y: -200, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="absolute top-4 left-16 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20"
+        transition={{ duration: 0.4 }}
+        className="absolute top-14 right-2 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 max-[340px]:top-24 max-[340px]:mt-1"
         onClick={() => Save()}
         title="Save board"
       >
@@ -1132,10 +1141,10 @@ const Canvas = ({ history }) => {
       </motion.button>
 
       <motion.button
-        initial={{ y: -100, opacity: 0.3 }}
+        initial={{ y: -200, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="absolute appearance-none top-4 left-[6.5rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 grid place-items-center"
+        transition={{ duration: 0.3 }}
+        className="absolute appearance-none top-24 right-2 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 grid place-items-center max-[340px]:top-32 max-[340px]:mt-2"
         onClick={() => document.getElementById("file").click()}
         title="Load board"
       >
@@ -1150,10 +1159,10 @@ const Canvas = ({ history }) => {
       </motion.button>
 
       <motion.button
-        initial={{ y: -100, opacity: 0.3 }}
+        initial={{ y: -200, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="absolute top-4 left-[9rem] shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 hover:w-28 transition-all"
+        transition={{ duration: 0.2 }}
+        className="absolute top-[8.5rem] right-2 shadow-xl w-8 h-8 rounded-full font-poppins bg-blue-50 text-black border z-20 hover:w-28 transition-all max-[340px]:top-40 max-[340px]:mt-3"
         onClick={handleShare}
         onMouseEnter={() => setShareHover(true)}
         onMouseLeave={() => setShareHover(false)}
@@ -1188,9 +1197,9 @@ const Canvas = ({ history }) => {
           onClose={onCloseModal}
         />
       )}
-
+      
       <Toolbar
-        className={"row-start-1 col-start-1 justify-self-center left-1/4 z-20"}
+        className={"absolute left-1/2 transform -translate-x-1/2 mx-auto"}
         contextRef={contextRef}
         clearGizmoOnOperation={clearGizmoOnOperation}
       />
@@ -1222,7 +1231,6 @@ const Canvas = ({ history }) => {
           cursorShapes[action]
         )}
         ref={canvasRef}
-        
         onPointerDown={Down}
         onPointerMove={Move}
         onPointerUp={Up}
@@ -1235,9 +1243,9 @@ const Canvas = ({ history }) => {
         history={history}
         textAreaRef={textRef}
       />
-      {action === "shape" && <OptionsToolbar />}
-      {action === "draw" && <PenOptionsToolbar />}
-      {selectedElements.current.length > 0 && (
+      {action === "shape" && toggleOptions && <OptionsToolbar />}
+      {action === "draw" && toggleOptions && <PenOptionsToolbar />}
+      {selectedElements.current.length > 0 && toggleOptions && (
         <SelectionOptionsToolbar
           editSelectedElements={editSelectedElements}
           Duplicate={Duplicate}

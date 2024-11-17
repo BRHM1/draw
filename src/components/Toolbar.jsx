@@ -80,11 +80,11 @@ const Toolbar = (props) => {
   return (
     <motion.div
       className={twMerge(
-        "min-w-[30rem] h-10 bg-blue-50 shadow-lg z-10 grid place-content-center grid-cols-9 rounded-md mt-3 ",
+        "min-w-[17rem] w-[70%] max-w-[30rem] h-10 bg-blue-50 shadow-lg z-20 flex items-center justify-center rounded-md mt-3 gap-1",
         props.className
       )}
-      initial={{ opacity: 0, y: -100 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: -100, x: "-50%" }}
+      animate={{ opacity: 1, y: 0, x: "-50%" }}
       transition={{ duration: 0.5 }}
     >
       {buttons.map((button, index) => (
@@ -96,10 +96,10 @@ const Toolbar = (props) => {
             props.clearGizmoOnOperation();
           }}
           className={twMerge(
-            `w-10 h-8 grid place-content-center justify-self-center rounded-md `,
+            `w-8 h-8 grid place-content-center justify-self-center rounded-md flex-auto max-[340px]:text-sm`,
             selectedType === button.type
               ? "bg-blue-200"
-              : "bg-blue-50 hover:bg-blue-100"
+              : "bg-blue-50 hover:bg-blue-100",
           )}
         >
           {button.icon}

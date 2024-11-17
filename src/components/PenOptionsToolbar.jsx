@@ -38,15 +38,16 @@ const PenOptionsToolbar = () => {
   };
 
   return (
-    <motion.div 
-    initial={{ opacity: 0, x: -200 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.2 }}
-    className="bg-blue-50 shadow-lg w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20">
+    <motion.div
+      initial={{ opacity: 0, x: -200 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2 }}
+      className="bg-blue-50 shadow-lg w-44 h-[75%] p-5 rounded-md absolute left-0 top-16 ml-3 font-poppins flex-col items-center justify-center z-20"
+    >
       <div className="text-lg font-medium pb-2">Pen Options</div>
       <div className="flex items-center justify-start">
         <label>Color</label>
-        <input type="color" className="ml-8" onChange={handleColorChange} />
+        <input type="color" className="appearance-none ml-8 border-none" onChange={handleColorChange} />
       </div>
       {sliders.map((slider) => (
         <Slider
@@ -99,13 +100,14 @@ const Slider = ({ handleOptions, min, max, property, defaultValue, ratio }) => {
   };
 
   return (
-    <div className="mt-1">
+    <div className="mt-1 w-[100%] ">
       <div>{property}</div>
       <div>
         <input
           type="range"
           min={min}
           max={max}
+          className="w-[100%] mx-auto"
           defaultValue={defaultValue}
           onChange={handleChange}
         />

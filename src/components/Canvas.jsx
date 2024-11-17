@@ -57,8 +57,7 @@ import { motion } from "framer-motion";
 import ShortcutMessage from "./ShortcutMessage";
 
 const PROD = "https://drawing-app-backend-le7s.onrender.com"
-const DEV = "http://localhost:3000"
-const socket = io(DEV);
+const socket = io(PROD);
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);

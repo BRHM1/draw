@@ -3,7 +3,16 @@ import {motion} from "framer-motion";
 const Modal = ({ open, onClose, handleEndSession, roomID }) => {
   // this should take the URL of the current page and append the roomID to it
   // to avoid the need for additional "?" you can check if the URL already has a "?" and append accordingly
-  const URL = window.location.href.includes("?") ? window.location.href + `&roomID=${roomID}` : window.location.href + `?roomID=${roomID}`;
+  const getURL = () => {
+    if(window.location.href.includes("roomID")) {
+      const URL = window.location.href.split("roomID")[0] + `roomID=${roomID}`;
+      return URL;
+    }
+    const URL = window.location.href.includes("?")
+      ? window.location.href + `&roomID=${roomID}`
+      : window.location.href + `?roomID=${roomID}`;
+    return URL;
+  }
   const usernameRef = useRef(null);
   const [username, setUsername] = useState("");
   const copyToClipboard = () => {
@@ -56,7 +65,7 @@ const Modal = ({ open, onClose, handleEndSession, roomID }) => {
                     name="link"
                     id="link"
                     readOnly
-                    value={URL}
+                    value={getURL()}
                     className="border border-gray-300 rounded-md p-1 focus:border-none w-[70%]"
                   />
                   <button

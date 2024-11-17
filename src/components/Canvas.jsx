@@ -1222,9 +1222,10 @@ const Canvas = ({ history }) => {
           cursorShapes[action]
         )}
         ref={canvasRef}
-        onMouseDown={Down}
-        onMouseMove={Move}
-        onMouseUp={Up}
+        
+        onPointerDown={Down}
+        onPointerMove={Move}
+        onPointerUp={Up}
         onWheel={onWheel}
         // onMouseLeave={Up}
         // onMouseEnter={Move}

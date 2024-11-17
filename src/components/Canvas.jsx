@@ -1011,6 +1011,35 @@ const Canvas = ({ history }) => {
       if (shapeRef.current.type !== "text") shapeRef.current = null;
     };
 
+  useEffect(() => {
+    const touchDown = (e) => {
+      e.preventDefault()
+      e.clientX = e.touches[0].clientX;
+      e.clientY = e.touches[0].clientY;
+      Down(e);
+    }
+
+    const touchMove = (e) => {
+      e.preventDefault()
+      e.clientX = e.touches[0].clientX;
+      e.clientY = e.touches[0].clientY;
+      Move(e);
+    }
+
+    const touchUp = (e) => {
+      e.preventDefault()
+      Up(e);
+    }
+    canvasRef.current.addEventListener("touchstart", touchDown, { passive: false });
+    canvasRef.current.addEventListener("touchmove", touchMove, { passive: false });
+    canvasRef.current.addEventListener("touchend", touchUp, { passive: false });
+    return () => {
+      canvasRef.current.removeEventListener("touchstart", touchDown);
+      canvasRef.current.removeEventListener("touchmove", touchDown);
+      canvasRef.current.removeEventListener("touchend", touchUp);
+    }
+  }, [type, options, penOptions, isDrawing]);
+
   const KeyDown = () => {
     setTimeout(() => {
       contextRef.current.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -1257,6 +1286,7 @@ const Canvas = ({ history }) => {
         onPointerDown={Down}
         onPointerMove={Move}
         onPointerUp={Up}
+    
         onWheel={onWheel}
         // onMouseLeave={Up}
         // onMouseEnter={Move}

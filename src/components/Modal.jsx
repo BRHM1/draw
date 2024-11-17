@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import {motion} from "framer-motion";
 const Modal = ({ open, onClose, handleEndSession, roomID }) => {
   // this should take the URL of the current page and append the roomID to it
-  const URL = window.location.href + `?roomID=${roomID}`;
+  // to avoid the need for additional "?" you can check if the URL already has a "?" and append accordingly
+  const URL = window.location.href.includes("?") ? window.location.href + `&roomID=${roomID}` : window.location.href + `?roomID=${roomID}`;
   const usernameRef = useRef(null);
   const [username, setUsername] = useState("");
   const copyToClipboard = () => {

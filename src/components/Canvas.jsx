@@ -56,7 +56,9 @@ import ClearModal from "./ClearModal";
 import { motion } from "framer-motion";
 import ShortcutMessage from "./ShortcutMessage";
 
-const socket = io("https://drawing-app-backend-le7s.onrender.com");
+const PROD = "https://drawing-app-backend-le7s.onrender.com"
+const DEV = "http://localhost:3000"
+const socket = io(DEV);
 
 const Canvas = ({ history }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -85,7 +87,6 @@ const Canvas = ({ history }) => {
   const lastdy = useRef(0);
   const isSelectedElementRemoved = useRef(true);
   const setRerender = useStore((state) => state.setRerender);
-  const setType = useStore((state) => state.setType);
   const capturedText = useRef(null);
 
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -267,8 +268,10 @@ const Canvas = ({ history }) => {
   };
 
   const handleEndSession = () => {
-    setRoomID("");
+    socket.emit("leave-room", roomID);
     urlParams.delete("roomID");
+    window.location.search = urlParams;
+    setRoomID("");
   };
 
   const reFocus = () => {

@@ -559,6 +559,7 @@ const RandomnessSlider = ({ handleOptions }) => {
       <div>
         <input
           type="range"
+          className="apearance-none w-full"
           min="0"
           max="100"
           defaultValue={0}

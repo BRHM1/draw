@@ -12,6 +12,8 @@ import {
   Download,
   Upload,
   Users,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import rough from "roughjs/bundled/rough.esm";
 import { twMerge } from "tailwind-merge";
@@ -114,7 +116,6 @@ const Canvas = ({ history }) => {
   const generator = rough.generator();
   const shapes = new Set(["rectangle", "ellipse", "line", "circle"]);
   const [toggleOptions, setToggleOptions] = useState(true);
-
 
   const cursorShapes = {
     draw: "cursor-crosshair",
@@ -265,6 +266,14 @@ const Canvas = ({ history }) => {
       window.removeEventListener("keydown", handleSpace);
       window.removeEventListener("keyup", handleSpaceUp);
     };
+  }, []);
+
+  // ensure that width and height of the canvas are the same as the window when it resizes
+  useLayoutEffect(() => {
+    canvasRef.current.width = window.innerWidth;
+    canvasRef.current.height = window.innerHeight;
+    contextRef.current = canvasRef.current.getContext("2d");
+    roughCanvasRef.current = rough.canvas(canvasRef.current);
   }, []);
 
   const handleShare = () => {
@@ -1117,7 +1126,6 @@ const Canvas = ({ history }) => {
         />
       )}
 
-
       <motion.button
         initial={{ y: -200, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1197,12 +1205,27 @@ const Canvas = ({ history }) => {
           onClose={onCloseModal}
         />
       )}
-      
+
       <Toolbar
         className={"absolute left-1/2 transform -translate-x-1/2 mx-auto"}
         contextRef={contextRef}
         clearGizmoOnOperation={clearGizmoOnOperation}
       />
+
+      {(action === "draw" || action === "shape" || selectedElements.current.length > 0) && <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        onClick={() => setToggleOptions(!toggleOptions)}
+        className="absolute z-[10200] rounded-full w-6 h-6 bg-blue-400 flex items-center justify-center top-16 transition-all shadow-xl min-[740px]:hidden "
+        style={{ left: toggleOptions ? "10rem" : "0" }}
+      >
+        {toggleOptions ? (
+          <ChevronLeft color="white" size={20} />
+        ) : (
+          <ChevronRight color="white" size={20} />
+        )}
+      </motion.button>}
 
       <textarea
         ref={textRef}
@@ -1227,7 +1250,7 @@ const Canvas = ({ history }) => {
       />
       <CanvasElement
         className={twMerge(
-          "row-start-1 col-start-1 min-w-full min-h-full overflow-hidden z-10",
+          "row-start-1 col-start-1 min-w-full min-h-full overflow-hidden z-10 touch-none",
           cursorShapes[action]
         )}
         ref={canvasRef}

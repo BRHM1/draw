@@ -1008,7 +1008,7 @@ const Canvas = ({ history }) => {
         history.push(action);
         setRerender((prev) => !prev);
       }
-      if (shapeRef.current.type !== "text") shapeRef.current = null;
+      if (shapeRef.current?.type !== "text") shapeRef.current = null;
     };
 
 
